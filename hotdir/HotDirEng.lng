@@ -10,7 +10,18 @@
 "Hot &key"
 "    &Allias:"
 "&Path:"
+"Run &macro commands:"
 "&OK"
 "&Current"
 "&Under cursor"
 "Ca&ncel"
+
+"Length of the line more 512 symbols"
+"The line with macro commands will be shortcut, continue?"
+
+"Run macro commands?"
+
+"Do you wish to delete the menu item?"
+
+"&Yes"
+"&No"

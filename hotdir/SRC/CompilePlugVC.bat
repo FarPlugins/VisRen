@@ -7,8 +7,8 @@ rem =============== Use Microsoft Visual Studio .NET 2003 ======================
 rem  ======================== Set name and version ... =========================
 
 @set PlugName=HotDir
-@set fileversion=1,71,0,4
-@set fileversion_str=1.71 build 4
+@set fileversion=1,71,0,5
+@set fileversion_str=1.71 build 5
 @set MyDir=%CD%
 @set MyFarDir=C:\Program Files\Far
 @set MyReleaseDir=%MyFarDir%\Plugins\%PlugName%

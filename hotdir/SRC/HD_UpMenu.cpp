@@ -114,10 +114,17 @@ void TUpDirMenu::Init()
   fpos  = 0;
   fnum  = GetArgv(Path, &flist, &fpos);
 
-  for ( ; Count < fnum; ) // menu for real file system
-    InsItem(Count,flist[Count]);
+  for (int i=fnum-1; Count<fnum; i--)
+  {
+    char Temp[MAX_PATH];
+    if (i<=36)
+      FSF.sprintf(Temp, "&%1.1c  %s",(i>=10 ? ('a'+(i-10)) : ('0'+i)), flist[Count]);
+    else
+      FSF.sprintf(Temp, "&%1.1s  %s", "", flist[Count]);
+    InsItem(Count,Temp);
+  }
 
-  FarListPos flp={Count-2, -1};
+  FarListPos flp={Count-1, -1};
   Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, 0, (LONG_PTR)&flp);
 
   TMenu::Init();
@@ -144,6 +151,20 @@ bool TUpDirMenu::MouseClick(int Bottom, int Pos)
 
 LONG_PTR TUpDirMenu::KeyPress(LONG_PTR Key, int Pos)
 {
+  DWORD k=Key&0xFFFFFF;
+  if (k>='A' && k<='Z') k+=32;
+  if (k<123 && ((k>='0' && k<='9')||(k>='a' && k<='z')))
+  {
+    char h[3]={k,'*','\0'};
+    FarListFind flf={0, h, 0, 0};
+    int Index=Info.SendDlgMessage(hDlg, DM_LISTFINDSTRING, 0, (LONG_PTR)&flf);
+    if (Index!=-1)
+    {
+      Pos=Index;
+      Key=(Key&0xFF000000)|KEY_ENTER;
+    }
+  }
+
   switch (Key)
   {
     case KEY_ENTER:

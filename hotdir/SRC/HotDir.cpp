@@ -9,7 +9,7 @@
 
 /* Current developer: samlyukov<at>gmail.com  */
 
-/* $ Revision: 04.1 $ */
+/* $ Revision: 05.2 $ */
 
 //#define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -60,10 +60,21 @@ enum {
   MHotkey,
   MAllias,
   MPath,
+  MRunMacro,
   MOK,
   MCurrent,
   MUnderCursor,
   MCancel,
+
+  MLength512Title,
+  MLength512Body,
+
+  MRunMacroBody,
+
+  MDelItem,
+
+  MYes,
+  MNo,
 };
 
 /****************************************************************************
