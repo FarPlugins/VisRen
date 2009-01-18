@@ -1,0 +1,87 @@
+REGEDIT4
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl1]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl1]
+@=""
+"Sequence"="F11 ' 1"
+"DisableOutput"=dword:00000001
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl2]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl2]
+@=""
+"Sequence"="F11 ' 2"
+"DisableOutput"=dword:00000001
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl3]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl3]
+@=""
+"Sequence"="F11 ' 3"
+"DisableOutput"=dword:00000001
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl4]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl4]
+@=""
+"Sequence"="F11 ' 4"
+"DisableOutput"=dword:00000001
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl5]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl5]
+@=""
+"Sequence"="F11 ' 5"
+"DisableOutput"=dword:00000001
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl6]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl6]
+@=""
+"Sequence"="F11 ' 6"
+"DisableOutput"=dword:00000001
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl7]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl7]
+@=""
+"Sequence"="F11 ' 7"
+"DisableOutput"=dword:00000001
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl8]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl8]
+@=""
+"Sequence"="F11 ' 8"
+"DisableOutput"=dword:00000001
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl9]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl9]
+@=""
+"Sequence"="F11 ' 9"
+"DisableOutput"=dword:00000001
+
+[-HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl0]
+[HKEY_CURRENT_USER\SOFTWARE\Far\KeyMacros\Shell\RCtrl0]
+@=""
+"Sequence"="F11 ' 0"
+"DisableOutput"=dword:00000001
+
+[HKEY_CURRENT_USER\Software\Far\Plugins\HotDir\RightCtrl-0]
+"Hotkey0"="1"
+"Allias0"="Far"
+"Path0"="%FarHome%"
+"Hotkey1"="2"
+"Allias1"="Plugins"
+"Path1"="%FarHome%\\Plugins"
+"Hotkey2"="3"
+"Allias2"="Program Files"
+"Path2"="%ProgramFiles%"
+"Hotkey3"="4"
+"Allias3"="Temp"
+"Path3"="%TEMP%"
+"Hotkey4"="5"
+"Allias4"="Windows"
+"Path4"="%WinDir%"
+"Hotkey5"="6"
+"Allias5"="System32"
+"Path5"="%WinDir%\\System32"
+"Hotkey6"="7"
+"Allias6"="Мои документы"
+"Path6"="%UserProfile%\\Мои документы"
+"Hotkey7"="8"
+"Allias7"="Рабочий стол"
+"Path7"="%UserProfile%\\Рабочий стол"
