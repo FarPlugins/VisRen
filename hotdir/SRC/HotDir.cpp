@@ -4,12 +4,12 @@
  * Plugin module for FAR Manager 1.71
  *
  * Copyright (c) 2003 Alexander Arefiev
- * Copyrigth (c) 2007 Alexey Samlyukov
+ * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
 /* Current developer: samlyukov<at>gmail.com  */
 
-/* $ Revision: 05.2 $ */
+/* $ Revision: 06.2 $ */
 
 //#define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -55,6 +55,7 @@ enum {
   MShotrcutTitle,
   MShotrcutButton,
 
+  MRootFolder,
   MEditButton,
 
   MHotkey,
@@ -179,6 +180,11 @@ HANDLE WINAPI _export OpenPlugin(int OpenFrom, INT_PTR Item)
   if (bOldFAR)
     return INVALID_HANDLE_VALUE;
 
+  PanelInfo pi;
+  if ( !Info.Control(INVALID_HANDLE_VALUE, FCTL_GETPANELSHORTINFO, &pi)
+       || pi.PanelType != PTYPE_FILEPANEL )
+    return INVALID_HANDLE_VALUE;
+
   char Section[15], NoAmpersand[15];
   THotKeyMenu HotKeyMenu;
   int Code;
@@ -200,7 +206,7 @@ HANDLE WINAPI _export OpenPlugin(int OpenFrom, INT_PTR Item)
         return INVALID_HANDLE_VALUE;
       if (Key==KEY_BS)                                                        //  Backspace
         break;
-      if (Key==(KEY_CTRL|KEY_BACKSLASH) || Key==(KEY_RCTRL|KEY_BACKSLASH))    //  Ctrl-'\'
+      if (Key==(KEY_CTRL|KEY_BACKSLASH) || Key==(KEY_RCTRL|KEY_BACKSLASH) || Key==KEY_BACKSLASH)  //  Ctrl-'\'
       {
         TUpDirMenu UpDirMenu;
         if (UpDirMenu.Run(NoAmpersand, GetMsg(MShotrcutButton), Sect)!=-1)

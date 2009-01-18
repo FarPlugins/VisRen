@@ -4,7 +4,7 @@
  * Plugin module for FAR Manager 1.71
  *
  * Copyright (c) 2003 Alexander Arefiev
- * Copyrigth (c) 2007 Alexey Samlyukov
+ * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
 class TDirMenu:public TMenu
@@ -39,8 +39,8 @@ LONG_PTR WINAPI DlgPathProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2)
 
         PanelInfo pi;
         Info.Control(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &pi);
-        if (pi.PanelItems[pi.CurrentItem].FindData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY
-            && pi.CurrentItem)
+        if (pi.PanelItems[pi.CurrentItem].FindData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY &&
+            FSF.LStricmp(pi.PanelItems[pi.CurrentItem].FindData.cFileName,".."))
         {
           Info.SendDlgMessage(hDlg, DM_ENABLE, 12, true);
           FSF.AddEndSlash(lstrcpy(CurPath, pi.CurDir));
@@ -174,27 +174,28 @@ void TDirMenu::Init()
   Shortcut=0;
   PathIsSet=0;
   bPressAlt=false;
-  unsigned i;
+  unsigned i,j;
 
   // Загрузим элементы меню из реестра
-  for (i=0; ; i++)
+  for (i=0, j=2; ; i++, j++)
   {
-    Shortcut = (struct FolderShortcuts *) realloc(Shortcut, (i+1)*sizeof(*Shortcut));
-    memset(&Shortcut[i], 0, sizeof(Shortcut[i]));
+    Shortcut = (struct FolderShortcuts *) realloc(Shortcut, (j+1)*sizeof(*Shortcut));
+    memset(&Shortcut[j], 0, sizeof(Shortcut[j]));
     if (HKEY hKey=CreateOrOpenRegKey(false, PluginRootKey, Title))
     {
       char curHotkey[15], curAllias[15], curPath[15], curMacro[15], curRunMacro[15];
       FSF.sprintf(curHotkey, "Hotkey%u", i);
-      GetRegKey(hKey, curHotkey, Shortcut[i].Hotkey, sizeof(Shortcut[i].Hotkey));
+      GetRegKey(hKey, curHotkey, Shortcut[j].Hotkey, sizeof(Shortcut[j].Hotkey));
       FSF.sprintf(curAllias, "Allias%u", i);
-      GetRegKey(hKey, curAllias, Shortcut[i].Allias, sizeof(Shortcut[i].Allias));
+      GetRegKey(hKey, curAllias, Shortcut[j].Allias, sizeof(Shortcut[j].Allias));
       FSF.sprintf(curRunMacro, "RunMacro%u", i);
-      GetRegKey(hKey, curRunMacro, (DWORD &)Shortcut[i].RunMacro);
+      GetRegKey(hKey, curRunMacro, (DWORD &)Shortcut[j].RunMacro);
       FSF.sprintf(curMacro, "Macro%u", i);
-      GetRegKey(hKey, curMacro, Shortcut[i].Macro, sizeof(Shortcut[i].Macro));
+      GetRegKey(hKey, curMacro, Shortcut[j].Macro, sizeof(Shortcut[j].Macro));
       FSF.sprintf(curPath, "Path%u", i);
-      if ( GetRegKey(hKey, curPath, Shortcut[i].Path, sizeof(Shortcut[i].Path))
-           || (!FSF.LStricmp(Shortcut[i].Hotkey, "-") && !*Shortcut[i].Allias) )
+      if ( GetRegKey(hKey, curPath, Shortcut[j].Path, sizeof(Shortcut[j].Path))
+           || Shortcut[j].Hotkey[0]=='-' && !*Shortcut[j].Allias)
+
       {
         RegCloseKey(hKey);
         continue;
@@ -204,10 +205,13 @@ void TDirMenu::Init()
     break;
   }
 
+  InsItem(Count, GetMsg(MRootFolder));
+  InsItem(Count, "", true);
+
   do
   {
     char Temp[MAX_PATH+10];
-    if (!FSF.LStricmp(Shortcut[Count].Hotkey, "-") && !*Shortcut[Count].Allias)
+    if (Shortcut[Count].Hotkey[0]=='-' && !*Shortcut[Count].Allias)
       InsItem(Count, "", true);
     else
     {
@@ -215,34 +219,50 @@ void TDirMenu::Init()
            (*Shortcut[Count].Allias ? Shortcut[Count].Allias : Shortcut[Count].Path));
       InsItem(Count, Temp);
     }
-  } while (Count<=i);
+  } while (Count<=j);
+
+  FarListPos flp={2, -1};
+  Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, 0, (LONG_PTR)&flp);
+
   TMenu::Init();
 }
 
 bool TDirMenu::MouseClick(int Bottom, int Pos)
 {
+  bool bRet=false;
   char Path[MAX_PATH];
-  FSF.ExpandEnvironmentStr(Shortcut[Pos].Path, Path, sizeof(Path));
-  if (Bottom==RIGHTMOST_BUTTON_PRESSED)
+  if (Pos>1)
   {
-    PathIsSet=2;
-    Info.Control(INVALID_HANDLE_VALUE, FCTL_SETANOTHERPANELDIR, (void *)Path);
+    FSF.ExpandEnvironmentStr(Shortcut[Pos].Path, Path, sizeof(Path));
+    if (Bottom==RIGHTMOST_BUTTON_PRESSED)
+    {
+      PathIsSet=2; bRet=true;
+      Info.Control(INVALID_HANDLE_VALUE, FCTL_SETANOTHERPANELDIR, (void *)Path);
+    }
+    else if (Bottom==FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+      PathIsSet=1; bRet=true;
+      Info.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, (void *)Path);
+    }
+    else if (Bottom==FROM_LEFT_2ND_BUTTON_PRESSED && Pos<Count-1)
+    {
+      *((LONG_PTR *)Param)=(KEY_CTRL|KEY_BACKSLASH);  bRet=true;
+    }
+  }
+  else
+  {
+    if (Bottom==FROM_LEFT_1ST_BUTTON_PRESSED || Bottom==FROM_LEFT_2ND_BUTTON_PRESSED)
+    {
+      *((LONG_PTR *)Param)=(KEY_CTRL|KEY_BACKSLASH);  bRet=true;
+    }
+  }
+
+  if (bRet)
+  {
     Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
     return true;
   }
-  else if (Bottom==FROM_LEFT_1ST_BUTTON_PRESSED)
-  {
-    PathIsSet=1;
-    Info.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, (void *)Path);
-    Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
-    return true;
-  }
-  else if (Bottom==FROM_LEFT_2ND_BUTTON_PRESSED && Pos<Count-1)
-  {
-    *((LONG_PTR *)Param)=(KEY_CTRL|KEY_BACKSLASH);
-    Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
-    return true;
-  }
+
   return false;
 }
 
@@ -290,14 +310,14 @@ LONG_PTR TDirMenu::KeyPress(LONG_PTR Key, int Pos)
     case KEY_INS:
     {
       memset(&TempShortcut, 0, sizeof(TempShortcut));
-      if (DlgPath(&TempShortcut, (Key==KEY_INS ? 1:2) ))
+      if (Pos>1 && DlgPath(&TempShortcut, (Key==KEY_INS ? 1:2) ))
       {
         Shortcut = (struct FolderShortcuts *) realloc(Shortcut, (Count+1)*sizeof(*Shortcut));
         memset(&Shortcut[Count], 0, sizeof(Shortcut[Count]));
         for (int i=Count-1; i>Pos; i--)
           Shortcut[i]=Shortcut[i-1];
         Shortcut[Pos]=TempShortcut;
-        if (!FSF.LStricmp(Shortcut[Pos].Hotkey, "-") && !*Shortcut[Pos].Allias)
+        if (Shortcut[Pos].Hotkey[0]=='-' && !*Shortcut[Pos].Allias)
         {
           InsItem(Pos, "", true);
           FarListPos flp={Pos+1, -1};
@@ -314,10 +334,10 @@ LONG_PTR TDirMenu::KeyPress(LONG_PTR Key, int Pos)
     }
     //-------------------
     case KEY_F4:
-      if (Pos<Count-1 && DlgPath(&Shortcut[Pos]))
+      if (Pos>1 && Pos<Count-1 && DlgPath(&Shortcut[Pos]))
       {
         DelItem(Pos);
-        if (!FSF.LStricmp(Shortcut[Pos].Hotkey, "-") && !*Shortcut[Pos].Allias)
+        if (Shortcut[Pos].Hotkey[0]=='-' && !*Shortcut[Pos].Allias)
         {
           InsItem(Pos, "", true);
           FarListPos flp={Pos+1, -1};
@@ -333,7 +353,7 @@ LONG_PTR TDirMenu::KeyPress(LONG_PTR Key, int Pos)
       break;
     //-------------------
     case KEY_DEL:
-      if (Pos<Count-1)
+      if (Pos>1 && Pos<Count-1)
       {
         const char *MsgItems[] = {
           GetMsg(MShotrcutTitle),
@@ -355,7 +375,7 @@ LONG_PTR TDirMenu::KeyPress(LONG_PTR Key, int Pos)
     //-------------------
     case KEY_CTRL|KEY_DEL:
     case KEY_RCTRL|KEY_DEL:
-      if (!FSF.LStricmp(Shortcut[Pos-1].Hotkey, "-") && !*Shortcut[Pos-1].Allias)
+      if (Pos>2 && Shortcut[Pos-1].Hotkey[0]=='-' && !*Shortcut[Pos-1].Allias)
       {
         const char *MsgItems[] = {
           GetMsg(MShotrcutTitle),
@@ -379,13 +399,13 @@ LONG_PTR TDirMenu::KeyPress(LONG_PTR Key, int Pos)
     //-------------------
     case KEY_CTRL|KEY_UP:
     case KEY_RCTRL|KEY_UP:
-      if (Pos<Count-1 && Pos)
+      if (Pos>2 && Pos<Count-1)
       {
         TempShortcut=Shortcut[Pos-1];
         Shortcut[Pos-1]=Shortcut[Pos];
         Shortcut[Pos]=TempShortcut;
         DelItem(Pos-1);
-        if (!FSF.LStricmp(Shortcut[Pos].Hotkey, "-") && !*Shortcut[Pos].Allias)
+        if (Shortcut[Pos].Hotkey[0]=='-' && !*Shortcut[Pos].Allias)
           InsItem(Pos, "", true);
         else
         {
@@ -400,13 +420,13 @@ LONG_PTR TDirMenu::KeyPress(LONG_PTR Key, int Pos)
     //-------------------
     case KEY_CTRL|KEY_DOWN:
     case KEY_RCTRL|KEY_DOWN:
-      if (Pos<Count-2)
+      if (Pos>1 && Pos<Count-2)
       {
         TempShortcut=Shortcut[Pos+1];
         Shortcut[Pos+1]=Shortcut[Pos];
         Shortcut[Pos]=TempShortcut;
         DelItem(Pos+1);
-        if (!FSF.LStricmp(Shortcut[Pos].Hotkey, "-") && !*Shortcut[Pos].Allias)
+        if (Shortcut[Pos].Hotkey[0]=='-' && !*Shortcut[Pos].Allias)
           InsItem(Pos, "", true);
         else
         {
@@ -419,6 +439,29 @@ LONG_PTR TDirMenu::KeyPress(LONG_PTR Key, int Pos)
       }
       break;
     //-------------------
+    case KEY_ENTER:
+    case KEY_CTRL|KEY_ENTER:
+    case KEY_RCTRL|KEY_ENTER:
+    {
+      FarListPos flp={Pos, -1};
+      Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, 0, (LONG_PTR)&flp);
+      if (Pos>1)
+      {
+        FSF.ExpandEnvironmentStr(Shortcut[Pos].Path, Path, sizeof(Path));
+        if (Info.Control(INVALID_HANDLE_VALUE, (Key==KEY_ENTER)?FCTL_SETPANELDIR:FCTL_SETANOTHERPANELDIR, (void *)Path))
+          (Key==KEY_ENTER) ? PathIsSet=1 : PathIsSet=2;
+        Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
+        return true;
+      }
+      else
+        Key=KEY_BACKSLASH;
+    }
+    //-------------------
+    case KEY_BACKSLASH:
+    {
+      FarListPos flp={0, -1};
+      Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, 0, (LONG_PTR)&flp);
+    }
     case KEY_CTRL|KEY_BACKSLASH:
     case KEY_RCTRL|KEY_BACKSLASH:
       if (Pos>=Count-1) break;
@@ -428,17 +471,6 @@ LONG_PTR TDirMenu::KeyPress(LONG_PTR Key, int Pos)
       *((LONG_PTR *)Param)=Key;
       Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
       return true;
-    //-------------------
-    case KEY_ENTER:
-    case KEY_CTRL|KEY_ENTER:
-    case KEY_RCTRL|KEY_ENTER:
-    {
-      FSF.ExpandEnvironmentStr(Shortcut[Pos].Path, Path, sizeof(Path));
-      if (Info.Control(INVALID_HANDLE_VALUE, (Key==KEY_ENTER)?FCTL_SETPANELDIR:FCTL_SETANOTHERPANELDIR, (void *)Path))
-        (Key==KEY_ENTER) ? PathIsSet=1 : PathIsSet=2;
-      Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
-      return true;
-    }
     //-------------------
     case KEY_ESC:
       fexit=-1;
@@ -460,32 +492,29 @@ int TDirMenu::Close(int Index)
 
   if (PathIsSet) PostMacro(Index, PathIsSet);
   DeleteRegKey(PluginRootKey, Title);
-  for (int i=0; i<Count && (!FSF.LStricmp(Shortcut[i].Hotkey,"-")||*Shortcut[i].Path); i++)
+  for (int i=0, j=2; j<Count && (Shortcut[j].Hotkey[0]=='-' || *Shortcut[j].Path); i++, j++)
   {
     char curHotkey[15], curAllias[15], curPath[15], curMacro[15], curRunMacro[15];
-    if (*Shortcut[i].Hotkey)
+    if (*Shortcut[j].Hotkey)
     {
       FSF.sprintf(curHotkey, "Hotkey%u", i);
-      SetRegKey(PluginRootKey, Title, curHotkey, Shortcut[i].Hotkey);
-      if (!FSF.LStricmp(Shortcut[i].Hotkey,"-") && !*Shortcut[i].Allias)
+      SetRegKey(PluginRootKey, Title, curHotkey, Shortcut[j].Hotkey);
+      if (Shortcut[j].Hotkey[0]=='-' && !*Shortcut[j].Allias)
         continue;
     }
-    if (*Shortcut[i].Allias)
+    if (*Shortcut[j].Allias)
     {
       FSF.sprintf(curAllias, "Allias%u", i);
-      SetRegKey(PluginRootKey, Title, curAllias, Shortcut[i].Allias);
+      SetRegKey(PluginRootKey, Title, curAllias, Shortcut[j].Allias);
     }
     FSF.sprintf(curPath, "Path%u", i);
-    SetRegKey(PluginRootKey, Title, curPath, Shortcut[i].Path);
-    if (Shortcut[i].RunMacro)
-    {
-      FSF.sprintf(curRunMacro, "RunMacro%u", i);
-      SetRegKey(PluginRootKey, Title, curRunMacro, (DWORD)Shortcut[i].RunMacro);
-    }
-    if (*Shortcut[i].Macro)
+    SetRegKey(PluginRootKey, Title, curPath, Shortcut[j].Path);
+    FSF.sprintf(curRunMacro, "RunMacro%u", i);
+    SetRegKey(PluginRootKey, Title, curRunMacro, (DWORD)Shortcut[j].RunMacro);
+    if (*Shortcut[j].Macro)
     {
       FSF.sprintf(curMacro, "Macro%u", i);
-      SetRegKey(PluginRootKey, Title, curMacro, Shortcut[i].Macro);
+      SetRegKey(PluginRootKey, Title, curMacro, Shortcut[j].Macro);
     }
   }
   if (Shortcut) free(Shortcut);

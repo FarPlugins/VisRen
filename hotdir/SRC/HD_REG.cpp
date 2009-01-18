@@ -3,7 +3,7 @@
  *
  * Plugin module for FAR Manager 1.71
  *
- * Copyrigth (c) 2007 Alexey Samlyukov
+ * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
 /****************************************************************************
@@ -32,6 +32,7 @@ static HKEY CreateOrOpenRegKey(bool bCreate, const char *cpRootKey, char *cpKey 
 //---------
 static bool GetRegKey(HKEY hKey, const char *ValueName, DWORD &ValueData)
 {
+  // DWORD
   DWORD Type, DataSize = sizeof(ValueData);
   if (RegQueryValueEx(hKey, ValueName, 0, &Type, (LPBYTE)&ValueData, &DataSize) == ERROR_SUCCESS)
     return true;
@@ -40,6 +41,7 @@ static bool GetRegKey(HKEY hKey, const char *ValueName, DWORD &ValueData)
 
 static bool GetRegKey(HKEY hKey, const char *ValueName, char *ValueData, DWORD DataSize)
 {
+  // REG_SZ
   DWORD Type;
   if (RegQueryValueEx(hKey, ValueName, 0, &Type, (LPBYTE)ValueData, &DataSize) == ERROR_SUCCESS)
     return true;
@@ -48,6 +50,7 @@ static bool GetRegKey(HKEY hKey, const char *ValueName, char *ValueData, DWORD D
 //---------
 static void SetRegKey(const char *cpRootKey, const char *cpKey, const char *cpValueName, DWORD dwValueData)
 {
+  // DWORD
   HKEY hKey = CreateOrOpenRegKey(true, cpRootKey, (char *)cpKey);
   RegSetValueEx(hKey, cpValueName, 0, REG_DWORD, (LPBYTE)&dwValueData, sizeof(dwValueData));
   if (hKey) RegCloseKey(hKey);
@@ -55,6 +58,7 @@ static void SetRegKey(const char *cpRootKey, const char *cpKey, const char *cpVa
 
 static void SetRegKey(const char *cpRootKey, const char *cpKey, const char *cpValueName, char *cpValueData)
 {
+  // REG_SZ
   HKEY hKey = CreateOrOpenRegKey(true, cpRootKey, (char *)cpKey);
   RegSetValueEx(hKey, cpValueName, 0, REG_SZ, (CONST LPBYTE)cpValueData, lstrlen(cpValueData)+1);
   if (hKey) RegCloseKey(hKey);

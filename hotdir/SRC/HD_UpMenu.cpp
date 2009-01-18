@@ -3,19 +3,21 @@
  *
  * Plugin module for FAR Manager 1.71
  *
- * Copyrigth (c) 2007 Alexey Samlyukov
+ * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
 class TUpDirMenu:public TMenu
 {
-  char Path[MAX_PATH];
-  char **flist;
-  int *fpos, fnum;
-
+  char Path[MAX_PATH], PlugPath[MAX_PATH];
+  char **flist, **plist;
+  int fnum, pnum, *fpos;
+  bool bShortcutPath;           // брать путь из панели (=0) или из "быстрого каталога" (=1)?
+  bool bPlug;
   void Init();
   void GetString(int i, char *Dest, int DestLen);
   LONG_PTR KeyPress(LONG_PTR Key, int Pos);
   bool MouseClick(int Bottom, int Pos);
+  void SetPath(bool bPressCtrl, int i);
   int GetArgv(const char *cmd, char ***argv, int **position = 0);
   bool FreeArgv(int argc, char **argv, int *pos = 0);
   int Close(int Index);
@@ -79,7 +81,6 @@ int TUpDirMenu::GetArgv(const char *cmd, char ***argv, int **position)
   return num;
 }
 
-
 bool TUpDirMenu::FreeArgv(int argc, char **argv, int *pos)
 {
   if (!argv)
@@ -106,22 +107,138 @@ void TUpDirMenu::GetString(int i, char *Dest, int DestLen)
   }
 }
 
+void TUpDirMenu::SetPath(bool bPressCtrl, int i)
+{
+  if (i<fnum)
+  {
+    if (i==fnum-1 && !bPressCtrl && !bPlug) return;
+    if (i<fnum-1) Path[fpos[i+1]]=0;
+    char name[MAX_PATH]={'\0'};
+    PanelInfo pi;
+    PanelRedrawInfo ri={0,0};
+
+    if (i==fnum-1 && bPressCtrl && !bPlug)
+    {
+      Info.Control(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &pi);
+      lstrcpy(name, pi.PanelItems[pi.CurrentItem].FindData.cFileName);
+    }
+    else
+      lstrcpy(name, flist[i+1]);
+
+    Info.Control(INVALID_HANDLE_VALUE, !bPressCtrl ?
+                 FCTL_SETPANELDIR:FCTL_SETANOTHERPANELDIR, Path);
+
+    if ( !Info.Control(INVALID_HANDLE_VALUE, !bPressCtrl ?
+                       FCTL_GETPANELINFO:FCTL_GETANOTHERPANELINFO, &pi)
+         || pi.PanelType != PTYPE_FILEPANEL )
+      return;
+
+    for (int j=0; j<pi.ItemsNumber; j++)
+    {
+      if (!FSF.LStricmp(pi.PanelItems[j].FindData.cFileName, name))
+      {
+        ri.CurrentItem=j;
+        if (i==fnum-1 && bPressCtrl && !bPlug) ri.TopPanelItem=j;
+        Info.Control(INVALID_HANDLE_VALUE, !bPressCtrl ?
+                     FCTL_REDRAWPANEL:FCTL_REDRAWANOTHERPANEL, &ri);
+        break;
+      }
+    }
+  }
+  else if (bPlug && !bPressCtrl)
+  {
+    if (i==pnum+fnum+1) return;
+
+    KeySequence keys={KSFLAGS_DISABLEOUTPUT, pnum+fnum+1-i};
+    keys.Sequence = (DWORD*)malloc(keys.Count * sizeof(*keys.Sequence));
+    for (int j=0; j<keys.Count; j++)
+      keys.Sequence[j]=KEY_CTRL|KEY_PGUP;
+
+    Info.AdvControl( Info.ModuleNumber, ACTL_POSTKEYSEQUENCE, &keys );
+    free(keys.Sequence);
+  }
+  return;
+}
+
 void TUpDirMenu::Init()
 {
-  GetString(Param, Path, sizeof(Path));
-  FSF.ExpandEnvironmentStr(Path, Path, sizeof(Path));
-  flist = 0;
-  fpos  = 0;
-  fnum  = GetArgv(Path, &flist, &fpos);
-
-  for (int i=fnum-1; Count<fnum; i--)
+  flist=plist=0;
+  fpos=0;
+  pnum=0;
+  char Temp[MAX_PATH];
+  if (bShortcutPath=Param)
   {
-    char Temp[MAX_PATH];
-    if (i<=36)
-      FSF.sprintf(Temp, "&%1.1c  %s",(i>=10 ? ('a'+(i-10)) : ('0'+i)), flist[Count]);
+    GetString(Param-2, Path, sizeof(Path));
+    FSF.ExpandEnvironmentStr(Path, Path, sizeof(Path));
+    if (fnum=GetArgv(Path, &flist, &fpos))
+      for (int i=fnum-1; Count<fnum; i--)
+      {
+        if (i<=36)
+          FSF.sprintf(Temp, "&%1.1c  %s",(i>=10 ? ('a'+(i-10)) : ('0'+i)), flist[Count]);
+        else
+          FSF.sprintf(Temp, "&%1.1s  %s", "", flist[Count]);
+        InsItem(Count,Temp);
+      }
     else
-      FSF.sprintf(Temp, "&%1.1s  %s", "", flist[Count]);
-    InsItem(Count,Temp);
+      InsItem(Count,"");
+  }
+  else
+  {
+    Path[0]=PlugPath[0]='\0';
+    PanelInfo pi;
+    Info.Control(INVALID_HANDLE_VALUE, FCTL_GETPANELSHORTINFO, &pi);
+    if (bPlug=pi.Plugin)
+    { //  узнаем путь на ФАР-панели и плагиновой панели
+      GetCurrentDirectory(sizeof(Path), Path);
+      lstrcpy(PlugPath, pi.CurDir);
+      pnum=GetArgv(PlugPath, &plist);
+      //DebugMsg(PlugPath, "PlugPath",pnum);
+    }
+    else
+      lstrcpy(Path, pi.CurDir);
+    fnum=GetArgv(Path, &flist, &fpos);
+    //DebugMsg(Path,"Path",fnum);
+    // check for network folder
+    if (Path[0]=='\\' && Path[1]=='\\')
+    {
+      FSF.sprintf(Temp, "\\\\%s\\%s", flist[0], flist[1]);
+      flist[0]=(char*)realloc(flist[0], (lstrlen(Temp)+1) * sizeof(**flist));
+      lstrcpy(flist[0], Temp);
+      free(flist[1]);
+      fnum--;
+      for (int i=1; i<fnum; i++)
+      {
+        flist[i]=flist[i+1];
+        fpos[i]=fpos[i+1];
+      }
+    }
+
+    for (int i=(bPlug?pnum+fnum:fnum-1); Count<fnum; i--)
+    {
+      if (i<=36)
+        FSF.sprintf(Temp, "&%1.1c  %s",(i>=10 ? ('a'+(i-10)) : ('0'+i)), flist[Count]);
+      else
+        FSF.sprintf(Temp, "&%1.1s  %s", "", flist[Count]);
+      InsItem(Count,Temp);
+    }
+    if (bPlug)
+    {
+      InsItem(Count,"",true);
+      if (pnum<=36)
+        FSF.sprintf(Temp, "&%1.1c  %s",(pnum>=10 ? ('a'+(pnum-10)) : ('0'+pnum)), "\\");
+      else
+        FSF.sprintf(Temp, "&%1.1s  %s", "", "\\");
+      InsItem(Count,Temp);
+
+      for (int i=pnum-1, j=0; Count<pnum+fnum+2; i--, j++)
+      {
+        if (i<=36)
+          FSF.sprintf(Temp, "&%1.1c  %s",(i>=10 ? ('a'+(i-10)) : ('0'+i)), plist[j]);
+        else
+          FSF.sprintf(Temp, "&%1.1s  %s", "", plist[j]);
+        InsItem(Count,Temp);
+      }
+    }
   }
 
   FarListPos flp={Count-1, -1};
@@ -132,17 +249,17 @@ void TUpDirMenu::Init()
 
 bool TUpDirMenu::MouseClick(int Bottom, int Pos)
 {
-  if (Pos < fnum-1)
-    Path[fpos[Pos+1]] = 0;
-  if (Bottom==RIGHTMOST_BUTTON_PRESSED)
+  if (Bottom==RIGHTMOST_BUTTON_PRESSED || Bottom==FROM_LEFT_1ST_BUTTON_PRESSED)
   {
-    Info.Control(INVALID_HANDLE_VALUE, FCTL_SETANOTHERPANELDIR, (void *)Path);
-    Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
-    return true;
-  }
-  else if (Bottom==FROM_LEFT_1ST_BUTTON_PRESSED)
-  {
-    Info.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, (void *)Path);
+    if (bShortcutPath)
+    {
+      if (Pos<fnum-1) Path[fpos[Pos+1]]=0;
+      Info.Control(INVALID_HANDLE_VALUE, (Bottom==RIGHTMOST_BUTTON_PRESSED ?
+                   FCTL_SETANOTHERPANELDIR : FCTL_SETPANELDIR), (void *)Path);
+    }
+    else
+      SetPath(Bottom==RIGHTMOST_BUTTON_PRESSED, Pos);
+
     Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
     return true;
   }
@@ -171,11 +288,21 @@ LONG_PTR TUpDirMenu::KeyPress(LONG_PTR Key, int Pos)
     case KEY_CTRL|KEY_ENTER:
     case KEY_RCTRL|KEY_ENTER:
     {
-      if (Pos < fnum-1)
-        Path[fpos[Pos+1]] = 0;
-      Info.Control(INVALID_HANDLE_VALUE, (Key==KEY_ENTER)?FCTL_SETPANELDIR:FCTL_SETANOTHERPANELDIR, (void *)Path);
-      Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
-      return true;
+      if (bShortcutPath)
+      {
+        if (Pos<fnum-1)
+          Path[fpos[Pos+1]] = 0;
+        Info.Control(INVALID_HANDLE_VALUE, (Key==KEY_ENTER)?FCTL_SETPANELDIR:FCTL_SETANOTHERPANELDIR, (void *)Path);
+        Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
+        return true;
+      }
+      else
+      {
+        SetPath(Key!=KEY_ENTER, Pos);
+        Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
+        return true;
+      }
+      break;
     }
     //-------------------
     case KEY_ESC:
@@ -192,5 +319,7 @@ int TUpDirMenu::Close(int Index)
   if (fexit==-1)
     Index=fexit;
   FreeArgv(fnum, flist, fpos);
+  FreeArgv(pnum, plist);
+
   return Index;
 }

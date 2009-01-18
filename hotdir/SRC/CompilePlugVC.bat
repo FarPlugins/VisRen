@@ -7,8 +7,8 @@ rem =============== Use Microsoft Visual Studio .NET 2003 ======================
 rem  ======================== Set name and version ... =========================
 
 @set PlugName=HotDir
-@set fileversion=1,71,0,5
-@set fileversion_str=1.71 build 5
+@set fileversion=1,71,0,6
+@set fileversion_str=1.71 build 6
 @set MyDir=%CD%
 @set MyFarDir=C:\Program Files\Far
 @set MyReleaseDir=%MyFarDir%\Plugins\%PlugName%
@@ -120,7 +120,7 @@ rem  ==================== Compile %PlugName%.dll file...========================
 
 @cd %MyDir%
 @rc /l 0x4E4 %PlugName%.rc
-@cl /Zp2 /O1igy /GF /Gr /GR- /GX- /LD /Gs10000 %PlugName%.cpp /link /subsystem:console /machine:I386 /opt:nowin98 /noentry /nodefaultlib /def:%PlugName%.def kernel32.lib advapi32.lib user32.lib msvcrt60.lib shell32.lib %PlugName%.res /map:"..\%PlugName%.map" /out:"..\%PlugName%.dll" /merge:.rdata=.text
+@cl /Zp2 /O1igy /GF /Gr /GR- /GX- /LD %PlugName%.cpp /link /subsystem:console /machine:I386 /opt:nowin98 /noentry /nodefaultlib /def:%PlugName%.def kernel32.lib advapi32.lib user32.lib msvcrt60.lib shell32.lib %PlugName%.res /map:"..\%PlugName%.map" /out:"..\%PlugName%.dll" /merge:.rdata=.text
 @if exist %PlugName%.exp del %PlugName%.exp>nul
 @if exist %PlugName%.obj del %PlugName%.obj>nul
 @if exist %PlugName%.lib del %PlugName%.lib>nul

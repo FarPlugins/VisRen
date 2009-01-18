@@ -4,7 +4,7 @@
  * Plugin module for FAR Manager 1.71
  *
  * Copyright (c) 2003 Alexander Arefiev
- * Copyrigth (c) 2007 Alexey Samlyukov
+ * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
 class THotKeyMenu:public TMenu
