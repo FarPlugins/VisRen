@@ -9,7 +9,7 @@
 
 /* Current developer: samlyukov<at>gmail.com  */
 
-/* $ Revision: 06.2 $ */
+/* $ Revision: 07.1 $ */
 
 //#define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -147,7 +147,7 @@ static int DebugMsg(char *msg, char *msg2 = " ", int i = 1000)
  ***************************** Exported functions ***************************
  ****************************************************************************/
 
-int WINAPI _export GetMinFarVersion(void) { return MAKEFARVERSION(1,71,2203); }
+int WINAPI _export GetMinFarVersion(void) { return MAKEFARVERSION(1,71,2232); }
 
 void WINAPI _export SetStartupInfo(const struct PluginStartupInfo *Info)
 {

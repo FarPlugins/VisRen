@@ -190,7 +190,10 @@ void TUpDirMenu::Init()
     if (bPlug=pi.Plugin)
     { //  узнаем путь на ФАР-панели и плагиновой панели
       GetCurrentDirectory(sizeof(Path), Path);
-      lstrcpy(PlugPath, pi.CurDir);
+      if (!FSF.LStrnicmp(pi.CurDir, "plugin manager:\\", 16))
+        lstrcpy(PlugPath, pi.CurDir+16);
+      else
+        lstrcpy(PlugPath, pi.CurDir);
       pnum=GetArgv(PlugPath, &plist);
       //DebugMsg(PlugPath, "PlugPath",pnum);
     }

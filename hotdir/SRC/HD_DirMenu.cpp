@@ -233,21 +233,26 @@ bool TDirMenu::MouseClick(int Bottom, int Pos)
   char Path[MAX_PATH];
   if (Pos>1)
   {
-    FSF.ExpandEnvironmentStr(Shortcut[Pos].Path, Path, sizeof(Path));
-    if (Bottom==RIGHTMOST_BUTTON_PRESSED)
+    if (Pos<Count-1)
     {
-      PathIsSet=2; bRet=true;
-      Info.Control(INVALID_HANDLE_VALUE, FCTL_SETANOTHERPANELDIR, (void *)Path);
+      FSF.ExpandEnvironmentStr(Shortcut[Pos].Path, Path, sizeof(Path));
+      if (Bottom==RIGHTMOST_BUTTON_PRESSED)
+      {
+        PathIsSet=2; bRet=true;
+        Info.Control(INVALID_HANDLE_VALUE, FCTL_SETANOTHERPANELDIR, (void *)Path);
+      }
+      else if (Bottom==FROM_LEFT_1ST_BUTTON_PRESSED)
+      {
+        PathIsSet=1; bRet=true;
+        Info.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, (void *)Path);
+      }
+      else if (Bottom==FROM_LEFT_2ND_BUTTON_PRESSED)
+      {
+        *((LONG_PTR *)Param)=(KEY_CTRL|KEY_BACKSLASH);  bRet=true;
+      }
     }
-    else if (Bottom==FROM_LEFT_1ST_BUTTON_PRESSED)
-    {
-      PathIsSet=1; bRet=true;
-      Info.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, (void *)Path);
-    }
-    else if (Bottom==FROM_LEFT_2ND_BUTTON_PRESSED && Pos<Count-1)
-    {
-      *((LONG_PTR *)Param)=(KEY_CTRL|KEY_BACKSLASH);  bRet=true;
-    }
+    else
+      bRet=true;
   }
   else
   {
@@ -447,9 +452,12 @@ LONG_PTR TDirMenu::KeyPress(LONG_PTR Key, int Pos)
       Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, 0, (LONG_PTR)&flp);
       if (Pos>1)
       {
-        FSF.ExpandEnvironmentStr(Shortcut[Pos].Path, Path, sizeof(Path));
-        if (Info.Control(INVALID_HANDLE_VALUE, (Key==KEY_ENTER)?FCTL_SETPANELDIR:FCTL_SETANOTHERPANELDIR, (void *)Path))
-          (Key==KEY_ENTER) ? PathIsSet=1 : PathIsSet=2;
+        if (Pos<Count-1)
+        {
+          FSF.ExpandEnvironmentStr(Shortcut[Pos].Path, Path, sizeof(Path));
+          if (Info.Control(INVALID_HANDLE_VALUE, (Key==KEY_ENTER)?FCTL_SETPANELDIR:FCTL_SETANOTHERPANELDIR, (void *)Path))
+            (Key==KEY_ENTER) ? PathIsSet=1 : PathIsSet=2;
+        }
         Info.SendDlgMessage(hDlg, DM_CLOSE, 0, 0);
         return true;
       }

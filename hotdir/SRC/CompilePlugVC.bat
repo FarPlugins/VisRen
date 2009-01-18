@@ -7,8 +7,8 @@ rem =============== Use Microsoft Visual Studio .NET 2003 ======================
 rem  ======================== Set name and version ... =========================
 
 @set PlugName=HotDir
-@set fileversion=1,71,0,6
-@set fileversion_str=1.71 build 6
+@set fileversion=1,71,0,7
+@set fileversion_str=1.71 build 7
 @set MyDir=%CD%
 @set MyFarDir=C:\Program Files\Far
 @set MyReleaseDir=%MyFarDir%\Plugins\%PlugName%
@@ -18,26 +18,8 @@ rem  ======================== Set name and version ... =========================
 @set filedescription=Advanced folder shortcuts for FAR Manager
 @set legalcopyright=Copyright © Alexander Arefiev 2003, Copyright © 2007 Alexey Samlyukov
 
-rem   ================== Delete old plugin settings... =========================
-rem   using: "CompilePlugVC.bat -D"   or   "CompilePlugVC.bat -d"
-
-@if [%1]==[-d] goto del
-@if [%1]==[-D] goto del
-@if [%2]==[-d] goto del
-@if [%2]==[-D] goto del
-@goto next
-
-:del
-echo Delete old plugin settings...
-@echo REGEDIT4                                             > $DelOld$.reg
-@echo [-HKEY_CURRENT_USER\Software\Far\Plugins\%PlugReg%]    >> $DelOld$.reg
-@start/wait regedit -s $DelOld$.reg
-echo ... succesfully
-@goto next
-
 rem  ==================== Make %PlugName%.def file... ==========================
 
-:next
 @if not exist %PlugName%.def (
 echo Make %PlugName%.def file...
 
@@ -69,7 +51,7 @@ rem @echo   ProcessKey                                         >> %PlugName%.def
 rem @echo   ProcessEvent                                       >> %PlugName%.def
 rem @echo   Compare                                            >> %PlugName%.def
 
-@if exist %PlugName%.def echo ... succesfully
+@if exist %PlugName%.def echo ... successfully
 )
 
 rem  ================== Make %PlugName%.rc file... =============================
@@ -109,7 +91,7 @@ echo Make %PlugName%.rc file...
 @echo   }                                                       >> %PlugName%.rc
 @echo }                                                         >> %PlugName%.rc
 
-@if exist %PlugName%.rc echo ... succesfully
+@if exist %PlugName%.rc echo ... successfully
 )
 
 rem  ==================== Compile %PlugName%.dll file...========================
@@ -121,41 +103,18 @@ rem  ==================== Compile %PlugName%.dll file...========================
 @cd %MyDir%
 @rc /l 0x4E4 %PlugName%.rc
 @cl /Zp2 /O1igy /GF /Gr /GR- /GX- /LD %PlugName%.cpp /link /subsystem:console /machine:I386 /opt:nowin98 /noentry /nodefaultlib /def:%PlugName%.def kernel32.lib advapi32.lib user32.lib msvcrt60.lib shell32.lib %PlugName%.res /map:"..\%PlugName%.map" /out:"..\%PlugName%.dll" /merge:.rdata=.text
-@if exist %PlugName%.exp del %PlugName%.exp>nul
-@if exist %PlugName%.obj del %PlugName%.obj>nul
-@if exist %PlugName%.lib del %PlugName%.lib>nul
-@if exist %PlugName%.res del %PlugName%.res>nul
-@if exist %PlugName%.def del %PlugName%.def>nul
-@if exist %PlugName%.rc  del %PlugName%.rc>nul
-@if exist $DelOld$.reg del $DelOld$.reg>nul
+@if exist *.exp del *.exp>nul
+@if exist *.obj del *.obj>nul
+@if exist *.lib del *.lib>nul
+@if exist *.res del *.res>nul
+@if exist *.def del *.def>nul
+@if exist *.rc  del *.rc>nul
 
-rem   ======================= Copy to release... ===============================
-rem   using: "CompilePlugVC.bat -R"   or   "CompilePlugVC.bat -r"
-
-@if [%1]==[-r] goto CopyToRelease
-@if [%1]==[-R] goto CopyToRelease
-@if [%2]==[-r] goto CopyToRelease
-@if [%2]==[-R] goto CopyToRelease
-@goto next2
-
-:CopyToRelease
-echo Delete old plugin ...
-@if exist "%MyReleaseDir%\%PlugName%.dll" "%MyFarDir%\The Underscore\loader\LOADER.EXE" /u "%MyReleaseDir%\%PlugName%.dll"
-@del /Q "%MyReleaseDir%\*.*" >nul
-
-echo Copy new plugin ...
-@cd %MyDir%
-@cd ".."
-@copy "*.*" "%MyReleaseDir%" >nul
-@if exist "%MyReleaseDir%\%PlugName%.dll" "%MyFarDir%\The Underscore\loader\LOADER.EXE" /l "%MyReleaseDir%\%PlugName%.dll"
-@goto done
 
 rem  ================= Load work %PlugName%.dll file... ========================
 
-:next2
 @cd %MyDir%
 @cd ".."
 @if exist %PlugName%.dll  "%MyFarDir%\The Underscore\loader\LOADER.EXE" /l %PlugName%.dll
 
-:done
 echo ***************
