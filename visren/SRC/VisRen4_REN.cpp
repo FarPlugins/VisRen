@@ -80,13 +80,13 @@ static TCHAR *BuildFullFilename(TCHAR *FullFileName, const TCHAR *Dir, const TCH
 /****************************************************************************
  * Проверим, что содержимое тега не пусто
  ****************************************************************************/
-bool IsEmpty(const TCHAR *Str)
+static bool IsEmpty(const TCHAR *Str)
 {
   if (Str)
   {
     for (int i=0; i<lstrlen(Str); i++)
       if ( (Str[i] != _T('\n')) && (Str[i] != _T('\r')) && (Str[i] != _T('\t'))
-           && (Str[i] != '\0') && (Str[i] != ' ') )
+           && (Str[i] != _T('\0')) && (Str[i] != _T(' ')) )
         return false;
   }
   return true;
@@ -552,86 +552,81 @@ static bool ProcessFileName()
  ****************************************************************************/
 static bool RenameFile(PanelInfo *PInfo)
 {
-  HANDLE hScreen=Info.SaveScreen(0,0,-1,-1);
   TCHAR srcFull[MAX_PATH], destFull[MAX_PATH];
   bool bSkipAll=false;
-  int Count = (Opt.Undo ? sUndoFI.iCount : sFI.iCount);
-  int i, j, iRen, iUndo;
+  int i, j, Count, iRen=0, iUndo=0;
+  PanelRedrawInfo RInfo={0,0};
   SetLastError(ERROR_SUCCESS);
 
   // вначале снимем выделение на панели
   for (i=PInfo->ItemsNumber-1; i>=0; i--)
     PInfo->PanelItems[i].Flags &= ~PPIF_SELECTED;
 
-  for (i=0, iRen=0, iUndo=0; i<Count; i++)
+  if (!Opt.Undo)
   {
-    TCHAR *src =( Opt.Undo ?
-                  BuildFullFilename(srcFull, sUndoFI.Dir, sUndoFI.CurFileName[i]) :
-                  sFI.ppi[i].FindData.cFileName );
-    TCHAR *dest=( Opt.Undo ?
-                  BuildFullFilename(destFull, sUndoFI.Dir, sUndoFI.OldFileName[i]) :
-                  sFI.DestFileName[i] );
-    // Имена совпадают - пропустим переименование
-    if (!lstrcmp(src, dest)) continue;
+    Count=sFI.iCount;
 
- RETRY:
-    if (MoveFile(src, dest))
+    for (i=0; i<Count; i++)
     {
-      iRen++;
-      // поместим в Undo
-      if (Opt.LogRen && !Opt.Undo && !BuildUndoItem(dest, src, iUndo++))
+      TCHAR *src =sFI.ppi[i].FindData.cFileName,
+            *dest=sFI.DestFileName[i];
+
+      // Имена совпадают - пропустим переименование
+      if (!lstrcmp(src, dest)) continue;
+ RETRY_1:
+      // Переименовываем
+      if (MoveFile(src, dest))
       {
-        Opt.LogRen=0;
-        ErrorMsg(MErrorCreateLog, MErrorNoMem);
+        iRen++;
+        // поместим в Undo
+        if (Opt.LogRen && !BuildUndoItem(dest, src, iUndo++))
+        {
+          Opt.LogRen=0;
+          ErrorMsg(MErrorCreateLog, MErrorNoMem);
+        }
+        continue;
       }
-      continue;
-    }
-    // файл был удален сторонним процессом - продолжим без него
-    if (GetLastError()==ERROR_FILE_NOT_FOUND) continue;
-
-    if (bSkipAll)
-    {
+      // файл был удален сторонним процессом - продолжим без него
+      if (GetLastError()==ERROR_FILE_NOT_FOUND) continue;
       // не переименовали - отметим
-      if (!Opt.Undo)
+      if (bSkipAll)
+      {
         for (j=0; j<PInfo->ItemsNumber; j++)
           if (!FSF.LStricmp(PInfo->PanelItems[j].FindData.cFileName, src))
           {
             PInfo->PanelItems[j].Flags |= PPIF_SELECTED;
             break;
           }
-      continue;
-    }
-
-    // Запрос с сообщением-ошибкой переименования
-    const TCHAR *MsgItems[]={
-      GetMsg(MVRenTitle),
-      GetMsg(MRenameFail),
-      src,
-      GetMsg(MTo),
-      dest,
-      GetMsg(MSkip), GetMsg(MSkipAll), GetMsg(MRetry), GetMsg(MCancel)
-    };
-    int Ret=Info.Message( Info.ModuleNumber, FMSG_WARNING|FMSG_ERRORTYPE, 0,
-                          MsgItems, sizeof(MsgItems) / sizeof(MsgItems[0]), 4 );
-    switch (Ret)
-    {
-      case 2:     // Повторить
-        goto RETRY;
-      case 1:     // Пропустить все
-        bSkipAll=true;
-      case 0:     // Пропустить
-        // не переименовали - отметим
-        if (!Opt.Undo)
+        continue;
+      }
+      // Запрос с сообщением-ошибкой переименования
+      const TCHAR *MsgItems[]={
+        GetMsg(MVRenTitle),
+        GetMsg(MRenameFail),
+        src,
+        GetMsg(MTo),
+        dest,
+        GetMsg(MSkip), GetMsg(MSkipAll), GetMsg(MRetry), GetMsg(MCancel)
+      };
+      int Ret=Info.Message( Info.ModuleNumber, FMSG_WARNING|FMSG_ERRORTYPE, 0,
+                            MsgItems, sizeof(MsgItems) / sizeof(MsgItems[0]), 4 );
+      switch (Ret)
+      {
+        case 2:     // Повторить
+          goto RETRY_1;
+        case 1:     // Пропустить все
+          bSkipAll=true;
+        case 0:     // Пропустить
+          // не переименовали - отметим
           for (j=0; j<PInfo->ItemsNumber; j++)
             if (!FSF.LStricmp(PInfo->PanelItems[j].FindData.cFileName, src))
             {
               PInfo->PanelItems[j].Flags |= PPIF_SELECTED;
               break;
             }
-        break;
-      default:    // Отменить
-        // не переименовали - отметим
-        if (!Opt.Undo)
+          break;
+        default:    // Отменить
+          // не переименовали - отметим
           for ( ; i<Count; i++)
             for (j=0; j<PInfo->ItemsNumber; j++)
               if (!FSF.LStricmp(PInfo->PanelItems[j].FindData.cFileName, sFI.ppi[i].FindData.cFileName))
@@ -639,38 +634,67 @@ static bool RenameFile(PanelInfo *PInfo)
                 PInfo->PanelItems[j].Flags |= PPIF_SELECTED;
                 break;
               }
-        goto NEXT;
+          goto NEXT;
+      }
     }
-
   }
-
- NEXT:
-
-  PanelRedrawInfo RInfo={0,0};
-  if (Opt.Undo)
+  else
   {
-    // установим каталог
+    Count=sUndoFI.iCount;
 
-    // !!!?? пока не закомментировал - не работало
-    //       между тем код выше в цикле работает - отмечает, мистика
-    //if (FSF.LStricmp(PInfo->CurDir, sUndoFI.Dir))
-      Info.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, (void *)sUndoFI.Dir);
+    for (i=Count-1; i>=0; i--)
+    {
+      TCHAR *src =BuildFullFilename(srcFull, sUndoFI.Dir, sUndoFI.CurFileName[i]),
+            *dest=BuildFullFilename(destFull, sUndoFI.Dir, sUndoFI.OldFileName[i]);
+ RETRY_2:
+      if (MoveFile(src, dest))  { iRen++; continue; }
+
+      if (GetLastError()==ERROR_FILE_NOT_FOUND || bSkipAll) continue;
+
+      const TCHAR *MsgItems[]={
+        GetMsg(MVRenTitle),
+        GetMsg(MRenameFail),
+        src,
+        GetMsg(MTo),
+        dest,
+        GetMsg(MSkip), GetMsg(MSkipAll), GetMsg(MRetry), GetMsg(MCancel)
+      };
+      int Ret=Info.Message( Info.ModuleNumber, FMSG_WARNING|FMSG_ERRORTYPE, 0,
+                            MsgItems, sizeof(MsgItems) / sizeof(MsgItems[0]), 4 );
+      switch (Ret)
+      {
+        case 2:     // Повторить
+          goto RETRY_2;
+        case 1:     // Пропустить все
+          bSkipAll=true;
+        case 0:     // Пропустить
+          break;
+        default:    // Отменить
+          goto BREAK;
+      }
+    }
+ BREAK:
+    if (i<0) i=0;
+    // установим каталог
+    Info.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, (void *)sUndoFI.Dir);
     // отметим файлы
     Info.Control(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, PInfo);
-    for (i=0; i<sUndoFI.iCount; i++)
+    for (int k=i; k<Count; k++)
       for (j=0; j<PInfo->ItemsNumber; j++)
-        if (!FSF.LStricmp(PInfo->PanelItems[j].FindData.cFileName, sUndoFI.OldFileName[i]))
+        if (!FSF.LStricmp(PInfo->PanelItems[j].FindData.cFileName, sUndoFI.OldFileName[k]))
         {
-          if (i==0) RInfo.TopPanelItem=RInfo.CurrentItem=j;
+          if (k==i) RInfo.TopPanelItem=RInfo.CurrentItem=j;
           PInfo->PanelItems[j].Flags |= PPIF_SELECTED;
           break;
         }
   }
+
+ NEXT:
   // удалим из структуры лишние элементы (от старого Undo)
-  for (j=sUndoFI.iCount-1; j>iUndo-1; j--)
+  for (i=sUndoFI.iCount-1; i>iUndo-1; i--)
   {
-    my_free(sUndoFI.CurFileName[j]); sUndoFI.CurFileName[j]=0;
-    my_free(sUndoFI.OldFileName[j]); sUndoFI.OldFileName[j]=0;
+    my_free(sUndoFI.CurFileName[i]); sUndoFI.CurFileName[i]=0;
+    my_free(sUndoFI.OldFileName[i]); sUndoFI.OldFileName[i]=0;
   }
 
   // что-то поместили в Undo...
@@ -685,8 +709,6 @@ static bool RenameFile(PanelInfo *PInfo)
     else
       lstrcpy(sUndoFI.Dir, PInfo->CurDir);
   }
-
-  Info.RestoreScreen(hScreen);
 
   if (iRen)
   {

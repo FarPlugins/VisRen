@@ -156,10 +156,8 @@ ID3TagInternal *InitializeInternalTag1(ID3v11TagReal *pRealTag)
 }
 
 
-//#define TAG2
+#define TAG2
 #ifdef TAG2
-///!!!!!!!!!!!!!!!!!!  $ ме оюьер беяэ щрнр акнй :-(
-
 
 /****************************************************************************
  ********************************  Tag v.2  *********************************
@@ -439,7 +437,6 @@ ID3TagInternal *InitializeInternalTag2(ID3v2TagReal *pRealTag)
   return pInternalTag;
 }
 
-///!!!!!!!!!!!!!!!!!!  $
 #endif
 
 

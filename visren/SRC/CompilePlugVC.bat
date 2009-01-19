@@ -8,8 +8,8 @@ rem =============== Use Microsoft Visual Studio .NET 2003 ======================
 rem  ======================== Set name and version ... =========================
 
 @set PlugName=VisRen
-@set fileversion=1,71,0,2
-@set fileversion_str=1.71 build 2
+@set fileversion=1,71,0,3
+@set fileversion_str=1.71 build 3
 @set MyDir=%CD%
 @set MyFarDir=C:\Program Files\Far
 @set companyname=Eugene Roshal ^& FAR Group
@@ -103,7 +103,7 @@ rem  ==================== Compile %PlugName%.dll file...========================
 
 @cd %MyDir%
 @rc /l 0x4E4 %PlugName%.rc
-@cl /Zp2 /O1igy /GF /GR- /GX- /LD /G7 /EHsc %PlugName%.cpp /link /subsystem:console /machine:I386 /opt:nowin98 /noentry /nodefaultlib /def:%PlugName%.def kernel32.lib advapi32.lib user32.lib shell32.lib MSVCRT60.LIB "PCRE72\pcre.lib" %PlugName%.res /map:"..\%PlugName%.map" /out:"..\%PlugName%.dll" /merge:.rdata=.text
+@cl /Zp1 /O1igy /GF /GR- /GX- /LD /G7 /EHsc %PlugName%.cpp /link /subsystem:console /machine:I386 /opt:nowin98 /noentry /nodefaultlib /def:%PlugName%.def kernel32.lib advapi32.lib user32.lib shell32.lib MSVCRT60.LIB "PCRE72\pcre.lib" %PlugName%.res /map:"..\%PlugName%.map" /out:"..\%PlugName%.dll" /merge:.rdata=.text
 
 @if exist *.exp del *.exp>nul
 @if exist *.obj del *.obj>nul
