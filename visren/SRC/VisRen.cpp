@@ -6,7 +6,7 @@
  * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
-/* $ Revision: 3.1 $ */
+/* $ Revision: 4.1 $ */
 
 #define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -15,7 +15,7 @@
 #include "..\..\plugin.hpp"
 #include "..\..\farkeys.hpp"
 #include "..\..\farcolor.hpp"
-#include "PCRE72\pcre.h"
+#include "PCRE74\pcre.h"
 #include "VisRen1_LNG.cpp"        // набор констант для извлечения строк из .lng файла
 
 /// ВАЖНО! используем данные макросы, чтоб дополнительно не обнулять память
@@ -140,13 +140,13 @@ static int DebugMsg(TCHAR *msg, TCHAR *msg2 = _T(" "), int i = 1000)
  ***************************** Exported functions ***************************
  ****************************************************************************/
 
-static bool bOldFAR = false;
+static bool bOldFAR=false, bWin9x=false;
 
 /****************************************************************************
  * Эти функции плагина FAR вызывает в первую очередь
  ****************************************************************************/
 // установим минимально поддерживаемую версию FARа...
-int WINAPI _export GetMinFarVersion() { return MAKEFARVERSION(1,71,2251); }
+int WINAPI _export GetMinFarVersion() { return MAKEFARVERSION(1,71,2272); }
 
 // заполним структуру PluginStartupInfo и сделаем ряд полезных действий...
 void WINAPI _export SetStartupInfo(const struct PluginStartupInfo *Info)
@@ -161,6 +161,11 @@ void WINAPI _export SetStartupInfo(const struct PluginStartupInfo *Info)
     FSF.sprintf(PluginRootKey, _T("%s\\VisRen"), Info->RootKey);
     // обнулим структуру под элементы отката
     memset(&sUndoFI, 0, sizeof(sUndoFI));
+
+    OSVERSIONINFO ovi;
+    ovi.dwOSVersionInfoSize=sizeof(ovi);
+    if (GetVersionEx(&ovi) && ovi.dwPlatformId!=VER_PLATFORM_WIN32_NT)
+      bWin9x=true;
   }
   else
     bOldFAR = true;

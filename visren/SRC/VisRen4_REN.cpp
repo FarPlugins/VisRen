@@ -19,6 +19,14 @@ enum {
   CASE_EXT_TITLE   = 0x00000200
 };
 
+enum {
+  TRANSLIT_NAME_NONE = 0x00000001,
+  TRANSLIT_NAME_ENG  = 0x00000002,
+  TRANSLIT_NAME_RUS  = 0x00000004,
+  TRANSLIT_EXT_NONE  = 0x00000010,
+  TRANSLIT_EXT_ENG   = 0x00000020,
+  TRANSLIT_EXT_RUS   = 0x00000040
+};
 
 /****************************************************************************
  * Очистка элементов для отката переименования
@@ -97,7 +105,8 @@ static bool IsEmpty(const TCHAR *Str)
  * Преобразование по маске имени и расширения файлов
  ****************************************************************************/
 static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
-                          unsigned ItemIndex, DWORD *dwCase, FILETIME ftLastWriteTime)
+                          unsigned ItemIndex, DWORD *dwCase, DWORD *dwTranslit,
+                          FILETIME ftLastWriteTime)
 {
   SYSTEMTIME modific; FILETIME local;
   FileTimeToLocalFileTime(&ftLastWriteTime, &local);
@@ -320,13 +329,23 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
       }
       else if (!strncmp(pMask, _T("[DM]"), 4))
       {
-        FSF.sprintf(ptr, "%02d.%02d.%04d", modific.wDay, modific.wMonth, modific.wYear);
+        FSF.sprintf(ptr, "%04d.%02d.%02d", modific.wYear, modific.wMonth, modific.wDay);
         pMask+=4; ptr+=10;
       }
       else if (!strncmp(pMask, _T("[TM]"), 4))
       {
-        FSF.sprintf(ptr, "%02d-%02d", modific.wHour, modific.wMinute);
-        pMask+=4; ptr+=5;
+        FSF.sprintf(ptr, "%02d-%02d-%02d", modific.wHour, modific.wMinute, modific.wSecond);
+        pMask+=4; ptr+=8;
+      }
+      else if (!strncmp(pMask, _T("[TL]"), 4))
+      {
+        *dwTranslit|=(Index==0 ? TRANSLIT_NAME_ENG : TRANSLIT_EXT_ENG);
+        pMask+=4;
+      }
+      else if (!strncmp(pMask, _T("[TR]"), 4))
+      {
+        *dwTranslit|=(Index==0 ? TRANSLIT_NAME_RUS : TRANSLIT_EXT_RUS);
+        pMask+=4;
       }
       else if (*pMask==_T('[') || *pMask==_T(']')) return false;
       else *ptr++=*pMask++;
@@ -448,6 +467,86 @@ static bool Replase(const TCHAR *src, TCHAR *dest)
 
 
 /****************************************************************************
+ * Транслитерация имен файлов: русский <-> russkij
+ ****************************************************************************/
+static void Translit(TCHAR *Name, TCHAR *Ext, DWORD dwTranslit)
+{
+  if (!dwTranslit) return;
+
+  // CP-1251
+  TCHAR rus[][33]={
+    _T("ж"), _T("з"), _T("ы"), _T("в"), _T("у"),
+    _T("т"), _T("щ"), _T("ш"), _T("с"), _T("р"),
+    _T("п"), _T("о"), _T("н"), _T("м"), _T("л"),
+    _T("х"), _T("к"), _T("ю"), _T("ё"), _T("я"),
+    _T("й"), _T("и"), _T("г"), _T("ф"), _T("э"),
+    _T("е"), _T("д"), _T("ч"), _T("ц"), _T("б"),
+    _T("а"), _T("ъ"), _T("ь")
+  };
+
+  TCHAR eng[][33]={
+    _T("zh"), _T("z"),   _T("y"),  _T("v"),  _T("u"),
+    _T("t"),  _T("shh"), _T("sh"), _T("s"),  _T("r"),
+    _T("p"),  _T("o"),   _T("n"),  _T("m"),  _T("l"),
+    _T("kh"), _T("k"),   _T("ju"), _T("jo"), _T("ja"),
+    _T("j"),  _T("i"),   _T("g"),  _T("f"),  _T("eh"),
+    _T("e"),  _T("d"),   _T("ch"), _T("c"),  _T("b"),
+    _T("a"),  _T("`"),   _T("'")
+  };
+
+  int i;
+  // ФАРу надо CP-866
+  for (i=0; i<33; i++) CharToOem(rus[i], rus[i]);
+  TCHAR Buf[4096];
+  int lenOut, lenIn;
+
+  if (dwTranslit&TRANSLIT_NAME_ENG || dwTranslit&TRANSLIT_NAME_RUS)
+  {
+    lenOut=lenIn=0;
+    Buf[0]=_T('\0');
+    TCHAR *out=Buf, *in=Name;
+    bool bEng=dwTranslit&TRANSLIT_NAME_ENG;
+
+    while (*in)
+    {
+      for (i=0; i<33; i++)
+        if (!FSF.LStrnicmp(in, (bEng?rus[i]:eng[i]), lenIn=lstrlen(bEng?rus[i]:eng[i])))
+        {
+          lenOut=lstrlen(lstrcpy(out, (bEng?eng[i]:rus[i]))); break;
+        }
+      if (i==33) {*out++=*in++; continue;}
+      if (FSF.LIsUpper((BYTE)*in)) *out=(TCHAR)FSF.LUpper((BYTE)*out);
+      in+=lenIn; out+=lenOut;
+    }
+    *out=_T('\0');
+    if (lstrlen(Buf)+lstrlen(Ext)<MAX_PATH) lstrcpy(Name, Buf);
+  }
+
+  if (dwTranslit&TRANSLIT_EXT_ENG || dwTranslit&TRANSLIT_EXT_RUS)
+  {
+    lenOut=lenIn=0;
+    Buf[0]=_T('\0');
+    TCHAR *out=Buf, *in=Ext;
+    bool bEng=dwTranslit&TRANSLIT_EXT_ENG;
+
+    while (*in)
+    {
+      for (i=0; i<33; i++)
+        if (!FSF.LStrnicmp(in, (bEng?rus[i]:eng[i]), lenIn=lstrlen(bEng?rus[i]:eng[i])))
+        {
+          lenOut=lstrlen(lstrcpy(out, (bEng?eng[i]:rus[i]))); break;
+        }
+      if (i==33) {*out++=*in++; continue;}
+      if (FSF.LIsUpper((BYTE)*in)) *out=(TCHAR)FSF.LUpper((BYTE)*out);
+      in+=lenIn; out+=lenOut;
+    }
+    *out=_T('\0');
+    if (lstrlen(Buf)+lstrlen(Name)<MAX_PATH) lstrcpy(Ext, Buf);
+  }
+}
+
+
+/****************************************************************************
  * Изменение регистра имен файлов.
  ****************************************************************************/
 static void Case(TCHAR *Name, TCHAR *Ext, DWORD dwCase)
@@ -460,16 +559,16 @@ static void Case(TCHAR *Name, TCHAR *Ext, DWORD dwCase)
     FSF.LStrupr(Name);
   else if (dwCase&CASE_NAME_FIRST)
   {
-    *Name = (char)FSF.LUpper((BYTE)*Name);
+    *Name = (TCHAR)FSF.LUpper((BYTE)*Name);
      FSF.LStrlwr(Name+1);
   }
   else if (dwCase&CASE_NAME_TITLE)
     for (int i=0; Name[i]; i++)
     {
       if (!i || memchr(Opt.WordDiv, Name[i-1], lstrlen(Opt.WordDiv)))
-        Name[i]=(char)FSF.LUpper((BYTE)Name[i]);
+        Name[i]=(TCHAR)FSF.LUpper((BYTE)Name[i]);
       else
-        Name[i]=(char)FSF.LLower((BYTE)Name[i]);
+        Name[i]=(TCHAR)FSF.LLower((BYTE)Name[i]);
     }
   // регистр расширения
   if (dwCase&CASE_EXT_LOWER)
@@ -478,18 +577,49 @@ static void Case(TCHAR *Name, TCHAR *Ext, DWORD dwCase)
     FSF.LStrupr(Ext);
   else if (dwCase&CASE_EXT_FIRST)
   {
-    *Ext = (char)FSF.LUpper((BYTE)*Ext);
+    *Ext = (TCHAR)FSF.LUpper((BYTE)*Ext);
      FSF.LStrlwr(Ext+1);
   }
   else if (dwCase&CASE_EXT_TITLE)
     for (int i=0; Ext[i]; i++)
     {
       if (!i || memchr(Opt.WordDiv, Ext[i-1], lstrlen(Opt.WordDiv)))
-        Ext[i]=(char)FSF.LUpper((BYTE)Ext[i]);
+        Ext[i]=(TCHAR)FSF.LUpper((BYTE)Ext[i]);
       else
-        Ext[i]=(char)FSF.LLower((BYTE)Ext[i]);
+        Ext[i]=(TCHAR)FSF.LLower((BYTE)Ext[i]);
     }
 }
+
+
+/****************************************************************************
+ * Проверка на Esc. Возвращает true, если пользователь нажал Esc
+ ****************************************************************************/
+static bool CheckForEsc(HANDLE hConInp)
+{
+  if (hConInp==INVALID_HANDLE_VALUE) return false;
+
+  static DWORD dwTicks;
+  DWORD dwNewTicks=GetTickCount();
+  if (dwNewTicks-dwTicks<500) return false;
+  dwTicks=dwNewTicks;
+
+  INPUT_RECORD rec;
+  DWORD ReadCount;
+  while (PeekConsoleInput(hConInp, &rec, 1, &ReadCount) && ReadCount)
+  {
+    ReadConsoleInput(hConInp, &rec, 1, &ReadCount);
+    if ( rec.EventType == KEY_EVENT && rec.Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE &&
+         rec.Event.KeyEvent.bKeyDown )
+      // Опциональное подтверждение прерывания по Esc
+      if ( Info.AdvControl(Info.ModuleNumber, ACTL_GETCONFIRMATIONS, NULL) & FCS_INTERRUPTOPERATION )
+      {
+        if (YesNoMsg(MEscTitle, MEscBody)) return true;
+      }
+      else return true;
+  }
+  return false;
+}
+
 
 /****************************************************************************
  * Основная функция по обработке и созданию новых имен файлов.
@@ -500,9 +630,9 @@ static bool ProcessFileName()
     return false;
 
   HANDLE hScreen=Info.SaveScreen(0,0,-1,-1);
-  const TCHAR *MsgItems[]={ GetMsg(MVRenTitle), GetMsg(MLoadFiles) };
+  HANDLE hConInp=CreateFile(_T("CONIN$"), GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
   TCHAR NewName[NM], NewExt[NM];
-  DWORD dwCase=0, dwTicks=GetTickCount();
+  DWORD dwCase=0, dwTranslit=0, dwTicks=GetTickCount();
   bool bRet=true;
 
   for (unsigned Index=0; Index<sFI.iCount; Index++)
@@ -511,8 +641,23 @@ static bool ProcessFileName()
           *dest = sFI.DestFileName[Index];
 
     if (GetTickCount()-dwTicks>1000)
-      Info.Message(Info.ModuleNumber, 0, 0, MsgItems, 2, 0);
-    if (!GetNewNameExt(src, NewName, NewExt, Index, &dwCase, sFI.ppi[Index].FindData.ftLastWriteTime))
+    {
+      TCHAR buf[15];
+      FSF.itoa(Index, buf, 10);
+      static TCHAR *MsgItems[]={(TCHAR *)GetMsg(MVRenTitle), (TCHAR *)GetMsg(MLoadFiles), buf};
+      Info.Message(Info.ModuleNumber, 0, 0, MsgItems, 3, 0);
+
+      if (CheckForEsc(hConInp))
+      {
+        for (int i=Index; i<sFI.iCount; i++)
+        {
+          my_free(&sFI.ppi[i]); my_free(sFI.DestFileName[i]); sFI.DestFileName[i]=0;
+        }
+        sFI.iCount=Index;
+        break;
+      }
+    }
+    if (!GetNewNameExt(src, NewName, NewExt, Index, &dwCase, &dwTranslit, sFI.ppi[Index].FindData.ftLastWriteTime))
     {
       bRet=false; break;
     }
@@ -535,11 +680,14 @@ static bool ProcessFileName()
     if (ptr) { *ptr=_T('\0'); lstrcpy(NewExt, ++ptr); }
     else NewExt[0]=_T('\0');
 
+    Translit(NewName, NewExt, dwTranslit);
     Case(NewName, NewExt, dwCase);
+
     lstrcpy(dest, NewName);
     if (NewExt[0]) lstrcat(lstrcat(dest, _T(".")), NewExt);
   }
 
+  CloseHandle(hConInp);
   Info.RestoreScreen(hScreen);
   return bRet;
 }

@@ -31,6 +31,8 @@
 ""
 "[DM]  Date modification    "
 "[TM]  Time modification    "
+"[TL]  Translit, latin      "
+"[TR]  Translit, russian    "
 //----
 "[E]    Extension           "
 "[E#-#] Range               "
@@ -50,6 +52,9 @@
 " û Log renaming"
 "   Log renaming"
 
+"Word delimiters"
+"The default value is "-.<space>_""
+
 "Wrong FAR version"
 "Plugin Visual renaming files requires FAR 1.70 Release or later"
 
@@ -59,10 +64,13 @@
 
 "Collection of information on files"
 
+"Operation was interrupted"
+"Do you really want to cancel it?"
+
 "<Error!>"
 
-"Clearing protocol of renaming"
-"Do you really want to clearing protocol?"
+"Clearing log renaming"
+"Do you really want to clearing log?"
 
 "Rename list of files"
 "Show files name in two columns:"

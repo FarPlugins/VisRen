@@ -44,6 +44,8 @@ enum {
   MTempl_16, //< SEPARATOR
   MTempl_17,
   MTempl_18,
+  MTempl_19,
+  MTempl_20,
 //-----
   MTempl2_1,
   MTempl2_2,
@@ -63,6 +65,11 @@ enum {
   MCreateLog,
   MNoCreateLog,
 
+  /**** Word delimiters ****/
+
+  MWordDivTitle,
+  MWordDivBody,
+
   /**** сообщения ****/
 
   MOldFARTitle,
@@ -73,6 +80,9 @@ enum {
   MErrorNoMem,
 
   MLoadFiles,
+
+  MEscTitle,
+  MEscBody,
 
   MError,
 

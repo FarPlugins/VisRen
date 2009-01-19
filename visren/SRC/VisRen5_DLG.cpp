@@ -215,7 +215,8 @@ static void DlgResize(HANDLE hDlg)
     c.X=DlgSize.W; c.Y=DlgSize.H;
     DlgSize.Full=false; // вернули нормальный
   }
-
+  Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
+  Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0;
   FarDialogItem Item;
   for (int i=DlgBORDER; i<=DlgCANCEL; i++)
   {
@@ -274,6 +275,7 @@ static void DlgResize(HANDLE hDlg)
   c.X=c.Y=-1;
   Info.SendDlgMessage(hDlg, DM_MOVEDIALOG, true, (LONG_PTR)&c);
   Info.SendDlgMessage(hDlg, DM_LISTSETMOUSEREACTION, DlgLIST, (LONG_PTR)LMRT_NEVER);
+  Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
   return;
 }
 
@@ -313,6 +315,8 @@ static bool SetMask(HANDLE hDlg, DWORD dwMask, DWORD dwTempl)
       //---
       case 16: lstrcpy(templ, _T("[DM]"));     break;
       case 17: lstrcpy(templ, _T("[TM]"));     break;
+      case 18: lstrcpy(templ, _T("[TL]"));     break;
+      case 19: lstrcpy(templ, _T("[TR]"));     break;
     }
   }
   else
@@ -426,6 +430,10 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         StartPosX=Focus=-1;
         bStartSelect=true;
         bListFocus=bError=false;
+
+        Info.SendDlgMessage(hDlg, DM_SETCOMBOBOXEVENT, DlgETEMPLNAME, (LONG_PTR)CBET_KEY);
+        Info.SendDlgMessage(hDlg, DM_SETCOMBOBOXEVENT, DlgETEMPLEXT, (LONG_PTR)CBET_KEY);
+
         if (!Opt.UseLastHistory)
         {
           Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgEMASKNAME, (LONG_PTR)_T("[N]"));
@@ -444,7 +452,8 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
 
     case DN_RESIZECONSOLE:
       GetDlgSize();
-      break;
+      DlgResize(hDlg);
+      return true;
 
   /************************************************************************/
 
@@ -610,7 +619,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
   /************************************************************************/
 
     case DN_KEY:
-      if (Param2==KEY_F2)
+      if (Param2==KEY_F2 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
       {
  LOGREN:
         int ItemFocus=Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0);
@@ -621,30 +630,42 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         return true;
       }
       //----
-      else if (Param2==KEY_F3 && sUndoFI.iCount && !bError)
+      else if (Param2==KEY_F3 && sUndoFI.iCount && !bError &&
+               !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
       {
         Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0;
         UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo=1);
         Info.SendDlgMessage(hDlg, DM_REDRAW, 0, 0);
         Info.SendDlgMessage(hDlg, DM_SETFOCUS, DlgREN, 0);
+        return true;
       }
       //----
       else if (Param2==KEY_F4)
       {
-        Info.SendDlgMessage(hDlg, DM_CLOSE, DlgEDIT, 0);
-      }
-      //----
-      else if (Param2==KEY_F5)
-      {
- DLGRESIZE:
-        Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
-        Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0;
-        DlgResize(hDlg);
-        Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
+        if ( (Param1==DlgETEMPLNAME || Param1==DlgETEMPLEXT) &&
+             Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0) )
+        {
+          if (  (Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgETEMPLNAME, 0)==7 ||
+                 Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgETEMPLEXT, 0)==7)
+              &&
+                 Info.InputBox( GetMsg(MWordDivTitle), GetMsg(MWordDivBody),
+                               _T("VisRenWordDiv"), Opt.WordDiv, Opt.WordDiv,
+                               sizeof(Opt.WordDiv)-1, 0, FIB_BUTTONS )  )
+              SetRegKey(PluginRootKey, _T(""), _T("WordDiv"), (TCHAR *)Opt.WordDiv);
+        }
+        else
+          Info.SendDlgMessage(hDlg, DM_CLOSE, DlgEDIT, 0);
         return true;
       }
       //----
-      else if (Param2==KEY_F8)
+      else if (Param2==KEY_F5 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
+      {
+ DLGRESIZE:
+        DlgResize(hDlg);
+        return true;
+      }
+      //----
+      else if (Param2==KEY_F8 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
       {
  CLEARLOGREN:
         if (sUndoFI.iCount && !Opt.LoadUndo && YesNoMsg(MClearLogTitle, MClearLogBody))
@@ -660,7 +681,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         return false;
       }
       //----
-      else if (Param2==KEY_F12)
+      else if (Param2==KEY_F12 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
       {
         if (!bListFocus)
         {
@@ -673,6 +694,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
           Info.SendDlgMessage(hDlg, DM_SETFOCUS, ItemFocus, 0);
           bListFocus=false;
         }
+        return true;
       }
       //----
       else if (Param2==KEY_INS)
@@ -919,6 +941,11 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
 
   /************************************************************************/
 
+    case DN_DRAGGED:
+      return false;
+
+  /************************************************************************/
+
     case DN_CLOSE:
       if (Param1==DlgREN && Opt.LoadUndo)
       {
@@ -986,7 +1013,7 @@ static int ShowDialog()
   InitDialogItems(InitItems, DialogItems, sizeof(InitItems) / sizeof(InitItems[0]));
 
   // комбинированный список с шаблонами
-  FarListItem itemTempl1[18];
+  FarListItem itemTempl1[20];
   int n = sizeof(itemTempl1) / sizeof(itemTempl1[0]);
   for (int i = 0; i < n; i++)
   {
