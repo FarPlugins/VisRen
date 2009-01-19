@@ -1,0 +1,78 @@
+.Language=English,English
+
+"Visual renaming files"
+
+"Ok"
+
+"&Rename"
+"F3-&Undo"
+"F4-&In editor"
+"C&ancel"
+
+"Mask for file &name:"
+"&extension:"
+"&Templates:"
+//----
+"[N]  Name                  "
+"[N#-#] Range               "
+"[C#+#] Counter             "
+""
+"[L]  lower case            "
+"[U]  UPPER CASE            "
+"[F]  First capital         "
+"[T]  Title Case            "
+""
+"[d]  Date modification     "
+"[t]  Time modification     "
+//----
+"[E]  Extension             "
+"[E#-#] Range               "
+"[C#+#] Counter             "
+""
+"[L]  lower case            "
+"[U]  UPPER CASE            "
+"[F]  First capital         "
+"[T]  Title Case            "
+//----
+"[+]"
+"&Search for:"
+"Re&place with:"
+"&Case sensitive"
+"Re&gular expressions"
+"name before - name after"
+" û Protocol of renaming"
+"   Protocol of renaming"
+
+"Wrong FAR version"
+"Plugin Visual renaming files requires FAR 1.70 Release or later"
+
+"Is required non-plugin file panel with selected objects"
+
+"Not enough memory to initialize plugin"
+
+"<Error!>"
+
+"Clearing protocol of renaming"
+"Do you really want to clearing protocol?"
+
+"Rename list of files"
+"Show files name in two columns:"
+""Source" "New""
+
+"Can not create files list"
+"Error open file for editing"
+"Incorrect list of file names"
+"File editing aborted. No files renamed."
+
+"Error create protocol of renaming"
+
+"Undo renaming files"
+"Do you really want to return previous file names?"
+
+"Error renaming file"
+"to"
+"&Skip"
+"Ski&p all"
+"&Retry"
+
+"Processed %d of %d file(s)"

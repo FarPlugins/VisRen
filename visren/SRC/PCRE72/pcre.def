@@ -1,0 +1,27 @@
+LIBRARY   pcre
+EXPORTS
+  pcre_malloc
+  pcre_free
+  pcre_stack_malloc
+  pcre_stack_free
+  pcre_config
+  pcre_callout
+  pcre_compile
+  pcre_compile2
+  pcre_copy_substring
+  pcre_copy_named_substring
+  pcre_dfa_exec
+  pcre_exec
+  pcre_get_substring
+  pcre_get_named_substring
+  pcre_get_stringnumber
+  pcre_get_substring_list
+  pcre_get_stringtable_entries
+  pcre_free_substring
+  pcre_free_substring_list
+  pcre_info
+  pcre_fullinfo
+  pcre_maketables
+  pcre_study
+  pcre_version
+  pcre_refcount
