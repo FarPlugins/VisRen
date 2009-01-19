@@ -742,7 +742,8 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
               MouseSelect(hDlg, DlgEREPLACE, MRec->dwMousePosition.X);
               return false;
             case DlgLIST:
-              MouseDragDrop(hDlg,MRec->dwMousePosition.Y);
+              if (!Opt.LoadUndo)
+                MouseDragDrop(hDlg,MRec->dwMousePosition.Y);
               return false;
           }
         }
