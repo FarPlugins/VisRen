@@ -5,7 +5,7 @@
 "Ok"
 
 "&Rename"
-"F3-&Undo"
+"F6-&Undo"
 "F4-&In editor"
 "C&ancel"
 
@@ -54,6 +54,10 @@
 
 "Word delimiters"
 "The default value is "-.<space>_""
+
+"File name"
+"Old name"
+"New name"
 
 "Wrong FAR version"
 "Plugin Visual renaming files requires FAR 1.70 Release or later"

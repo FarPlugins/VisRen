@@ -403,6 +403,93 @@ static void MouseSelect(HANDLE hDlg, DWORD dwStr, DWORD dwMousePosX)
   return;
 }
 
+/****************************************************************************
+ * Обработка клика правой клавишей мыши в листе файлов
+ ****************************************************************************/
+static int ListMouseRightClick(HANDLE hDlg, DWORD dwMousePosX, DWORD dwMousePosY)
+{
+  SMALL_RECT dlgRect;
+  Info.SendDlgMessage(hDlg, DM_GETDLGRECT, 0, (LONG_PTR)&dlgRect);
+  FarListPos ListPos;
+  Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, (LONG_PTR)&ListPos);
+  int Pos=ListPos.TopPos+(dwMousePosY-(dlgRect.Top+9));
+  if ( Pos>=(Opt.LoadUndo?sUndoFI.iCount:sFI.iCount)
+       // щелкнули за пределами границ DlgLIST
+       || dwMousePosX<=dlgRect.Left  || dwMousePosX>=dlgRect.Right
+       || dwMousePosY<=dlgRect.Top+8 || dwMousePosY>=dlgRect.Bottom-2
+     )
+    return -1;
+  ListPos.SelectPos=Pos;
+  Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, (LONG_PTR)&ListPos);
+  return Pos;
+}
+
+/****************************************************************************
+ * Ф-ция отображает текущее имя из листа файлов на несколько строк
+ ****************************************************************************/
+static void ShowName(int Pos)
+{
+  int i;
+  TCHAR srcName[4][66], destName[4][66];
+
+  for (i=0; i<4; i++)
+  {
+    srcName[i][0]=_T('\0'); destName[i][0]=_T('\0');
+  }
+  // старое имя
+  TCHAR *src=Opt.LoadUndo?sUndoFI.CurFileName[Pos]:sFI.ppi[Pos].FindData.cFileName;
+  int len=lstrlen(src);
+  for (i=0; i<4; i++, len-=65)
+  {
+    if (len<65)
+    {
+      lstrcpyn(srcName[i], src+i*65, len+1);
+      break;
+    }
+    else
+      lstrcpyn(srcName[i], src+i*65, 66);
+  }
+  // новое имя
+  TCHAR *dest=Opt.LoadUndo?sUndoFI.OldFileName[Pos]:sFI.DestFileName[Pos];
+  len=lstrlen(dest);
+  for (i=0; i<4; i++, len-=65)
+  {
+    if (len<65)
+    {
+      lstrcpyn(destName[i], dest+i*65, len+1);
+      break;
+    }
+    else
+      lstrcpyn(destName[i], dest+i*65, 66);
+  }
+
+  FarDialogItem DialogItems[15];
+  memset(DialogItems, 0, sizeof(DialogItems));
+  DialogItems[0].Type=DI_DOUBLEBOX; lstrcpy(DialogItems[0].Data.Data, GetMsg(MFullFileName));
+  DialogItems[0].X1=0; DialogItems[0].Y1=0; DialogItems[0].X2=70; DialogItems[0].Y2=14;
+  DialogItems[1].Type=DI_SINGLEBOX;
+  lstrcpy(DialogItems[1].Data.Data, GetMsg(MOldName)); DialogItems[1].Flags=DIF_LEFTTEXT;
+  DialogItems[1].X1=2; DialogItems[1].Y1=1; DialogItems[1].X2=68; DialogItems[1].Y2=6;
+  DialogItems[7].Type=DI_SINGLEBOX;
+  lstrcpy(DialogItems[7].Data.Data, GetMsg(MNewName)); DialogItems[7].Flags=DIF_LEFTTEXT;
+  DialogItems[7].X1=2; DialogItems[7].Y1=7; DialogItems[7].X2=68; DialogItems[7].Y2=12;
+  for(i=2; i<6; i++)
+  {
+    DialogItems[i].Type=DI_TEXT;
+    DialogItems[i].X1=3; DialogItems[i].Y1=i; lstrcpy(DialogItems[i].Data.Data, srcName[i-2]);
+  }
+  for(i=8; i<11; i++)
+  {
+    DialogItems[i].Type=DI_TEXT;
+    DialogItems[i].X1=3; DialogItems[i].Y1=i; lstrcpy(DialogItems[i].Data.Data, destName[i-8]);
+  }
+  DialogItems[13].Type=DI_BUTTON; lstrcpy(DialogItems[13].Data.Data, GetMsg(MOK));
+  DialogItems[13].Y1=13; DialogItems[13].Flags=DIF_CENTERGROUP;
+
+  Info.DialogEx(Info.ModuleNumber,-1,-1,71,15,0,
+                DialogItems,sizeof(DialogItems) / sizeof(DialogItems[0]),0,FDLG_SMALLDIALOG,0,0);
+  return;
+}
 
 /****************************************************************************
  * Обработчик диалога для ShowDialog
@@ -539,6 +626,12 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
               ((MOUSE_EVENT_RECORD *)Param2)->dwButtonState==FROM_LEFT_1ST_BUTTON_PRESSED &&
               ((MOUSE_EVENT_RECORD *)Param2)->dwEventFlags==DOUBLE_CLICK )
         goto GOTOFILE;
+      else if (Param1==DlgLIST &&
+              ((MOUSE_EVENT_RECORD *)Param2)->dwButtonState==RIGHTMOST_BUTTON_PRESSED)
+      {
+        Info.SendDlgMessage(hDlg, DM_SETFOCUS, DlgLIST, 0);
+        goto RIGHTCLICK;
+      }
       return false;
 
   /************************************************************************/
@@ -556,6 +649,8 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
             Focus=DlgESEARCH; break;
           case DlgEREPLACE:
             Focus=DlgEREPLACE; break;
+          case DlgLIST:
+            Focus=DlgLIST; break;
           default:
             /* $ !!  skirda, 10.07.2007 1:27:03:
              *       в обработчике мыши после смены фокуса идет ShowDialog(-1)
@@ -577,6 +672,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
 
     case DN_MOUSEEVENT:
       {
+ RIGHTCLICK:
         MOUSE_EVENT_RECORD *MRec=(MOUSE_EVENT_RECORD *)Param2;
         if ( MRec->dwButtonState==FROM_LEFT_1ST_BUTTON_PRESSED &&
              MRec->dwEventFlags==MOUSE_MOVED )
@@ -597,6 +693,17 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
               return false;
           }
         }
+        // обработка клика правой клавишей мыши в листе файлов
+        else if (MRec->dwButtonState==RIGHTMOST_BUTTON_PRESSED && Focus==DlgLIST)
+        {
+
+          int Pos=ListMouseRightClick(hDlg, MRec->dwMousePosition.X, MRec->dwMousePosition.Y);
+          if (Pos>=0)
+          {
+            ShowName(Pos);
+            return false;
+          }
+        }
         bStartSelect=true;
         return true;
       }
@@ -610,6 +717,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
           case DlgEMASKEXT:
           case DlgESEARCH:
           case DlgEREPLACE:
+          case DlgLIST:
             Focus=-1;
             Info.SendDlgMessage(hDlg, DM_SETMOUSEEVENTNOTIFY, 0, 0);
             break;
@@ -619,7 +727,12 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
   /************************************************************************/
 
     case DN_KEY:
-      if (Param2==KEY_F2 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
+      if (Param2==KEY_F1 && (Param1==DlgETEMPLNAME || Param1==DlgETEMPLEXT))
+      {
+        Info.ShowHelp(Info.ModuleName, 0, 0);
+        return true;
+      }
+      else if (Param2==KEY_F2 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
       {
  LOGREN:
         int ItemFocus=Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0);
@@ -630,13 +743,10 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         return true;
       }
       //----
-      else if (Param2==KEY_F3 && sUndoFI.iCount && !bError &&
-               !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
+      else if (Param2==KEY_F3)
       {
-        Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0;
-        UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo=1);
-        Info.SendDlgMessage(hDlg, DM_REDRAW, 0, 0);
-        Info.SendDlgMessage(hDlg, DM_SETFOCUS, DlgREN, 0);
+        int Pos=Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, 0);
+        if (Pos<(Opt.LoadUndo?sUndoFI.iCount:sFI.iCount)) ShowName(Pos);
         return true;
       }
       //----
@@ -662,6 +772,16 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
       {
  DLGRESIZE:
         DlgResize(hDlg);
+        return true;
+      }
+      //----
+      else if (Param2==KEY_F6 && sUndoFI.iCount && !bError &&
+               !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
+      {
+        Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0;
+        UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo=1);
+        Info.SendDlgMessage(hDlg, DM_REDRAW, 0, 0);
+        Info.SendDlgMessage(hDlg, DM_SETFOCUS, DlgREN, 0);
         return true;
       }
       //----

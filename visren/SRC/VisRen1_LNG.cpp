@@ -65,10 +65,14 @@ enum {
   MCreateLog,
   MNoCreateLog,
 
-  /**** Word delimiters ****/
+  /**** дополнительные диалоги ****/
 
   MWordDivTitle,
   MWordDivBody,
+
+  MFullFileName,
+  MOldName,
+  MNewName,
 
   /**** сообщения ****/
 
