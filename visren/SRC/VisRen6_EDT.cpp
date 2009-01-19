@@ -1,5 +1,5 @@
 /****************************************************************************
- * VisRen5_EDT.cpp
+ * VisRen6_EDT.cpp
  *
  * Plugin module for FAR Manager 1.71
  *
@@ -95,7 +95,7 @@ static int ReadList(TCHAR *TempFileName)
 /****************************************************************************
  * Основная ф-ция по переименованию файлов в редакторе
  ****************************************************************************/
-static void RenameInEditor()
+static void RenameInEditor(PanelInfo *PInfo)
 {
   TCHAR TempFileName[MAX_PATH];
   int  width;
@@ -132,7 +132,7 @@ static void RenameInEditor()
       break;
   }
 
-  RenameFile();
+  RenameFile(PInfo);
 
  END:
   if (TempFileName[0]) DeleteFile(TempFileName);

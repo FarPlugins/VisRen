@@ -1,5 +1,5 @@
 /****************************************************************************
- * VisRen4_DLG.cpp
+ * VisRen5_DLG.cpp
  *
  * Plugin module for FAR Manager 1.71
  *
@@ -149,11 +149,21 @@ static bool UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
   if (Opt.CurBorder!=0) { widthSrc+=Opt.CurBorder; widthDest-=Opt.CurBorder; }
   FarList List;
   List.ItemsNumber=(bUndoList?sUndoFI.iCount:sFI.iCount);
-  FarListItem *ListItems=(FarListItem *)my_malloc(List.ItemsNumber*sizeof(FarListItem));
+  // для корректного показа границы между колонками
+  int AddNumber=((bFull?DlgSize.mH:DlgSize.H)-4)-9+1;
+  if (List.ItemsNumber<AddNumber) AddNumber-=List.ItemsNumber;
+  else AddNumber=0;
+
+  FarListItem *ListItems=(FarListItem *)my_malloc((List.ItemsNumber+AddNumber)*sizeof(FarListItem));
   if (ListItems)
   {
+    // восстановим положение курсора
     FarListPos ListPos;
     Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, (LONG_PTR)&ListPos);
+    static bool bOldFull=bFull;
+    if (ListPos.SelectPos>=List.ItemsNumber) ListPos.SelectPos=List.ItemsNumber?List.ItemsNumber-1:0;
+    if (bOldFull!=bFull) { ListPos.TopPos=-1; bOldFull=bFull; }
+
     for (int i=0; i<List.ItemsNumber; i++)
     {
       TCHAR *src =(bUndoList?sUndoFI.CurFileName[i]:sFI.ppi[i].FindData.cFileName),
@@ -168,9 +178,17 @@ static bool UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
       if (lenDest<=widthDest) posDest=0;
       else if (posDest>lenDest-widthDest) posDest=lenDest-widthDest;
 
-      FSF.sprintf( ListItems[i].Text, _T("%-*.*s %-*.*s"), widthSrc, widthSrc, src+posSrc,
-                   widthDest, widthDest, (bError?GetMsg(MError):dest+posDest) );
+      FSF.sprintf( ListItems[i].Text, _T("%-*.*s%c%-*.*s"), widthSrc, widthSrc, src+posSrc,
+                   0x000000B3, widthDest, widthDest, (bError?GetMsg(MError):dest+posDest) );
     }
+
+    for (int i=List.ItemsNumber; i<List.ItemsNumber+AddNumber; i++)
+    {
+      FSF.sprintf( ListItems[i].Text, _T("%-*.*s%c%-*.*s"), widthSrc, widthSrc, _T(""),
+                   0x000000B3, widthDest, widthDest, _T("") );
+    }
+
+    List.ItemsNumber+=AddNumber;
     List.Items=ListItems;
     Info.SendDlgMessage(hDlg, DM_LISTSET, DlgLIST, (LONG_PTR)&List);
     my_free(ListItems);
@@ -264,7 +282,7 @@ static void DlgResize(HANDLE hDlg)
  ****************************************************************************/
 static bool SetMask(HANDLE hDlg, DWORD dwMask, DWORD dwTempl)
 {
-  TCHAR buf[512], buf2[512], templ[7];
+  TCHAR buf[512], buf2[512], templ[10];
   Info.SendDlgMessage(hDlg, DM_GETTEXTPTR, dwMask, (LONG_PTR)buf);
   int length=lstrlen(buf);
   COORD Pos;
@@ -279,15 +297,22 @@ static bool SetMask(HANDLE hDlg, DWORD dwMask, DWORD dwTempl)
     {
       case 0:  lstrcpy(templ, _T("[N]"));      break;
       case 1:  FSF.sprintf(templ, _T("[N1-%d]"), Opt.lenName); break;
-      case 2:  lstrcpy(templ, _T("[C1+1]")); break;
+      case 2:  lstrcpy(templ, _T("[C1+1]"));   break;
       //---
       case 4:  lstrcpy(templ, _T("[L]"));      break;
       case 5:  lstrcpy(templ, _T("[U]"));      break;
       case 6:  lstrcpy(templ, _T("[F]"));      break;
       case 7:  lstrcpy(templ, _T("[T]"));      break;
       //---
-      case 9:  lstrcpy(templ, _T("[d]"));      break;
+      case 9:  lstrcpy(templ, _T("[#]"));      break;
       case 10: lstrcpy(templ, _T("[t]"));      break;
+      case 11: lstrcpy(templ, _T("[a]"));      break;
+      case 12: lstrcpy(templ, _T("[l]"));      break;
+      case 13: lstrcpy(templ, _T("[y]"));      break;
+      case 14: lstrcpy(templ, _T("[g]"));      break;
+      //---
+      case 16: lstrcpy(templ, _T("[DM]"));     break;
+      case 17: lstrcpy(templ, _T("[TM]"));     break;
     }
   }
   else
@@ -501,6 +526,10 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
       else if (Param1==DlgSEP3_LOG &&
               ((MOUSE_EVENT_RECORD *)Param2)->dwButtonState==RIGHTMOST_BUTTON_PRESSED)
         goto CLEARLOGREN;
+      else if (Param1==DlgLIST &&
+              ((MOUSE_EVENT_RECORD *)Param2)->dwButtonState==FROM_LEFT_1ST_BUTTON_PRESSED &&
+              ((MOUSE_EVENT_RECORD *)Param2)->dwEventFlags==DOUBLE_CLICK )
+        goto GOTOFILE;
       return false;
 
   /************************************************************************/
@@ -670,8 +699,9 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
       //----
       else if (Param2==KEY_DEL && Param1==DlgLIST && !Opt.LoadUndo)
       {
-        Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
         int Pos=Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, 0);
+        if (Pos>=sFI.iCount) return false;
+        Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
         FarListPos ListPos={Pos, -1};
         FarListDelete ListDel={Pos, 1};
         Info.SendDlgMessage(hDlg, DM_LISTDELETE, DlgLIST, (LONG_PTR)&ListDel);
@@ -683,8 +713,8 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         } while(Pos<sFI.iCount-1);
         my_free(&sFI.ppi[Pos]); my_free(sFI.DestFileName[Pos]); sFI.DestFileName[Pos]=0;
         --sFI.iCount;
-        UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo);
         Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, (LONG_PTR)&ListPos);
+        UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo);
         Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
         return true;
       }
@@ -693,8 +723,9 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
                (Param2==(KEY_CTRL|KEY_UP) || Param2==(KEY_RCTRL|KEY_UP) ||
                 Param2==(KEY_CTRL|KEY_DOWN) || Param2==(KEY_RCTRL|KEY_DOWN)) )
       {
-        bool bUp=(Param2==(KEY_CTRL|KEY_UP) || Param2==(KEY_RCTRL|KEY_UP));
         int Pos=Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, 0);
+        if (Pos>=sFI.iCount) return false;
+        bool bUp=(Param2==(KEY_CTRL|KEY_UP) || Param2==(KEY_RCTRL|KEY_UP));
         if (bUp?Pos>0:Pos<sFI.iCount-1)
         {
           Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
@@ -731,7 +762,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         bool Ret=false;
         if (Param2==(KEY_CTRL|KEY_NUMPAD5) || Param2==(KEY_RCTRL|KEY_NUMPAD5))
         {
-          Opt.CurBorder=0; Ret=true;
+          Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0; Ret=true;
         }
         else if (bLeft?Opt.CurBorder>-maxBorder:Opt.CurBorder<maxBorder)
         {
@@ -764,7 +795,9 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         if (Param2==KEY_LEFT || Param2==KEY_RIGHT)
         {
           int maxDestCol=Opt.lenDestFileName-((DlgSize.Full?DlgSize.mW2:DlgSize.W2)-2)+Opt.CurBorder;
-          if (Opt.destCurCol>maxDestCol) Opt.destCurCol=maxDestCol;
+          if (Opt.destCurCol>maxDestCol)
+            if (maxDestCol>0) Opt.destCurCol=maxDestCol;
+            else Opt.destCurCol=0;
           if (Param2==KEY_LEFT && Opt.destCurCol>0)
           {
             Opt.destCurCol-=1; Ret=true;
@@ -777,6 +810,9 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         else
         {
           int maxSrcCol=Opt.lenFileName-((DlgSize.Full?DlgSize.mW2:DlgSize.W2)-2)-Opt.CurBorder;
+          if (Opt.srcCurCol>maxSrcCol)
+            if (maxSrcCol>0) Opt.srcCurCol=maxSrcCol;
+            else Opt.srcCurCol=0;
           if ((Param2==(KEY_ALT|KEY_LEFT) || Param2==(KEY_RALT|KEY_LEFT)) && Opt.srcCurCol>0)
           {
             Opt.srcCurCol-=1; Ret=true;
@@ -792,6 +828,38 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
           Ret=UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo);
           Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
         }
+        return true;
+      }
+      //----
+      else if ( Param1==DlgLIST &&
+               (Param2==(KEY_CTRL|KEY_PGUP) || Param2==(KEY_RCTRL|KEY_PGUP)) )
+      {
+ GOTOFILE:
+        int Pos=Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, 0);
+        if (Pos>=(Opt.LoadUndo?sUndoFI.iCount:sFI.iCount)) return true;
+
+        TCHAR Name[MAX_PATH];
+        GetCurrentDirectory(sizeof(Name), Name);
+        if (Opt.LoadUndo && FSF.LStricmp(Name, sUndoFI.Dir))
+          Info.Control(INVALID_HANDLE_VALUE, FCTL_SETPANELDIR, (void *)sUndoFI.Dir);
+
+        PanelInfo PInfo;
+        Info.Control(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &PInfo);
+        PanelRedrawInfo RInfo;
+        RInfo.CurrentItem=PInfo.CurrentItem;
+        RInfo.TopPanelItem=PInfo.TopPanelItem;
+        lstrcpy(Name, Opt.LoadUndo?sUndoFI.CurFileName[Pos]:sFI.ppi[Pos].FindData.cFileName);
+
+        for (int i=0; i<PInfo.ItemsNumber; i++)
+        {
+          if (!FSF.LStricmp(Name, PInfo.PanelItems[i].FindData.cFileName))
+          {
+            RInfo.CurrentItem=i;
+            break;
+          }
+        }
+        Info.Control(INVALID_HANDLE_VALUE, FCTL_REDRAWPANEL, &RInfo);
+        Info.SendDlgMessage(hDlg, DM_CLOSE, DlgCANCEL, 0);
         return true;
       }
       break;
@@ -918,11 +986,11 @@ static int ShowDialog()
   InitDialogItems(InitItems, DialogItems, sizeof(InitItems) / sizeof(InitItems[0]));
 
   // комбинированный список с шаблонами
-  FarListItem itemTempl1[11];
+  FarListItem itemTempl1[18];
   int n = sizeof(itemTempl1) / sizeof(itemTempl1[0]);
   for (int i = 0; i < n; i++)
   {
-    itemTempl1[i].Flags = ((i==3 || i==8)?LIF_SEPARATOR:0);
+    itemTempl1[i].Flags = ((i==3 || i==8 || i==15)?LIF_SEPARATOR:0);
     lstrcpy(itemTempl1[i].Text, GetMsg(MTempl_1+i));
   }
   FarList Templates1 = {n, itemTempl1};
