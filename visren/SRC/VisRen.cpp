@@ -6,7 +6,7 @@
  * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
-/* $ Revision: 1 $ */
+/* $ Revision: 2.4 $ */
 
 #define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -131,9 +131,10 @@ static int DebugMsg(TCHAR *msg, TCHAR *msg2 = _T(" "), int i = 1000)
 
 
 #include "VisRen2_REG.cpp"        // ф-ции для работы с реестром
-#include "VisRen3_REN.cpp"        // ф-ции для переименования и отката
-#include "VisRen4_DLG.cpp"        // ф-ции для основного диалога плагина
-#include "VisRen5_EDT.cpp"        // ф-ции для переименования в редакторе
+#include "VisRen3_MP3.cpp"        // ф-ции для переименования из тэгов MP3
+#include "VisRen4_REN.cpp"        // ф-ции для переименования и отката
+#include "VisRen5_DLG.cpp"        // ф-ции для основного диалога плагина
+#include "VisRen6_EDT.cpp"        // ф-ции для переименования в редакторе
 
 /****************************************************************************
  ***************************** Exported functions ***************************
@@ -145,7 +146,7 @@ static bool bOldFAR = false;
  * Эти функции плагина FAR вызывает в первую очередь
  ****************************************************************************/
 // установим минимально поддерживаемую версию FARа...
-int WINAPI _export GetMinFarVersion() { return MAKEFARVERSION(1,71,2248); }
+int WINAPI _export GetMinFarVersion() { return MAKEFARVERSION(1,71,2251); }
 
 // заполним структуру PluginStartupInfo и сделаем ряд полезных действий...
 void WINAPI _export SetStartupInfo(const struct PluginStartupInfo *Info)
@@ -234,9 +235,9 @@ HANDLE WINAPI _export OpenPlugin(int OpenFrom, INT_PTR Item)
     switch (ShowDialog())
     {
       case 0:
-        RenameFile(); break;
+        RenameFile(&PInfo); break;
       case 2:
-        RenameInEditor(); break;
+        RenameInEditor(&PInfo); break;
     }
   }
 

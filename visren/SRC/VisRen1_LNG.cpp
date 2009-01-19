@@ -37,6 +37,13 @@ enum {
   MTempl_9,  //< SEPARATOR
   MTempl_10,
   MTempl_11,
+  MTempl_12,
+  MTempl_13,
+  MTempl_14,
+  MTempl_15,
+  MTempl_16, //< SEPARATOR
+  MTempl_17,
+  MTempl_18,
 //-----
   MTempl2_1,
   MTempl2_2,
@@ -64,6 +71,8 @@ enum {
   MFilePanelsRequired,
 
   MErrorNoMem,
+
+  MLoadFiles,
 
   MError,
 

@@ -13,7 +13,7 @@
 "&extension:"
 "&Templates:"
 //----
-"[N]  Name                  "
+"[N]    Name                "
 "[N#-#] Range               "
 "[C#+#] Counter             "
 ""
@@ -22,10 +22,17 @@
 "[F]  First capital         "
 "[T]  Title Case            "
 ""
-"[d]  Date modification     "
-"[t]  Time modification     "
+"[#]  Track number          "
+"[t]  Song title            "
+"[a]  Artist                "
+"[l]  Album                 "
+"[y]  Year                  "
+"[g]  Genre                 "
+""
+"[DM]  Date modification    "
+"[TM]  Time modification    "
 //----
-"[E]  Extension             "
+"[E]    Extension           "
 "[E#-#] Range               "
 "[C#+#] Counter             "
 ""
@@ -40,8 +47,8 @@
 "&Case sensitive"
 "Re&gular expressions"
 "name before - name after"
-" û Protocol of renaming"
-"   Protocol of renaming"
+" û Log renaming"
+"   Log renaming"
 
 "Wrong FAR version"
 "Plugin Visual renaming files requires FAR 1.70 Release or later"
@@ -49,6 +56,8 @@
 "Is required non-plugin file panel with selected objects"
 
 "Not enough memory to initialize plugin"
+
+"Collection of information on files"
 
 "<Error!>"
 

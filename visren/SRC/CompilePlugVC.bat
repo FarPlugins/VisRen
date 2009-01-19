@@ -8,8 +8,8 @@ rem =============== Use Microsoft Visual Studio .NET 2003 ======================
 rem  ======================== Set name and version ... =========================
 
 @set PlugName=VisRen
-@set fileversion=1,71,0,1
-@set fileversion_str=1.71 build 1
+@set fileversion=1,71,0,2
+@set fileversion_str=1.71 build 2
 @set MyDir=%CD%
 @set MyFarDir=C:\Program Files\Far
 @set companyname=Eugene Roshal ^& FAR Group
@@ -50,7 +50,7 @@ rem @echo   ProcessKey                                         >> %PlugName%.def
 rem @echo   ProcessEvent                                       >> %PlugName%.def
 rem @echo   Compare                                            >> %PlugName%.def
 
-@if exist %PlugName%.def echo ... succesfully
+@if exist %PlugName%.def echo ... successfully
 )
 
 rem  ================== Make %PlugName%.rc file... =============================
@@ -90,7 +90,7 @@ echo Make %PlugName%.rc file...
 @echo   }                                                       >> %PlugName%.rc
 @echo }                                                         >> %PlugName%.rc
 
-@if exist %PlugName%.rc echo ... succesfully
+@if exist %PlugName%.rc echo ... successfully
 )
 
 rem  ==================== Compile %PlugName%.dll file...========================
