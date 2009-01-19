@@ -6,6 +6,14 @@
  * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
+
+enum {
+  isNonImage=0,
+  isJPG,
+  isBMP,
+  isGIF,
+};
+
 // работа с EXIF
 //--------------------------------------------------------------------------
 // Program to pull the information out of various types of EXIF digital
@@ -51,7 +59,7 @@ typedef struct {
     char  CameraMake   [32];
     char  CameraModel  [40];
     char  DateTime     [20];
-    int   Height, Width;
+    DWORD Height, Width;
 }ImageInfo_t;
 
 // Storage for simplified info extracted from file.
@@ -208,7 +216,7 @@ static void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase,
 // Process a EXIF marker
 // Describes all the drivel that most digital cameras include...
 //--------------------------------------------------------------------------
-void process_EXIF(unsigned char * ExifSection, unsigned int length)
+static void process_EXIF(unsigned char * ExifSection, unsigned int length)
 {
   // Check the EXIF header component
   static UCHAR ExifHeader[] = "Exif\0\0";
@@ -230,7 +238,7 @@ void process_EXIF(unsigned char * ExifSection, unsigned int length)
 //--------------------------------------------------------------------------
 // Parse the marker stream until SOS or EOI is seen;
 //--------------------------------------------------------------------------
-bool ReadJpegSections(HANDLE infile)
+static bool ReadJpegSections(HANDLE infile)
 {
   DWORD Readed;
   int a=FileGetC(infile);
@@ -316,14 +324,43 @@ bool ReadJpegSections(HANDLE infile)
 //--------------------------------------------------------------------------
 // Read image data.
 //--------------------------------------------------------------------------
-int AnalyseJpegFile(const char *FileName)
+static bool AnalyseImageFile(const char *FileName, int ImageFormat)
 {
   memset(&ImageInfo, 0, sizeof(ImageInfo));
   HANDLE infile=CreateFile(FileName,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,0,NULL);
   if (infile==INVALID_HANDLE_VALUE) return false;
+  int ret=0;
+  DWORD Readed=0;
 
   // Scan the JPEG headers.
-  int ret=ReadJpegSections(infile);
+  if (ImageFormat==isJPG)
+    ret=ReadJpegSections(infile);
+
+  // !!NEW!! Scan the BMP :-)
+  else if (ImageFormat==isBMP)
+  {
+    ret= (    FileGetC(infile) == 0x42
+           && FileGetC(infile) == 0x4D
+           && ((HANDLE)SetFilePointer(infile, 18, 0, FILE_BEGIN) != INVALID_HANDLE_VALUE)
+           && ReadFile(infile, &(ImageInfo.Width), sizeof(DWORD), &Readed, 0)
+           && ReadFile(infile, &(ImageInfo.Height), sizeof(DWORD), &Readed, 0)
+         );
+  }
+
+  // !!NEW!! Scan the GIF :-)
+  else if (ImageFormat==isGIF)
+  {
+    ret= (    FileGetC(infile) == 0x47
+           && FileGetC(infile) == 0x49
+           && FileGetC(infile) == 0x46
+           && FileGetC(infile) == 0x38
+           && ((Readed=FileGetC(infile)) == 0x39 || Readed==0x37)
+           && FileGetC(infile) == 0x61
+           && ReadFile(infile, &(ImageInfo.Width), sizeof(WORD), &Readed, 0)
+           && ReadFile(infile, &(ImageInfo.Height), sizeof(WORD), &Readed, 0)
+         );
+  }
+
   CloseHandle(infile);
-  return ret;
+  return (ret && ImageInfo.Width && ImageInfo.Height);
 }

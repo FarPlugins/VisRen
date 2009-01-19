@@ -8,8 +8,8 @@ rem =============== Use Microsoft Visual Studio .NET 2003 ======================
 rem  ======================== Set name and version ... =========================
 
 @set PlugName=VisRen
-@set fileversion=1,71,0,6
-@set fileversion_str=1.71 build 6
+@set fileversion=1,71,0,7
+@set fileversion_str=1.71 build 7
 @set MyDir=%CD%
 @set MyFarDir=C:\Program Files\Far
 @set companyname=Eugene Roshal ^& FAR Group

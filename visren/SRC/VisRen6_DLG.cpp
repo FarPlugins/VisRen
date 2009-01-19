@@ -48,7 +48,7 @@ enum {
 /****************************************************************************
  * Размер диалога.
  ****************************************************************************/
-struct DlgSize {
+static struct DlgSize {
   // состояние диалога
   bool Full;
   // нормальный
@@ -202,18 +202,26 @@ static bool UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 /***************************************************************************
  * Изменение размера диалога
  ***************************************************************************/
-static void DlgResize(HANDLE hDlg)
+static void DlgResize(HANDLE hDlg, bool bF5=false)
 {
   COORD c;
-  if (DlgSize.Full==0)  // был нормальный размер
+  if (bF5) // нажали F5
   {
-    c.X=DlgSize.mW; c.Y=DlgSize.mH;
-    DlgSize.Full=true;  // установили максимальный
+    if (DlgSize.Full==0)  // был нормальный размер
+    {
+      c.X=DlgSize.mW; c.Y=DlgSize.mH;
+      DlgSize.Full=true;  // установили максимальный
+    }
+    else
+    {
+      c.X=DlgSize.W; c.Y=DlgSize.H;
+      DlgSize.Full=false; // вернули нормальный
+    }
   }
-  else
+  else // иначе просто пересчитаем размеры диалога
   {
-    c.X=DlgSize.W; c.Y=DlgSize.H;
-    DlgSize.Full=false; // вернули нормальный
+    if (DlgSize.Full) { c.X=DlgSize.mW; c.Y=DlgSize.mH; }
+    else { c.X=DlgSize.W; c.Y=DlgSize.H; }
   }
   Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
   Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0;
@@ -508,7 +516,6 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         Opt.Search[0]=_T('\0');
         Opt.Replace[0]=_T('\0');
         lstrcpy(Opt.WordDiv, _T("-. _"));
-        HKEY hKey;
         if (HKEY hKey=CreateOrOpenRegKey(false, PluginRootKey))
         {
           TCHAR cpRegValue[NM];
@@ -531,6 +538,8 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
           Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgEMASKNAME, (LONG_PTR)_T("[N]"));
           Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgEMASKEXT, (LONG_PTR)_T("[E]"));
         }
+        // установим предыдущий размер диалога
+        DlgResize(hDlg);
         // для корректного использования масок из истории
         FarDialogItem Item;
         Info.SendDlgMessage(hDlg, DM_GETDLGITEM, DlgEMASKNAME, (LONG_PTR)&Item);
@@ -776,7 +785,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
       else if (Param2==KEY_F5 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
       {
  DLGRESIZE:
-        DlgResize(hDlg);
+        DlgResize(hDlg, true);  //true - т.к. нажали F5
         return true;
       }
       //----
@@ -1066,11 +1075,6 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
 
   /************************************************************************/
 
-    case DN_DRAGGED:
-      return false;
-
-  /************************************************************************/
-
     case DN_CLOSE:
       if (Param1==DlgREN && Opt.LoadUndo)
       {
@@ -1099,7 +1103,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
  ****************************************************************************/
 static int ShowDialog()
 {
-  GetDlgSize();  DlgSize.Full=false;
+  GetDlgSize();
 
   struct InitDialogItem InitItems[] = {
     /* 0*/{DI_DOUBLEBOX,0,          0,DlgSize.W-1,DlgSize.H-1, 0, 0,                       0, 0, (TCHAR *)MVRenTitle},

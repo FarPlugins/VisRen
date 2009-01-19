@@ -6,7 +6,7 @@
  * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
-/* $ Revision: 6.1 $ */
+/* $ Revision: 7.2 $ */
 
 #define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -167,6 +167,8 @@ void WINAPI _export SetStartupInfo(const struct PluginStartupInfo *Info)
     ovi.dwOSVersionInfoSize=sizeof(ovi);
     if (GetVersionEx(&ovi) && ovi.dwPlatformId!=VER_PLATFORM_WIN32_NT)
       bWin9x=true;
+    // стартуем с минимизированным диалогом!
+    DlgSize.Full=false;
   }
   else
     bOldFAR = true;

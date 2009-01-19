@@ -116,12 +116,16 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
   GetCurrentDirectory(sizeof(FullFilename), FullFilename);
   BuildFullFilename(FullFilename, FullFilename, src);
 
-  bool bCorrectJPG=false;
+  bool bCorrectJPG=false, bCorrectBMP=false, bCorrectGIF=false;
   ID3TagInternal *pInternalTag=0;
   if (Info.CmpName(_T("*.mp3"), src, true))
     pInternalTag=AnalyseMP3File(FullFilename);
   else if (Info.CmpName(_T("*.jpg"), src, true))
-    bCorrectJPG=AnalyseJpegFile(FullFilename);
+    bCorrectJPG=AnalyseImageFile(FullFilename, isJPG);
+  else if (Info.CmpName(_T("*.bmp"), src, true))
+    bCorrectBMP=AnalyseImageFile(FullFilename, isBMP);
+  else if (Info.CmpName(_T("*.gif"), src, true))
+    bCorrectGIF=AnalyseImageFile(FullFilename, isGIF);
 
   TCHAR Name[NM], Ext[NM];
   lstrcpy(Name, src);
@@ -348,7 +352,7 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
       }
       else if (!strncmp(pMask, _T("[d]"), 3))
       {
-        if (bCorrectJPG)
+        if (bCorrectJPG || bCorrectBMP || bCorrectGIF)
         {
           if (lstrlen(ImageInfo.DateTime))
             lstrcpy(ptr, ImageInfo.DateTime);
@@ -362,7 +366,7 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
       }
       else if (!strncmp(pMask, _T("[r]"), 3))
       {
-        if (bCorrectJPG)
+        if (bCorrectJPG || bCorrectBMP || bCorrectGIF)
         {
           FSF.sprintf(ptr, _T("%dx%d"), ImageInfo.Width, ImageInfo.Height);
           ptr+=lstrlen(ptr);
