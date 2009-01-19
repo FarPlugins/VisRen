@@ -3,7 +3,7 @@
  *
  * Plugin module for FAR Manager 1.71
  *
- * Copyright (c) 2007 Alexey Samlyukov
+ * Copyright (c) 2007, 2008 Alexey Samlyukov
  ****************************************************************************/
 
 
@@ -12,6 +12,7 @@ enum {
   isJPG,
   isBMP,
   isGIF,
+  isPNG
 };
 
 // работа с EXIF
@@ -359,6 +360,30 @@ static bool AnalyseImageFile(const char *FileName, int ImageFormat)
            && ReadFile(infile, &(ImageInfo.Width), sizeof(WORD), &Readed, 0)
            && ReadFile(infile, &(ImageInfo.Height), sizeof(WORD), &Readed, 0)
          );
+  }
+
+  // !!NEW!! Scan the PNG :-)
+  else if (ImageFormat==isPNG)
+  {
+    if ((ret=
+         (    FileGetC(infile) == 0x89
+           && FileGetC(infile) == 0x50
+           && FileGetC(infile) == 0x4E
+           && FileGetC(infile) == 0x47
+           && FileGetC(infile) == 0x0D
+           && FileGetC(infile) == 0x0A
+           && FileGetC(infile) == 0x1A
+           && FileGetC(infile) == 0x0A
+           && ((HANDLE)SetFilePointer(infile, 18, 0, FILE_BEGIN) != INVALID_HANDLE_VALUE)
+           && ReadFile(infile, &(ImageInfo.Width), sizeof(WORD), &Readed, 0)
+           && ((HANDLE)SetFilePointer(infile, 22, 0, FILE_BEGIN) != INVALID_HANDLE_VALUE)
+           && ReadFile(infile, &(ImageInfo.Height), sizeof(WORD), &Readed, 0)
+         )
+       ))
+      {
+        ImageInfo.Width=Get16m(&ImageInfo.Width);
+        ImageInfo.Height=Get16m(&ImageInfo.Height);
+      }
   }
 
   CloseHandle(infile);

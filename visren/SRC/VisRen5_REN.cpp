@@ -3,7 +3,7 @@
  *
  * Plugin module for FAR Manager 1.71
  *
- * Copyright (c) 2007 Alexey Samlyukov
+ * Copyright (c) 2007, 2008 Alexey Samlyukov
  ****************************************************************************/
 
 enum {
@@ -116,7 +116,7 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
   GetCurrentDirectory(sizeof(FullFilename), FullFilename);
   BuildFullFilename(FullFilename, FullFilename, src);
 
-  bool bCorrectJPG=false, bCorrectBMP=false, bCorrectGIF=false;
+  bool bCorrectJPG=false, bCorrectBMP=false, bCorrectGIF=false, bCorrectPNG=false;
   ID3TagInternal *pInternalTag=0;
   if (Info.CmpName(_T("*.mp3"), src, true))
     pInternalTag=AnalyseMP3File(FullFilename);
@@ -126,6 +126,8 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
     bCorrectBMP=AnalyseImageFile(FullFilename, isBMP);
   else if (Info.CmpName(_T("*.gif"), src, true))
     bCorrectGIF=AnalyseImageFile(FullFilename, isGIF);
+  else if (Info.CmpName(_T("*.png"), src, true))
+    bCorrectPNG=AnalyseImageFile(FullFilename, isPNG);
 
   TCHAR Name[NM], Ext[NM];
   lstrcpy(Name, src);
@@ -352,7 +354,7 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
       }
       else if (!strncmp(pMask, _T("[d]"), 3))
       {
-        if (bCorrectJPG || bCorrectBMP || bCorrectGIF)
+        if (bCorrectJPG || bCorrectBMP || bCorrectGIF || bCorrectPNG)
         {
           if (lstrlen(ImageInfo.DateTime))
             lstrcpy(ptr, ImageInfo.DateTime);
@@ -366,7 +368,7 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
       }
       else if (!strncmp(pMask, _T("[r]"), 3))
       {
-        if (bCorrectJPG || bCorrectBMP || bCorrectGIF)
+        if (bCorrectJPG || bCorrectBMP || bCorrectGIF || bCorrectPNG)
         {
           FSF.sprintf(ptr, _T("%dx%d"), ImageInfo.Width, ImageInfo.Height);
           ptr+=lstrlen(ptr);

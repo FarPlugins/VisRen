@@ -3,10 +3,10 @@
  *
  * Plugin module for FAR Manager 1.71
  *
- * Copyright (c) 2007 Alexey Samlyukov
+ * Copyright (c) 2007, 2008 Alexey Samlyukov
  ****************************************************************************/
 
-/* $ Revision: 7.2 $ */
+/* $ Revision: 8.1 $ */
 
 #define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -15,7 +15,7 @@
 #include "..\..\plugin.hpp"
 #include "..\..\farkeys.hpp"
 #include "..\..\farcolor.hpp"
-#include "PCRE74\pcre.h"
+#include "PCRE77\pcre.h"
 #include "VisRen1_LNG.cpp"        // набор констант для извлечения строк из .lng файла
 
 /// ВАЖНО! используем данные макросы, чтоб дополнительно не обнулять память
@@ -147,7 +147,7 @@ static bool bOldFAR=false, bWin9x=false;
  * Эти функции плагина FAR вызывает в первую очередь
  ****************************************************************************/
 // установим минимально поддерживаемую версию FARа...
-int WINAPI _export GetMinFarVersion() { return MAKEFARVERSION(1,71,2275); }
+int WINAPI _export GetMinFarVersion() { return MAKEFARVERSION(1,71,2368); }
 
 // заполним структуру PluginStartupInfo и сделаем ряд полезных действий...
 void WINAPI _export SetStartupInfo(const struct PluginStartupInfo *Info)

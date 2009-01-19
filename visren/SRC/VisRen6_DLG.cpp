@@ -3,7 +3,7 @@
  *
  * Plugin module for FAR Manager 1.71
  *
- * Copyright (c) 2007 Alexey Samlyukov
+ * Copyright (c) 2007, 2008 Alexey Samlyukov
  ****************************************************************************/
 
 /****************************************************************************
@@ -417,6 +417,49 @@ static void MouseSelect(HANDLE hDlg, DWORD dwStr, DWORD dwMousePosX)
 }
 
 /****************************************************************************
+ * Поддержка Drag&Drop мышью в листе файлов
+ ****************************************************************************/
+static void MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY)
+{
+  FarListPos ListPos;
+  Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, (LONG_PTR)&ListPos);
+  if (ListPos.SelectPos>=sFI.iCount) return;
+
+  SMALL_RECT dlgRect;
+  Info.SendDlgMessage(hDlg, DM_GETDLGRECT, 0, (LONG_PTR)&dlgRect);
+  int CurPos=ListPos.TopPos+(dwMousePosY-(dlgRect.Top+9));
+
+  if (CurPos<0) CurPos=0;
+  else if (CurPos>=sFI.iCount) CurPos=sFI.iCount-1;
+
+  if (CurPos!=ListPos.SelectPos)
+  {
+    bool bUp=CurPos<ListPos.SelectPos;
+    if (bUp?ListPos.SelectPos>0:ListPos.SelectPos<sFI.iCount-1)
+    {
+      Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
+      PluginPanelItem TempSrcItem=sFI.ppi[bUp?ListPos.SelectPos-1:ListPos.SelectPos+1];
+      sFI.ppi[bUp?ListPos.SelectPos-1:ListPos.SelectPos+1]=sFI.ppi[ListPos.SelectPos];
+      sFI.ppi[ListPos.SelectPos]=TempSrcItem;
+      FarDialogItem Item;
+      for (int i=DlgEMASKNAME; i<=DlgEREPLACE; i++)
+        switch(i)
+        {
+          case DlgEMASKNAME: case DlgEMASKEXT:
+          case DlgESEARCH:   case DlgEREPLACE:
+           Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, (LONG_PTR)&Item);
+           Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, (LONG_PTR)&Item);
+           break;
+        }
+      bUp?ListPos.SelectPos--:ListPos.SelectPos++;
+      Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, (LONG_PTR)&ListPos);
+      Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
+    }
+  }
+  return;
+}
+
+/****************************************************************************
  * Обработка клика правой клавишей мыши в листе файлов
  ****************************************************************************/
 static int ListMouseRightClick(HANDLE hDlg, DWORD dwMousePosX, DWORD dwMousePosY)
@@ -558,46 +601,39 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
 
   /************************************************************************/
 
-    case DN_DRAWDLGITEM:
-      switch (Param1)
-      {
-        case DlgEMASKNAME: case DlgETEMPLNAME: case DlgBTEMPLNAME:
-        case DlgEMASKEXT:  case DlgETEMPLEXT:  case DlgBTEMPLEXT:
-        case DlgESEARCH:   case DlgEREPLACE:   case DlgCASE:
-        case DlgREGEX:
-        case DlgEDIT:
-          if (Opt.LoadUndo || !sFI.iCount) ((FarDialogItem*)Param2)->Flags|=DIF_DISABLE;
-          else ((FarDialogItem*)Param2)->Flags&=~DIF_DISABLE;
-          return true;
-        case DlgREN:
+    case DN_DRAWDIALOG:
+			{
+			  TCHAR buf[MAX_PATH], sep[MAX_PATH];
+
+		    FSF.TruncStr(lstrcpy(buf, sUndoFI.Dir), DlgSize.Full?DlgSize.mW-6:DlgSize.W-6);
+			  FSF.sprintf(sep, _T(" %s "), Opt.LoadUndo?buf:GetMsg(MSep));
+			  Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgSEP2, (LONG_PTR)sep);
+
+        lstrcpy(sep, Opt.LogRen?GetMsg(MCreateLog):GetMsg(MNoCreateLog));
+        lstrcat(sep, sUndoFI.iCount? _T("* ") : _T(" "));
+        Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgSEP3_LOG, (LONG_PTR)sep);
+
+        for (int i=DlgEMASKNAME; i<=DlgEDIT; i++)
         {
-          if (!sFI.iCount || bError) ((FarDialogItem*)Param2)->Flags|=DIF_DISABLE;
-          else ((FarDialogItem*)Param2)->Flags&=~DIF_DISABLE;
-          return true;
-        }
-        case DlgUNDO:
-        {
-          if (!sUndoFI.iCount || Opt.LoadUndo || bError) ((FarDialogItem*)Param2)->Flags|=DIF_DISABLE;
-          else ((FarDialogItem*)Param2)->Flags&=~DIF_DISABLE;
-          return true;
-        }
-        case DlgSEP2:
-        {
-          TCHAR sep[MAX_PATH];
-          FSF.TruncStr(lstrcpy(sep, sUndoFI.Dir), (DlgSize.Full?DlgSize.mW-6:DlgSize.W-6));
-          FSF.sprintf(((FarDialogItem*)Param2)->Data.Data, _T(" %s "), (Opt.LoadUndo?sep:GetMsg(MSep)));
-          return true;
-        }
-        case DlgSEP3_LOG:
-        {
-          TCHAR sep[80];
-          lstrcpy(sep, Opt.LogRen?GetMsg(MCreateLog):GetMsg(MNoCreateLog));
-          lstrcat(sep, sUndoFI.iCount? _T("* ") : _T(" "));
-          lstrcpy(((FarDialogItem*)Param2)->Data.Data, sep);
-          return true;
-        }
-      }
-      break;
+          switch (i)
+          {
+            case DlgEMASKNAME: case DlgETEMPLNAME: case DlgBTEMPLNAME:
+            case DlgEMASKEXT:  case DlgETEMPLEXT:  case DlgBTEMPLEXT:
+            case DlgESEARCH:   case DlgEREPLACE:   case DlgCASE:
+            case DlgREGEX:
+            case DlgEDIT:
+              Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(Opt.LoadUndo || !sFI.iCount));
+              break;
+            case DlgREN:
+              Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(!sFI.iCount || bError || (Opt.LoadUndo && !sUndoFI.iCount)));
+              break;
+            case DlgUNDO:
+              Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(!sUndoFI.iCount || Opt.LoadUndo || bError));
+              break;
+			    }
+			  }
+			  return true;
+			}
 
   /************************************************************************/
 
@@ -666,18 +702,18 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
           case DlgLIST:
             Focus=DlgLIST; break;
           default:
-            /* $ !!  skirda, 10.07.2007 1:27:03:
-             *       в обработчике мыши после смены фокуса идет ShowDialog(-1)
-             *       а в обработчике клавиатуры - ShowDialog(OldPos); ShowDialog(FocusPos);
-             *
-             *       AS,  т.е. для мыши Фар дает команду "DN_DRAWDIALOG"
-             *            а для клавы "DN_DRAWDLGITEM"
-             *       учтем этот нюанс для DN_CTLCOLORDLGITEM:
-             */
-            Info.SendDlgMessage(hDlg, DM_SHOWITEM, DlgSEP2, 1);
-             /* $ */
             Ret=false; break;
         }
+        /* $ !!  skirda, 10.07.2007 1:27:03:
+         *       в обработчике мыши после смены фокуса идет ShowDialog(-1)
+         *       а в обработчике клавиатуры - ShowDialog(OldPos); ShowDialog(FocusPos);
+         *
+         *       AS,  т.е. для мыши Фар дает команду "DN_DRAWDIALOG"
+         *            а для клавы "DN_DRAWDLGITEM"
+         *       учтем этот нюанс для DN_CTLCOLORDLGITEM:
+         */
+        Info.SendDlgMessage(hDlg, DM_SHOWITEM, DlgSEP2, 1);
+         /* $ */
         if (Ret) Info.SendDlgMessage(hDlg, DM_SETMOUSEEVENTNOTIFY, 1, 0);
       }
       break;
@@ -705,12 +741,14 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
             case DlgEREPLACE:
               MouseSelect(hDlg, DlgEREPLACE, MRec->dwMousePosition.X);
               return false;
+            case DlgLIST:
+              MouseDragDrop(hDlg,MRec->dwMousePosition.Y);
+              return false;
           }
         }
         // обработка клика правой клавишей мыши в листе файлов
         else if (MRec->dwButtonState==RIGHTMOST_BUTTON_PRESSED && Focus==DlgLIST)
         {
-
           int Pos=ListMouseRightClick(hDlg, MRec->dwMousePosition.X, MRec->dwMousePosition.Y);
           if (Pos>=0)
           {
@@ -749,11 +787,9 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
       else if (Param2==KEY_F2 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
       {
  LOGREN:
-        int ItemFocus=Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0);
         if (Opt.LogRen) Opt.LogRen=0;
         else Opt.LogRen=1;
-        Info.SendDlgMessage(hDlg, DM_SHOWITEM, DlgSEP3_LOG, 1); //  для
-        Info.SendDlgMessage(hDlg, DM_SHOWITEM, ItemFocus, 1);   //      перерисовки
+        Info.SendDlgMessage(hDlg, DM_REDRAW, 0, 0);
         return true;
       }
       //----
@@ -777,7 +813,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
                                sizeof(Opt.WordDiv)-1, 0, FIB_BUTTONS )  )
               SetRegKey(PluginRootKey, _T(""), _T("WordDiv"), (TCHAR *)Opt.WordDiv);
         }
-        else
+        else if (!Opt.LoadUndo)
           Info.SendDlgMessage(hDlg, DM_CLOSE, DlgEDIT, 0);
         return true;
       }
@@ -806,9 +842,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         {
           FreeUndo();
           int ItemFocus=Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0);
-          Info.SendDlgMessage(hDlg, DM_SHOWITEM, DlgUNDO, 1);          //  для
-          Info.SendDlgMessage(hDlg, DM_SHOWITEM, DlgSEP3_LOG, 1);      //
-          Info.SendDlgMessage(hDlg, DM_SHOWITEM, ItemFocus, 1);        //      перерисовки
+          Info.SendDlgMessage(hDlg, DM_REDRAW, 0, 0);
           Info.SendDlgMessage(hDlg, DM_SETFOCUS, (ItemFocus!=DlgUNDO?ItemFocus:DlgREN), 0);
           return true;
         }
@@ -853,22 +887,40 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         }
       }
       //----
-      else if (Param2==KEY_DEL && Param1==DlgLIST && !Opt.LoadUndo)
+      else if (Param2==KEY_DEL && Param1==DlgLIST)
       {
         int Pos=Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, 0);
-        if (Pos>=sFI.iCount) return false;
+        if (Pos>=(Opt.LoadUndo?sUndoFI.iCount:sFI.iCount)) return false;
         Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
         FarListPos ListPos={Pos, -1};
         FarListDelete ListDel={Pos, 1};
         Info.SendDlgMessage(hDlg, DM_LISTDELETE, DlgLIST, (LONG_PTR)&ListDel);
         do
         {
-          sFI.ppi[Pos]=sFI.ppi[Pos+1];
-          lstrcpy(sFI.DestFileName[Pos], sFI.DestFileName[Pos+1]);
+          if (Opt.LoadUndo)
+          {
+            lstrcpy(sUndoFI.CurFileName[Pos], sUndoFI.CurFileName[Pos+1]);
+            lstrcpy(sUndoFI.OldFileName[Pos], sUndoFI.OldFileName[Pos+1]);
+          }
+          else
+          {
+            sFI.ppi[Pos]=sFI.ppi[Pos+1];
+            lstrcpy(sFI.DestFileName[Pos], sFI.DestFileName[Pos+1]);
+          }
           Pos++;
-        } while(Pos<sFI.iCount-1);
-        my_free(&sFI.ppi[Pos]); my_free(sFI.DestFileName[Pos]); sFI.DestFileName[Pos]=0;
-        --sFI.iCount;
+        } while(Pos<(Opt.LoadUndo?sUndoFI.iCount-1:sFI.iCount-1));
+
+        if (Opt.LoadUndo)
+        {
+          my_free(sUndoFI.CurFileName[Pos]); sUndoFI.CurFileName[Pos]=0;
+          my_free(sUndoFI.OldFileName[Pos]); sUndoFI.OldFileName[Pos]=0;
+          --sUndoFI.iCount;
+        }
+        else
+        {
+          my_free(&sFI.ppi[Pos]); my_free(sFI.DestFileName[Pos]); sFI.DestFileName[Pos]=0;
+          --sFI.iCount;
+        }
         Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, (LONG_PTR)&ListPos);
         UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo);
         Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
@@ -879,30 +931,28 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
                (Param2==(KEY_CTRL|KEY_UP) || Param2==(KEY_RCTRL|KEY_UP) ||
                 Param2==(KEY_CTRL|KEY_DOWN) || Param2==(KEY_RCTRL|KEY_DOWN)) )
       {
-        int Pos=Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, 0);
-        if (Pos>=sFI.iCount) return false;
+        FarListPos ListPos;
+        Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, (LONG_PTR)&ListPos);
+        if (ListPos.SelectPos>=sFI.iCount) return false;
         bool bUp=(Param2==(KEY_CTRL|KEY_UP) || Param2==(KEY_RCTRL|KEY_UP));
-        if (bUp?Pos>0:Pos<sFI.iCount-1)
+        if (bUp?ListPos.SelectPos>0:ListPos.SelectPos<sFI.iCount-1)
         {
           Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
-          PluginPanelItem TempSrcItem=sFI.ppi[bUp?Pos-1:Pos+1];
-          sFI.ppi[bUp?Pos-1:Pos+1]=sFI.ppi[Pos];
-          sFI.ppi[Pos]=TempSrcItem;
-          TCHAR *TempDestItem=sFI.DestFileName[bUp?Pos-1:Pos+1];
-          sFI.DestFileName[bUp?Pos-1:Pos+1]=sFI.DestFileName[Pos];
-          sFI.DestFileName[Pos]=TempDestItem;
-
-          FarListGetItem ListGet;
-          ListGet.ItemIndex=Pos;
-          Info.SendDlgMessage(hDlg, DM_LISTGETITEM, DlgLIST, (LONG_PTR)&ListGet);
-
-          FarListDelete ListDel={Pos, 1};
-          Info.SendDlgMessage(hDlg, DM_LISTDELETE, DlgLIST, (LONG_PTR)&ListDel);
-
-          FarListInsert ListIns;
-          ListIns.Index=bUp?Pos-1:Pos+1;
-          ListIns.Item=ListGet.Item;
-          Info.SendDlgMessage(hDlg, DM_LISTINSERT, DlgLIST, (LONG_PTR)&ListIns);
+          PluginPanelItem TempSrcItem=sFI.ppi[bUp?ListPos.SelectPos-1:ListPos.SelectPos+1];
+          sFI.ppi[bUp?ListPos.SelectPos-1:ListPos.SelectPos+1]=sFI.ppi[ListPos.SelectPos];
+          sFI.ppi[ListPos.SelectPos]=TempSrcItem;
+          FarDialogItem Item;
+          for (int i=DlgEMASKNAME; i<=DlgEREPLACE; i++)
+            switch(i)
+            {
+              case DlgEMASKNAME: case DlgEMASKEXT:
+              case DlgESEARCH:   case DlgEREPLACE:
+               Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, (LONG_PTR)&Item);
+               Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, (LONG_PTR)&Item);
+               break;
+            }
+          bUp?ListPos.SelectPos--:ListPos.SelectPos++;
+          Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, (LONG_PTR)&ListPos);
           Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
           return true;
         }
