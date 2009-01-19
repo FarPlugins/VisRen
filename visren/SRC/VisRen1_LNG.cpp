@@ -46,6 +46,11 @@ enum {
   MTempl_18,
   MTempl_19,
   MTempl_20,
+  MTempl_21, //< SEPARATOR
+  MTempl_22,
+  MTempl_23,
+  MTempl_24,
+  MTempl_25,
 //-----
   MTempl2_1,
   MTempl2_2,

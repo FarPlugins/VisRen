@@ -6,7 +6,7 @@
  * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 
-/* $ Revision: 5.1 $ */
+/* $ Revision: 6.1 $ */
 
 #define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -132,9 +132,10 @@ static int DebugMsg(TCHAR *msg, TCHAR *msg2 = _T(" "), int i = 1000)
 
 #include "VisRen2_REG.cpp"        // ф-ции для работы с реестром
 #include "VisRen3_MP3.cpp"        // ф-ции для переименования из тэгов MP3
-#include "VisRen4_REN.cpp"        // ф-ции для переименования и отката
-#include "VisRen5_DLG.cpp"        // ф-ции для основного диалога плагина
-#include "VisRen6_EDT.cpp"        // ф-ции для переименования в редакторе
+#include "VisRen4_JPG.cpp"        // ф-ции для работы с JPG
+#include "VisRen5_REN.cpp"        // ф-ции для переименования и отката
+#include "VisRen6_DLG.cpp"        // ф-ции для основного диалога плагина
+#include "VisRen7_EDT.cpp"        // ф-ции для переименования в редакторе
 
 /****************************************************************************
  ***************************** Exported functions ***************************

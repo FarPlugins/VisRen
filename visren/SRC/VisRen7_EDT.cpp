@@ -1,5 +1,5 @@
 /****************************************************************************
- * VisRen6_EDT.cpp
+ * VisRen7_EDT.cpp
  *
  * Plugin module for FAR Manager 1.71
  *

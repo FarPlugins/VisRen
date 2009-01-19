@@ -1,5 +1,5 @@
 /****************************************************************************
- * VisRen4_REN.cpp
+ * VisRen5_REN.cpp
  *
  * Plugin module for FAR Manager 1.71
  *
@@ -112,15 +112,16 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
   FileTimeToLocalFileTime(&ftLastWriteTime, &local);
   FileTimeToSystemTime(&local, &modific);
 
-  bool bIsMP3=Info.CmpName(_T("*.mp3"), src, true);
+  static TCHAR FullFilename[MAX_PATH];
+  GetCurrentDirectory(sizeof(FullFilename), FullFilename);
+  BuildFullFilename(FullFilename, FullFilename, src);
+
+  bool bCorrectJPG=false;
   ID3TagInternal *pInternalTag=0;
-  if (bIsMP3)
-  {
-    static TCHAR FullFilename[MAX_PATH];
-    GetCurrentDirectory(sizeof(FullFilename), FullFilename);
-    BuildFullFilename(FullFilename, FullFilename, src);
-    pInternalTag=AnalyseFile(FullFilename);
-  }
+  if (Info.CmpName(_T("*.mp3"), src, true))
+    pInternalTag=AnalyseMP3File(FullFilename);
+  else if (Info.CmpName(_T("*.jpg"), src, true))
+    bCorrectJPG=AnalyseJpegFile(FullFilename);
 
   TCHAR Name[NM], Ext[NM];
   lstrcpy(Name, src);
@@ -327,14 +328,55 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
         }
         pMask+=3;
       }
+      else if (!strncmp(pMask, _T("[c]"), 3))
+      {
+        if (bCorrectJPG && CheckFileName(ImageInfo.CameraMake))
+        {
+          lstrcpy(ptr, ImageInfo.CameraMake);
+          ptr+=lstrlen(ImageInfo.CameraMake);
+        }
+        pMask+=3;
+      }
+      else if (!strncmp(pMask, _T("[m]"), 3))
+      {
+        if (bCorrectJPG && CheckFileName(ImageInfo.CameraModel))
+        {
+          lstrcpy(ptr, ImageInfo.CameraModel);
+          ptr+=lstrlen(ImageInfo.CameraModel);
+        }
+        pMask+=3;
+      }
+      else if (!strncmp(pMask, _T("[d]"), 3))
+      {
+        if (bCorrectJPG)
+        {
+          if (lstrlen(ImageInfo.DateTime))
+            lstrcpy(ptr, ImageInfo.DateTime);
+          else
+            FSF.sprintf(ptr, _T("%04d.%02d.%02d %02d-%02d-%02d"),
+                        modific.wYear, modific.wMonth, modific.wDay,
+                        modific.wHour, modific.wMinute, modific.wSecond);
+          ptr+=lstrlen(ptr);
+        }
+        pMask+=3;
+      }
+      else if (!strncmp(pMask, _T("[r]"), 3))
+      {
+        if (bCorrectJPG)
+        {
+          FSF.sprintf(ptr, _T("%dx%d"), ImageInfo.Width, ImageInfo.Height);
+          ptr+=lstrlen(ptr);
+        }
+        pMask+=3;
+      }
       else if (!strncmp(pMask, _T("[DM]"), 4))
       {
-        FSF.sprintf(ptr, "%04d.%02d.%02d", modific.wYear, modific.wMonth, modific.wDay);
+        FSF.sprintf(ptr, _T("%04d.%02d.%02d"), modific.wYear, modific.wMonth, modific.wDay);
         pMask+=4; ptr+=10;
       }
       else if (!strncmp(pMask, _T("[TM]"), 4))
       {
-        FSF.sprintf(ptr, "%02d-%02d-%02d", modific.wHour, modific.wMinute, modific.wSecond);
+        FSF.sprintf(ptr, _T("%02d-%02d-%02d"), modific.wHour, modific.wMinute, modific.wSecond);
         pMask+=4; ptr+=8;
       }
       else if (!strncmp(pMask, _T("[TL]"), 4))

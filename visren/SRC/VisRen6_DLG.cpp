@@ -1,5 +1,5 @@
 /****************************************************************************
- * VisRen5_DLG.cpp
+ * VisRen6_DLG.cpp
  *
  * Plugin module for FAR Manager 1.71
  *
@@ -313,10 +313,15 @@ static bool SetMask(HANDLE hDlg, DWORD dwMask, DWORD dwTempl)
       case 13: lstrcpy(templ, _T("[y]"));      break;
       case 14: lstrcpy(templ, _T("[g]"));      break;
       //---
-      case 16: lstrcpy(templ, _T("[DM]"));     break;
-      case 17: lstrcpy(templ, _T("[TM]"));     break;
-      case 18: lstrcpy(templ, _T("[TL]"));     break;
-      case 19: lstrcpy(templ, _T("[TR]"));     break;
+      case 16: lstrcpy(templ, _T("[c]"));     break;
+      case 17: lstrcpy(templ, _T("[m]"));     break;
+      case 18: lstrcpy(templ, _T("[d]"));     break;
+      case 19: lstrcpy(templ, _T("[r]"));     break;
+      //---
+      case 21: lstrcpy(templ, _T("[DM]"));     break;
+      case 22: lstrcpy(templ, _T("[TM]"));     break;
+      case 23: lstrcpy(templ, _T("[TL]"));     break;
+      case 24: lstrcpy(templ, _T("[TR]"));     break;
     }
   }
   else
@@ -1133,11 +1138,11 @@ static int ShowDialog()
   InitDialogItems(InitItems, DialogItems, sizeof(InitItems) / sizeof(InitItems[0]));
 
   // комбинированный список с шаблонами
-  FarListItem itemTempl1[20];
+  FarListItem itemTempl1[25];
   int n = sizeof(itemTempl1) / sizeof(itemTempl1[0]);
   for (int i = 0; i < n; i++)
   {
-    itemTempl1[i].Flags = ((i==3 || i==8 || i==15)?LIF_SEPARATOR:0);
+    itemTempl1[i].Flags = ((i==3 || i==8 || i==15 || i==20)?LIF_SEPARATOR:0);
     lstrcpy(itemTempl1[i].Text, GetMsg(MTempl_1+i));
   }
   FarList Templates1 = {n, itemTempl1};

@@ -440,7 +440,7 @@ ID3TagInternal *InitializeInternalTag2(ID3v2TagReal *pRealTag)
 #endif
 
 
-ID3TagInternal *AnalyseFile(const char *lpFileName)
+ID3TagInternal *AnalyseMP3File(const char *lpFileName)
 {
   // оригинальные тэги
   ID3v11TagReal Tag1;
