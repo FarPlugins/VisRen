@@ -6,7 +6,7 @@
  * Copyright (c) 2007, 2008 Alexey Samlyukov
  ****************************************************************************/
 
-/* $ Revision: 8.1 $ */
+/* $ Revision: 8.2 $ */
 
 #define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -71,8 +71,7 @@ struct Options {
  * Набор переменных
  ****************************************************************************/
 int StartPosX,
-    Focus,
-    ItemFocus;
+    Focus;
 
 bool bStartSelect,
      bError,

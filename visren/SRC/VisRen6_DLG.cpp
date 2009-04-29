@@ -852,6 +852,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
       //----
       else if (Param2==KEY_F12 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
       {
+        static int ItemFocus=DlgEMASKNAME;
         if (!bListFocus)
         {
           ItemFocus=Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0);
@@ -860,7 +861,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         }
         else
         {
-          Info.SendDlgMessage(hDlg, DM_SETFOCUS, ItemFocus, 0);
+          Info.SendDlgMessage(hDlg, DM_SETFOCUS, ItemFocus==DlgLIST?DlgREN:ItemFocus, 0);
           bListFocus=false;
         }
         return true;
