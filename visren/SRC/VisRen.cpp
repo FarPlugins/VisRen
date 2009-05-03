@@ -6,7 +6,7 @@
  * Copyright (c) 2007, 2008 Alexey Samlyukov
  ****************************************************************************/
 
-/* $ Revision: 8.2 $ */
+/* $ Revision: 8.3 $ */
 
 #define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -71,11 +71,11 @@ struct Options {
  * Набор переменных
  ****************************************************************************/
 int StartPosX,
+    SaveItemFocus,
     Focus;
 
 bool bStartSelect,
-     bError,
-     bListFocus;
+     bError;
 
 struct FileIndex {                               // элементы для переименования
   PluginPanelItem *ppi;                          //   здесь оригинальные имена с панели

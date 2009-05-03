@@ -571,7 +571,8 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
         Opt.RegEx=Opt.LoadUndo=Opt.Undo=0;
         StartPosX=Focus=-1;
         bStartSelect=true;
-        bListFocus=bError=false;
+        bError=false;
+        SaveItemFocus=DlgEMASKNAME;
 
         Info.SendDlgMessage(hDlg, DM_SETCOMBOBOXEVENT, DlgETEMPLNAME, (LONG_PTR)CBET_KEY);
         Info.SendDlgMessage(hDlg, DM_SETCOMBOBOXEVENT, DlgETEMPLEXT, (LONG_PTR)CBET_KEY);
@@ -852,18 +853,9 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
       //----
       else if (Param2==KEY_F12 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
       {
-        static int ItemFocus=DlgEMASKNAME;
-        if (!bListFocus)
-        {
-          ItemFocus=Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0);
-          Info.SendDlgMessage(hDlg, DM_SETFOCUS, DlgLIST, 0);
-          bListFocus=true;
-        }
-        else
-        {
-          Info.SendDlgMessage(hDlg, DM_SETFOCUS, ItemFocus==DlgLIST?DlgREN:ItemFocus, 0);
-          bListFocus=false;
-        }
+        int ItemFocus=Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0);
+        if (ItemFocus!=DlgLIST) SaveItemFocus=ItemFocus;
+        Info.SendDlgMessage(hDlg, DM_SETFOCUS, ItemFocus!=DlgLIST?DlgLIST:SaveItemFocus, 0);
         return true;
       }
       //----
