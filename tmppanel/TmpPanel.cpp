@@ -306,52 +306,28 @@ void ReadFileLines(HANDLE hFileMapping, DWORD FileSizeLow, TCHAR **argv, TCHAR *
   DWORD Len,Pos=0,Size=FileSizeLow;
 
 #ifdef UNICODE
-  bool  ucs2 = false;
-  if (Size >= 2) switch(*(LPWORD)FileData) {
-    case (BOM_UTF8 & 0xFFFF):
-      if (Size >= 3 && ((LPBYTE)FileData)[2] == (BYTE)(BOM_UTF8>>16)) {
-    case BOM_UCS2_BE:
-        goto done;
-      }
-    default:
-      break;
-    case BOM_UCS2:
-      ucs2 = true;
-      Pos += 2;
-      break;
+  bool isUTF8=false;
+  if (Size >= 3 && FileData[0]=='\xEF' && FileData[1]=='\xBB' && FileData[2]=='\xBF')
+  {
+    isUTF8=true;
+    Pos += 3;
   }
 #endif
 
   while(Pos<Size)
   {
-#ifdef UNICODE
-    if (!ucs2) {
-#endif
-      char c;
-      while(Pos<Size && ((c = FileData[Pos]) == '\r' || c == '\n')) Pos++;
-      DWORD Off = Pos;
-      while(Pos<Size && (c = FileData[Pos]) != '\r' && c != '\n') Pos++;
-      Len = Pos - Off;
+    char c;
+    while(Pos<Size && ((c = FileData[Pos]) == '\r' || c == '\n')) Pos++;
+    DWORD Off = Pos;
+    while(Pos<Size && (c = FileData[Pos]) != '\r' && c != '\n') Pos++;
+    Len = Pos - Off;
 #ifndef UNICODE
-      if(Len >= sizeof(TMP)) Len = sizeof(TMP)-1;
-      memcpy(TMP, &FileData[Off], Len);
+    if(Len >= sizeof(TMP)) Len = sizeof(TMP)-1;
+    memcpy(TMP, &FileData[Off], Len);
 #else // UNICODE
-      Len = MultiByteToWideChar(CP_OEMCP, MB_PRECOMPOSED|MB_ERR_INVALID_CHARS,
-                                &FileData[Off], Len, TMP, ArraySize(TMP)-1);
-    } else {
-      wchar_t c;
-      --Size;
-      while(Pos<Size && ((c = *(wchar_t*)&FileData[Pos]) == L'\r' || c == L'\n'))
-        Pos += sizeof(wchar_t);
-      DWORD Off = Pos;
-      while(Pos<Size && (c = *(wchar_t*)&FileData[Pos]) != L'\r' && c != L'\n')
-        Pos += sizeof(wchar_t);
-      if(Pos < Size) ++Size;
-      Len = (Pos-Off)/sizeof(wchar_t);
-      if(Len >= ArraySize(TMP)) Len = ArraySize(TMP)-1;
-      memcpy(TMP, &FileData[Off], Len*sizeof(wchar_t));
-    }
+    Len = MultiByteToWideChar((isUTF8?CP_UTF8:CP_OEMCP), MB_ERR_INVALID_CHARS, &FileData[Off], Len, TMP, ArraySize(TMP)-1);
 #endif
+
     if (!Len) continue;
 
     TMP[Len]=0;
@@ -376,9 +352,6 @@ void ReadFileLines(HANDLE hFileMapping, DWORD FileSizeLow, TCHAR **argv, TCHAR *
     (*numchars)+=Len+1;
     ++*numargs;
   }
-#ifdef UNICODE
-done:
-#endif
   UnmapViewOfFile((LPVOID)FileData);
 }
 
@@ -449,7 +422,6 @@ void ShowMenuFromList(TCHAR *Name)
   FarMenuItem *fmi=(FarMenuItem*)malloc(argc*sizeof(FarMenuItem));
   if (fmi)
   {
-    //memset(fmi,0,argc*sizeof(FarMenuItem));
     TCHAR TMP[MAX_PATH];
     int i;
     for(i=0;i<argc;++i)
