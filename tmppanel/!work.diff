@@ -1,0 +1,739 @@
+Index: TmpLng.hpp
+===================================================================
+--- TmpLng.hpp	(revision 3200)
++++ TmpLng.hpp	(working copy)
+@@ -12,6 +12,7 @@
+   MTempPanelTitleNum,
+ 
+   MDiskMenuString,
++  MPluginMenuStringBranch,
+ 
+   MF7,
+   MAltShiftF12,
+@@ -28,6 +29,7 @@
+   MConfigAddToDisksMenu,
+   MConfigDisksMenuDigit,
+   MConfigAddToPluginsMenu,
++  MConfigPluginsMenuBranch,
+ 
+   MConfigCommonPanel,
+   MSafeModePanel,
+@@ -36,6 +38,7 @@
+   MReplaceInFilelist,
+   MMenuForFilelist,
+   MCopyContens,
++  MShowDir,
+ 
+   MFullScreenPanel,
+ 
+@@ -51,7 +54,8 @@
+   MNewPanelForSearchResults,
+   MListFilePath,
+ 
+-  MCopyContensMsg
++  MCopyContensMsg,
++  MShowDirMsg
+ };
+ 
+ #endif /* __TMPLNG_HPP__ */
+Index: TmpPanel.cpp
+===================================================================
+--- TmpPanel.cpp	(revision 3200)
++++ TmpPanel.cpp	(working copy)
+@@ -13,7 +13,7 @@
+ struct PluginStartupInfo Info;
+ struct FarStandardFunctions FSF;
+ BOOL IsOldFAR;
+-
++TCHAR StartupCurDir[MAX_PATH];
+ PluginPanels CommonPanels[COMMONPANELSNUMBER];
+ 
+ #if defined(__GNUC__)
+@@ -85,6 +85,8 @@
+   HANDLE hPlugin=INVALID_HANDLE_VALUE;
+ 
+   GetOptions();
++  // фы  тючтЁрЄр т яЁхцэ■■ яряъє яю <..>
++  GetCurrentDirectory(sizeof(StartupCurDir),StartupCurDir);
+ 
+   StartupOpenFrom=OpenFrom;
+   if(OpenFrom==OPEN_COMMANDLINE)
+@@ -166,6 +168,52 @@
+   {
+     hPlugin=new TmpPanel();
+     if(hPlugin==NULL) return(INVALID_HANDLE_VALUE);
++
++    // фюсртшь [x] in mode Branch
++    if (Opt.AddToPluginsMenu && Opt.Branch && OpenFrom==OPEN_PLUGINSMENU)
++    {
++      PanelInfo PInfo;
++#ifndef UNICODE
++      if (!Info.Control(INVALID_HANDLE_VALUE, FCTL_GETPANELINFO, &PInfo))
++#else
++      if (!Info.Control(PANEL_ACTIVE,FCTL_GETPANELINFO,0,(LONG_PTR)&PInfo))
++#endif
++        return(INVALID_HANDLE_VALUE);
++
++      ((TmpPanel *)hPlugin)->FindSearchResultsPanel();
++      if (Opt.Mode)
++      {
++        FreePanelItems(CommonPanels[CurrentCommonPanel].Items,
++                       CommonPanels[CurrentCommonPanel].ItemsNumber);
++        CommonPanels[CurrentCommonPanel].Items=(PluginPanelItem*)malloc(sizeof(PluginPanelItem));
++        CommonPanels[CurrentCommonPanel].ItemsNumber=0;
++      }
++      HANDLE hScreen = ((TmpPanel *)hPlugin)->BeginPutFiles();
++      for (int i=0; i<PInfo.SelectedItemsNumber; i++)
++      {
++#ifndef UNICODE
++        if (!((TmpPanel *)hPlugin)->PutOneFile(PInfo.SelectedItems[i]))
++        {
++          ((TmpPanel *)hPlugin)->CommitPutFiles(hScreen, false);
++           return(INVALID_HANDLE_VALUE);
++        }
++#else
++        PluginPanelItem* PPI=(PluginPanelItem*)malloc(Info.Control(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,0));
++        if (PPI)
++        {
++          Info.Control(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,(LONG_PTR)PPI);
++          if (!((TmpPanel *)hPlugin)->PutOneFile(*PPI))
++          {
++            free(PPI);
++            ((TmpPanel *)hPlugin)->CommitPutFiles(hScreen, false);
++            return(INVALID_HANDLE_VALUE);
++          }
++          free(PPI);
++        }
++#endif
++      }
++      ((TmpPanel *)hPlugin)->CommitPutFiles(hScreen, true);
++    }
+   }
+   return(hPlugin);
+ }
+@@ -399,8 +447,9 @@
+   ReadFileList (Name, &argc, &argv WITH_ANSI_ARG);
+ 
+   FarMenuItem *fmi=(FarMenuItem*)malloc(argc*sizeof(FarMenuItem));
+-  if(fmi)
++  if (fmi)
+   {
++    //memset(fmi,0,argc*sizeof(FarMenuItem));
+     TCHAR TMP[MAX_PATH];
+     int i;
+     for(i=0;i<argc;++i)
+@@ -505,6 +554,11 @@
+     return(INVALID_HANDLE_VALUE);
+ #undef PNAME_ARG
+ 
++  //save PanelMode
++  GetOptions();
++  // фы  тючтЁрЄр т яЁхцэ■■ яряъє яю <..>
++  GetCurrentDirectory(sizeof(StartupCurDir),StartupCurDir);
++
+   if(!Opt.MenuForFilelist)
+   {
+     HANDLE hPlugin=new TmpPanel();
+@@ -555,7 +609,7 @@
+   Info->DiskMenuNumbers=DiskMenuNumbers;
+   Info->DiskMenuStringsNumber=Opt.AddToDisksMenu?ArraySize(DiskMenuStrings):0;
+   static const TCHAR *PluginMenuStrings[1];
+-  PluginMenuStrings[0]=GetMsg(MTempPanel);
++  PluginMenuStrings[0]=Opt.Branch?GetMsg(MPluginMenuStringBranch):GetMsg(MTempPanel);
+   Info->PluginMenuStrings=Opt.AddToPluginsMenu?PluginMenuStrings:NULL;
+   Info->PluginMenuStringsNumber=Opt.AddToPluginsMenu?ArraySize(PluginMenuStrings):0;
+   static const TCHAR *PluginCfgStrings[1];
+@@ -617,7 +671,7 @@
+ int WINAPI EXP_NAME(GetMinFarVersion)(void)
+ {
+ #ifndef UNICODE
+-  return(MAKEFARVERSION(1,70,1024));
++  return(MAKEFARVERSION(1,70,2087));
+ #else
+   return(MAKEFARVERSION(2,0,863));
+ #endif
+Index: TmpCfg.cpp
+===================================================================
+--- TmpCfg.cpp	(revision 3200)
++++ TmpCfg.cpp	(working copy)
+@@ -19,6 +19,7 @@
+ {
+   AddToDisksMenu,
+   AddToPluginsMenu,
++  Branch,
+   CommonPanel,
+   SafeModePanel,
+   AnyInPanel,
+@@ -26,6 +27,7 @@
+   Mode,
+   MenuForFilelist,
+   NewPanelForSearchResults,
++  ShowDir,
+   FullScreenPanel,
+   ColumnTypes,
+   ColumnWidths,
+@@ -38,11 +40,11 @@
+ 
+ options_t Opt;
+ 
+-static const TCHAR REGStr[17][8]=
++static const TCHAR REGStr[19][8]=
+ {
+- _T("InDisks"), _T("InPlug"),
++ _T("InDisks"), _T("InPlug"), _T("Branch"),
+  _T("Common"),  _T("Safe"),   _T("Any"),    _T("Contens"),
+- _T("Mode"),    _T("Menu"),   _T("NewP"),
++ _T("Mode"),    _T("Menu"),   _T("NewP"),   _T("Dir"),
+  _T("Full"),
+  _T("ColT"),    _T("ColW"),   _T("StatT"),  _T("StatW"),
+  _T("DigitV"),  _T("Mask"),   _T("Prefix")
+@@ -58,37 +60,40 @@
+ static const struct COptionsList OptionsList[]={
+   {&Opt.AddToDisksMenu    , _T("")          ,  1},
+   {&Opt.AddToPluginsMenu  , _T("")          ,  4},
++  {&Opt.Branch            , _T("")          ,  5},
+ 
+-  {&Opt.CommonPanel       , _T("")          ,  6},
+-  {&Opt.SafeModePanel     , NULL            ,  7},
+-  {&Opt.AnyInPanel        , NULL            ,  8},
+-  {&Opt.CopyContents      , NULL            ,  9},
+-  {&Opt.Mode              , _T("")          , 10},
+-  {&Opt.MenuForFilelist   , NULL            , 11},
+-  {&Opt.NewPanelForSearchResults, NULL      , 12},
++  {&Opt.CommonPanel       , _T("")          ,  7},
++  {&Opt.SafeModePanel     , NULL            ,  8},
++  {&Opt.AnyInPanel        , NULL            ,  9},
++  {&Opt.CopyContents      , NULL            , 10},
++  {&Opt.Mode              , _T("")          , 11},
++  {&Opt.MenuForFilelist   , NULL            , 12},
++  {&Opt.NewPanelForSearchResults, NULL      , 13},
++  {&Opt.ShowDir           , _T("")          , 14},
+ 
+-  {&Opt.FullScreenPanel   , NULL            , 22},
++  {&Opt.FullScreenPanel   , NULL            , 24},
+ 
+-  {Opt.ColumnTypes        , _T("N,S")       , 15},
+-  {Opt.ColumnWidths       , _T("0,8")       , 17},
+-  {Opt.StatusColumnTypes  , _T("NR,SC,D,T") , 19},
+-  {Opt.StatusColumnWidths , _T("0,8,0,5")   , 21},
++  {Opt.ColumnTypes        , _T("N,S")       , 17},
++  {Opt.ColumnWidths       , _T("0,8")       , 19},
++  {Opt.StatusColumnTypes  , _T("NR,SC,D,T") , 21},
++  {Opt.StatusColumnWidths , _T("0,8,0,5")   , 23},
+ 
+   {Opt.DisksMenuDigit     , _T("1")         ,  2},
+-  {Opt.Mask               , _T("*.temp")    , 25},
+-  {Opt.Prefix             , _T("tmp")       , 27},
++  {Opt.Mask               , _T("*.temp")    , 27},
++  {Opt.Prefix             , _T("tmp")       , 29},
+ };
+ 
+ int StartupOptFullScreenPanel,StartupOptCommonPanel,StartupOpenFrom;
+ 
+ void GetOptions(void)
+ {
++  DWORD Type,Size,IntValueData;
++  TCHAR StrValueData[256];
++  HKEY hKey;
++  RegOpenKeyEx(HKEY_CURRENT_USER,PluginRootKey,0,KEY_QUERY_VALUE,&hKey);
++
+   for(int i=AddToDisksMenu;i<=Prefix;i++)
+   {
+-    DWORD Type,Size,IntValueData;
+-    TCHAR StrValueData[256];
+-    HKEY hKey;
+-    RegOpenKeyEx(HKEY_CURRENT_USER,PluginRootKey,0,KEY_QUERY_VALUE,&hKey);
+     if (i<ColumnTypes)
+     {
+       Size=sizeof(IntValueData);
+@@ -105,8 +110,14 @@
+         RegQueryValueEx(hKey,REGStr[i],0,&Type,(BYTE*)StrValueData,&Size)==ERROR_SUCCESS?
+         (TCHAR*)StrValueData:OptionsList[i].pStr);
+     }
+-    RegCloseKey(hKey);
+   }
++  //save PanelMode
++  Size=sizeof(IntValueData); Type=REG_DWORD;
++  Opt.PanelMode=0x34;
++  if (RegQueryValueEx(hKey, _T("PanelMode"),0,&Type,(BYTE *)&IntValueData,&Size)==ERROR_SUCCESS)
++    Opt.PanelMode=(IntValueData>=0x30 && IntValueData<=0x39?IntValueData:0x34);
++
++  RegCloseKey(hKey);
+ }
+ 
+ const int DIALOG_WIDTH = 78;
+@@ -122,46 +133,48 @@
+   /* 2*/ {DI_FIXEDIT,   7, 3,  7, 3, 0, -1},
+   /* 3*/ {DI_TEXT,      9, 3,  0, 0, 0, MConfigDisksMenuDigit},
+   /* 4*/ {DI_CHECKBOX, DC, 2,  0, 0, 0, MConfigAddToPluginsMenu},
+-  /* 5*/ {DI_TEXT,      5, 4,  0, 0, DIF_BOXCOLOR|DIF_SEPARATOR, -1},
++  /* 5*/ {DI_CHECKBOX,DC+3,3,  0, 0, 0, MConfigPluginsMenuBranch},
++  /* 6*/ {DI_TEXT,      5, 4,  0, 0, DIF_BOXCOLOR|DIF_SEPARATOR, -1},
+ 
+-  /* 6*/ {DI_CHECKBOX,  5, 5,  0, 0, 0, MConfigCommonPanel},
+-  /* 7*/ {DI_CHECKBOX,  5, 6,  0, 0, 0, MSafeModePanel},
+-  /* 8*/ {DI_CHECKBOX,  5, 7,  0, 0, 0, MAnyInPanel},
+-  /* 9*/ {DI_CHECKBOX,  5, 8,  0, 0, DIF_3STATE, MCopyContens},
+-  /*10*/ {DI_CHECKBOX, DC, 5,  0, 0, 0, MReplaceInFilelist},
+-  /*11*/ {DI_CHECKBOX, DC, 6,  0, 0, 0, MMenuForFilelist},
+-  /*12*/ {DI_CHECKBOX, DC, 7,  0, 0, 0, MNewPanelForSearchResults},
++  /* 7*/ {DI_CHECKBOX,  5, 5,  0, 0, 0, MConfigCommonPanel},
++  /* 8*/ {DI_CHECKBOX,  5, 6,  0, 0, 0, MSafeModePanel},
++  /* 9*/ {DI_CHECKBOX,  5, 7,  0, 0, 0, MAnyInPanel},
++  /*10*/ {DI_CHECKBOX,  5, 8,  0, 0, DIF_3STATE, MCopyContens},
++  /*11*/ {DI_CHECKBOX, DC, 5,  0, 0, 0, MReplaceInFilelist},
++  /*12*/ {DI_CHECKBOX, DC, 6,  0, 0, 0, MMenuForFilelist},
++  /*13*/ {DI_CHECKBOX, DC, 7,  0, 0, 0, MNewPanelForSearchResults},
++  /*14*/ {DI_CHECKBOX, DC, 8,  0, 0, DIF_3STATE, MShowDir},
+ 
+-  /*13*/ {DI_TEXT,      5, 9,  0, 0, DIF_BOXCOLOR|DIF_SEPARATOR, -1},
++  /*15*/ {DI_TEXT,      5, 9,  0, 0, DIF_BOXCOLOR|DIF_SEPARATOR, -1},
+ 
+-  /*14*/ {DI_TEXT,      5,10,  0, 0, 0, MColumnTypes},
+-  /*15*/ {DI_EDIT,      5,11, 36,11, 0, -1},
+-  /*16*/ {DI_TEXT,      5,12,  0, 0, 0, MColumnWidths},
+-  /*17*/ {DI_EDIT,      5,13, 36,13, 0, -1},
+-  /*18*/ {DI_TEXT,     DC,10,  0, 0, 0, MStatusColumnTypes},
+-  /*19*/ {DI_EDIT,     DC,11, 72,11, 0, -1},
+-  /*20*/ {DI_TEXT,     DC,12,  0, 0, 0, MStatusColumnWidths},
+-  /*21*/ {DI_EDIT,     DC,13, 72,13, 0, -1},
+-  /*22*/ {DI_CHECKBOX,  5,14,  0, 0, 0, MFullScreenPanel},
++  /*16*/ {DI_TEXT,      5,10,  0, 0, 0, MColumnTypes},
++  /*17*/ {DI_EDIT,      5,11, 36,11, 0, -1},
++  /*18*/ {DI_TEXT,      5,12,  0, 0, 0, MColumnWidths},
++  /*19*/ {DI_EDIT,      5,13, 36,13, 0, -1},
++  /*20*/ {DI_TEXT,     DC,10,  0, 0, 0, MStatusColumnTypes},
++  /*21*/ {DI_EDIT,     DC,11, 72,11, 0, -1},
++  /*22*/ {DI_TEXT,     DC,12,  0, 0, 0, MStatusColumnWidths},
++  /*23*/ {DI_EDIT,     DC,13, 72,13, 0, -1},
++  /*24*/ {DI_CHECKBOX,  5,14,  0, 0, 0, MFullScreenPanel},
+ 
+-  /*23*/ {DI_TEXT,      5,15,  0, 0, DIF_BOXCOLOR|DIF_SEPARATOR, -1},
++  /*25*/ {DI_TEXT,      5,15,  0, 0, DIF_BOXCOLOR|DIF_SEPARATOR, -1},
+ 
+-  /*24*/ {DI_TEXT,      5,16,  0, 0, 0, MMask},
+-  /*25*/ {DI_EDIT,      5,17, 36,17, 0, -1},
+-  /*26*/ {DI_TEXT,     DC,16,  0, 0, 0, MPrefix},
+-  /*27*/ {DI_EDIT,     DC,17, 72,17, 0, -1},
++  /*26*/ {DI_TEXT,      5,16,  0, 0, 0, MMask},
++  /*27*/ {DI_EDIT,      5,17, 36,17, 0, -1},
++  /*28*/ {DI_TEXT,     DC,16,  0, 0, 0, MPrefix},
++  /*29*/ {DI_EDIT,     DC,17, 72,17, 0, -1},
+ 
+-  /*28*/ {DI_TEXT,      5,18,  0, 0, DIF_BOXCOLOR|DIF_SEPARATOR, -1},
++  /*30*/ {DI_TEXT,      5,18,  0, 0, DIF_BOXCOLOR|DIF_SEPARATOR, -1},
+ 
+-  /*29*/ {DI_BUTTON,    0,19,  0, 0, DIF_CENTERGROUP,  MOk},
+-  /*30*/ {DI_BUTTON,    0,19,  0, 0, DIF_CENTERGROUP,  MCancel}
++  /*31*/ {DI_BUTTON,    0,19,  0, 0, DIF_CENTERGROUP,  MOk},
++  /*32*/ {DI_BUTTON,    0,19,  0, 0, DIF_CENTERGROUP,  MCancel}
+   };
+ 
+   int i;
+   struct FarDialogItem DialogItems[ArraySize(InitItems)];
+ 
+   InitDialogItems(InitItems,DialogItems,ArraySize(InitItems));
+-  DialogItems[29].DefaultButton=1;
++  DialogItems[31].DefaultButton=1;
+   DialogItems[2].Focus=1;
+ 
+   GetOptions();
+Index: TmpRus.hlf
+===================================================================
+--- TmpRus.hlf	(revision 3200)
++++ TmpRus.hlf	(working copy)
+@@ -72,6 +72,10 @@
+  #Добавить в меню плагинов#
+    Разрешает добавление в меню внешних модулей пункта "Временная панель".
+ 
++ #В режиме "Ветвь каталога"#
++    Позволяет использовать "Временную панель" в меню внешних модулей для
++построения из выделенных элементов плоского дерева папок и файлов.
++
+  #Использовать общую панель#
+    Эта опция разрешает использование общей временной панели,
+ содержимое которой сохраняется при ее закрытии.
+@@ -114,6 +118,9 @@
+    При нажатии #Enter# на элементе панели, не являющемся реальным
+ именем файла, этот элемент будет скопирован в командную строку FAR.
+ 
++   Если нажать #F8# на реальном объекте, этот объект будет физически
++удален с носителя, но на панели плагина он по-прежнему останется виден.
++
+  #Копировать содержимое папок# :
+    При копировании каталогов на временную панель, определяет,
+ должны ли вместе с каталогами копироваться содержащиеся в них файлы.
+@@ -160,6 +167,12 @@
+ временную панель. Таким образом, можно сохранять результаты нескольких
+ операций поиска и работать с ними одновременно.
+ 
++ #Отображать папки на панели#
++   При копировании каталогов на временную панель, определяет,
++должны ли сами каталоги отображаться на панели.
++Если эта опция находится в неопределенном состоянии (#[?]#), при
++каждом копировании каталогов задается вопрос, нужно ли их показывать.
++
+  #Типы колонок#    #Типы колонок строки статуса#,
+  #Ширина колонок#  #Ширина колонок строки статуса#
+  #[ ] Полноэкранный режим# : ~+full~@CMD@
+Index: TmpEng.hlf
+===================================================================
+--- TmpEng.hlf	(revision 3200)
++++ TmpEng.hlf	(working copy)
+@@ -72,6 +72,10 @@
+  #Add to plugins menu#
+    Enables adding the "Temporary" item to the plugins menu.
+ 
++ #In mode "Branch"#
++    Позволяет использовать "Временную панель" в меню внешних модулей для
++построения из выделенных элементов плоского дерева папок и файлов.
++
+  #Use common panel#
+    When enabled, a common temporary panel is created and its contents is
+ stored even after closing the panel. When this option is not enabled,
+@@ -112,6 +116,9 @@
+    When #Enter# is pressed on an element that is not a real file name,
+ its text will be copied to the FAR command line.
+ 
++   Если нажать #F8# на реальном объекте, этот объект будет физически
++удален с носителя, но на панели плагина он по-прежнему останется виден.
++
+  #Copy folders contents#
+    When copying folders to the temporary panel, controls whether
+ files are also copied to the panel. If set to the undefined state
+@@ -156,6 +163,12 @@
+ This allows to save the results of multiple search operations and work
+ with them at the same time.
+ 
++ #Отображать папки на панели#
++   При копировании каталогов на временную панель, определяет,
++должны ли сами каталоги отображаться на панели.
++Если эта опция находится в неопределенном состоянии (#[?]#), при
++каждом копировании каталогов задается вопрос, нужно ли их показывать.
++
+  #Column types#    #Status line column types#
+  #Column widths#   #Status line column widths#
+  #[ ] Full screen mode# : ~+full~@CMD@
+Index: TmpPanel.hpp
+===================================================================
+--- TmpPanel.hpp	(revision 3200)
++++ TmpPanel.hpp	(working copy)
+@@ -42,7 +42,7 @@
+ 
+ extern int StartupOptFullScreenPanel,StartupOptCommonPanel,StartupOpenFrom;
+ extern TCHAR PluginRootKey[80];
+-
++extern TCHAR StartupCurDir[MAX_PATH];
+ const TCHAR *GetMsg(int MsgId);
+ void InitDialogItems(const MyInitDialogItem *Init,struct FarDialogItem *Item,int ItemsNumber);
+ 
+Index: TmpCfg.hpp
+===================================================================
+--- TmpCfg.hpp	(revision 3200)
++++ TmpCfg.hpp	(working copy)
+@@ -5,6 +5,7 @@
+ {
+   int AddToDisksMenu;
+   int AddToPluginsMenu;
++  int Branch;
+   int CommonPanel;
+   int SafeModePanel;
+   int AnyInPanel;
+@@ -12,7 +13,10 @@
+   int Mode;
+   int MenuForFilelist;
+   int NewPanelForSearchResults;
++  int ShowDir;
++  int SelectedShowDir;
+   int FullScreenPanel;
++  int PanelMode;
+   int LastSearchResultsPanel;
+   int SelectedCopyContents;
+   TCHAR ColumnTypes[64];
+Index: TmpClass.cpp
+===================================================================
+--- TmpClass.cpp	(revision 3200)
++++ TmpClass.cpp	(working copy)
+@@ -32,7 +32,7 @@
+   IfOptCommonPanel();
+ #ifndef UNICODE
+   struct PanelInfo PInfo;
+-  Info.Control(this,FCTL_GETPANELINFO,&PInfo);
++  Info.Control(this,FCTL_GETPANELSHORTINFO,&PInfo);
+   UpdateItems(IsOwnersDisplayed (PInfo.ColumnTypes),IsLinksDisplayed (PInfo.ColumnTypes));
+ #else
+   int Size=Info.Control(this,FCTL_GETCOLUMNTYPES,0,NULL);
+@@ -82,7 +82,8 @@
+ 
+   Info->PanelModesArray=PanelModesArray;
+   Info->PanelModesNumber=ArraySize(PanelModesArray);
+-  Info->StartPanelMode=_T('4');
++  // save PanelMode
++  Info->StartPanelMode=(Opt.FullScreenPanel!=StartupOptFullScreenPanel?_T('4'):Opt.PanelMode);
+   static struct KeyBarTitles KeyBar;
+   memset(&KeyBar,0,sizeof(KeyBar));
+   KeyBar.Titles[7-1]=(TCHAR*)GetMsg(MF7);
+@@ -96,18 +97,16 @@
+ 
+ int TmpPanel::SetDirectory(const TCHAR *Dir,int OpMode)
+ {
+-  if((OpMode & OPM_FIND)/* || lstrcmp(Dir,_T("\\"))==0*/)
++  if(OpMode & OPM_FIND)
+     return(FALSE);
+   if(lstrcmp(Dir,_T("\\"))==0)
+ #ifndef UNICODE
+     Info.Control(this,FCTL_CLOSEPLUGIN,(void*)NULL);
++  else
++    Info.Control(this,FCTL_CLOSEPLUGIN,(void*)Dir);
+ #else
+     Info.Control(this,FCTL_CLOSEPLUGIN,0,NULL);
+-#endif
+   else
+-#ifndef UNICODE
+-    Info.Control(this,FCTL_CLOSEPLUGIN,(void*)Dir);
+-#else
+     Info.Control(this,FCTL_CLOSEPLUGIN,0,(LONG_PTR)Dir);
+ #endif
+   return(TRUE);
+@@ -135,6 +134,7 @@
+ {
+   IfOptCommonPanel();
+   Opt.SelectedCopyContents = Opt.CopyContents;
++  Opt.SelectedShowDir=Opt.ShowDir;
+ 
+   HANDLE hScreen=Info.SaveScreen(0,0,-1,-1);
+   const TCHAR *MsgItems[]={GetMsg(MTempPanel),GetMsg(MTempSendFiles)};
+@@ -200,6 +200,14 @@
+     lstrcat(wp, PanelItem.FindData.lpwszFileName);
+     CurPanelItem->FindData.lpwszFileName = wp;
+ #endif
++     // add [ ] ShowDir
++    if (Opt.SelectedShowDir==2 && NameOnly && (CurPanelItem->FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
++    {
++      const TCHAR *MsgItems[]={GetMsg(MWarning),GetMsg(MShowDirMsg)};
++      Opt.SelectedShowDir=!Info.Message(Info.ModuleNumber,FMSG_MB_YESNO,_T("Config"),MsgItems,
++          sizeof(MsgItems)/sizeof(MsgItems[0]),0);
++    }
++
+     if(Opt.SelectedCopyContents && NameOnly && (CurPanelItem->FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+     {
+       if (Opt.SelectedCopyContents==2)
+@@ -354,9 +362,17 @@
+ {
+   struct PluginPanelItem *CurItem=TmpPanelItem;
+   for(int i=0;i<TmpItemsNumber-1;i++,CurItem++)
+-    if(lstrcmp(CurItem->FindData.cFileName,CurItem[1].FindData.cFileName)==0)
++  {
++    if(lstrcmp(CurItem->FindData.cFileName,CurItem[1].FindData.cFileName)==0
++       // add [ ] ShowDir
++       || ( !Opt.SelectedShowDir && (CurItem->FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
++            && lstrcmp(CurItem->FindData.cFileName, _T("..")) )  )
+       CurItem->Flags|=REMOVE_FLAG;
+-    RemoveEmptyItems();
++  }
++  if ( !Opt.SelectedShowDir && (CurItem->FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
++        && lstrcmp(CurItem->FindData.cFileName, _T("..")) )
++    CurItem->Flags|=REMOVE_FLAG;
++  RemoveEmptyItems();
+ }
+ 
+ 
+@@ -507,12 +523,16 @@
+ 
+ int TmpPanel::ProcessEvent(int Event,void *)
+ {
++  struct PanelInfo PInfo;
++#ifndef UNICODE
++  Info.Control(this,FCTL_GETPANELSHORTINFO,&PInfo);
++#else
++  Info.Control(this,FCTL_GETPANELINFO,0,(LONG_PTR)&PInfo);
++#endif
++
+   if(Event==FE_CHANGEVIEWMODE)
+   {
+-    IfOptCommonPanel();
+ #ifndef UNICODE
+-    struct PanelInfo PInfo;
+-    Info.Control(this,FCTL_GETPANELINFO,&PInfo);
+     int UpdateOwners=IsOwnersDisplayed (PInfo.ColumnTypes) && !LastOwnersRead;
+     int UpdateLinks=IsLinksDisplayed (PInfo.ColumnTypes) && !LastLinksRead;
+ #else
+@@ -537,23 +557,34 @@
+ #endif
+     }
+   }
++  // save PanelMode
++  else if (Event==FE_CLOSE)
++  {
++    PInfo.ViewMode += 0x30;
++    HKEY hKey; DWORD Disposition;
++    if (Opt.FullScreenPanel==StartupOptFullScreenPanel && RegCreateKeyEx(HKEY_CURRENT_USER,
++          PluginRootKey,0,NULL,0,KEY_WRITE,NULL, &hKey,&Disposition)==ERROR_SUCCESS)
++    {
++      RegSetValueEx(hKey,_T("PanelMode"),0,REG_DWORD,(LPBYTE)&PInfo.ViewMode,sizeof(int));
++      RegCloseKey(hKey);
++    }
++  }
+   return(FALSE);
+ }
+ 
+ 
+ int TmpPanel::IsCurrentFileCorrect (TCHAR *pCurFileName)
+ {
+-  struct PanelInfo PInfo;
+   TCHAR CurFileName[NM];
+ #ifndef UNICODE
++  struct PanelInfo PInfo;
+   Info.Control(this,FCTL_GETPANELINFO,&PInfo);
+   lstrcpy(CurFileName, PInfo.PanelItems[PInfo.CurrentItem].FindData.cFileName);
+ #else
+-  Info.Control(this,FCTL_GETPANELINFO,0,(LONG_PTR)&PInfo);
+-  PluginPanelItem* PPI=(PluginPanelItem*)malloc(Info.Control(this,FCTL_GETPANELITEM,PInfo.CurrentItem,0));
++  PluginPanelItem* PPI=(PluginPanelItem*)malloc(Info.Control(this,FCTL_GETCURRENTPANELITEM,0,0));
+   if(PPI)
+   {
+-    Info.Control(this,FCTL_GETPANELITEM,PInfo.CurrentItem,(LONG_PTR)PPI);
++    Info.Control(this,FCTL_GETCURRENTPANELITEM,0,(LONG_PTR)PPI);
+     lstrcpy(CurFileName,PPI->FindData.lpwszFileName);
+     free(PPI);
+   }
+@@ -603,6 +634,7 @@
+ 
+         if (PInfo.PanelItems[PInfo.CurrentItem].FindData.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)
+         {
++          Info.Control(INVALID_HANDLE_VALUE, FCTL_SETANOTHERPANELDIR,&CurFileName);
+ #else
+         PluginPanelItem* PPI=(PluginPanelItem*)malloc(Info.Control(this,FCTL_GETPANELITEM,PInfo.CurrentItem,0));
+         DWORD attributes=0;
+@@ -614,10 +646,6 @@
+         }
+         if(attributes&FILE_ATTRIBUTE_DIRECTORY)
+         {
+-#endif
+-#ifndef UNICODE
+-          Info.Control(INVALID_HANDLE_VALUE, FCTL_SETANOTHERPANELDIR,&CurFileName);
+-#else
+           Info.Control(PANEL_PASSIVE, FCTL_SETPANELDIR,0,(LONG_PTR)&CurFileName);
+ #endif
+         }
+@@ -639,10 +667,11 @@
+       return(TRUE);
+   }
+ 
+-  if(ControlState==0 && Key==VK_RETURN && Opt.AnyInPanel)
++  if(ControlState==0 && Key==VK_RETURN)
+   {
+     TCHAR CurFileName [NM];
+-    if (!IsCurrentFileCorrect (CurFileName))
++    BOOL Ret;
++    if (!(Ret=IsCurrentFileCorrect(CurFileName)) && Opt.AnyInPanel)
+     {
+ #ifndef UNICODE
+       Info.Control(this,FCTL_SETCMDLINE,&CurFileName);
+@@ -651,6 +680,12 @@
+ #endif
+       return(TRUE);
+     }
++    // яю т√їюфє ё ярэхыш яю <..> тхЁэхьё  юЄъєфр яЁш°ыш
++    if (Ret && !lstrcmp(CurFileName,_T("..")))
++    {
++      SetDirectory(StartupCurDir,0);
++      return(TRUE);
++    }
+   }
+ 
+   if (Opt.SafeModePanel && ControlState == PKF_CONTROL && Key == VK_PRIOR)
+Index: TmpEng.lng
+===================================================================
+--- TmpEng.lng	(revision 3200)
++++ TmpEng.lng	(working copy)
+@@ -9,6 +9,7 @@
+ " %sTemporary panel [%d] "
+ 
+ "temporary"
++"Temporary panel - branch"
+ 
+ "Remove"
+ "Switch"
+@@ -23,8 +24,9 @@
+ 
+ "Temporary panel"
+ "Add to &Disks menu"
+-"Disks menu &hotkey ('1'-'9'). Leave empty to autoassign"
++"Disks menu &hotkey ('1'-'9')"
+ "Add to &Plugins menu"
++"In mode "&Branch""
+ 
+ "Use &common panel"
+ "&Safe panel mode"
+@@ -33,6 +35,7 @@
+ "&Replace files with file list"
+ "&Menu from file list"
+ "Copy folder c&ontents"
++"Show fold&ers in panel"
+ 
+ "F&ull screen mode"
+ 
+@@ -49,3 +52,4 @@
+ "Save file list as"
+ 
+ "Copy folder contents?"
++"Show folders in panel?"
+\ No newline at end of file
+Index: TmpRus.lng
+===================================================================
+--- TmpRus.lng	(revision 3200)
++++ TmpRus.lng	(working copy)
+@@ -9,6 +9,7 @@
+ " %sВременная панель [%d] "
+ 
+ "временная"
++"Временная панель - Ветвь каталога"
+ 
+ "Убрать"
+ "Выбор"
+@@ -23,8 +24,9 @@
+ 
+ "Временная панель"
+ "Добавить к меню &дисков"
+-"&Клавиша доступа ('1'-'9'). Если не введена, назначается сама"
++"&Клавиша доступа ('1'-'9')"
+ "Добавить к меню &плагинов"
++"В режиме "&Ветвь каталога""
+ 
+ "Использовать &общую панель"
+ "&Безопасный режим панели"
+@@ -33,6 +35,7 @@
+ ""&Замена" для файла-списка"
+ "&Меню из файла-списка"
+ "Копировать с&одержимое папок"
++"Отобра&жать папки на панели"
+ 
+ "Полно&экранный режим"
+ 
+@@ -49,3 +52,4 @@
+ "Сохранить список как"
+ 
+ "Копировать содержимое папки?"
++"Отображать папки на панели?"
+Index: TmpClass.hpp
+===================================================================
+--- TmpClass.hpp	(revision 3200)
++++ TmpClass.hpp	(working copy)
+@@ -23,7 +23,6 @@
+     void ProcessSaveListKey();
+     void ProcessPanelSwitchMenu();
+     void SwitchToPanel (int NewPanelIndex);
+-    void FindSearchResultsPanel();
+     void SaveListFile (const TCHAR *Path);
+     int IsCurrentFileCorrect (TCHAR *pCurFileName);
+ 
+@@ -45,7 +44,7 @@
+     HANDLE BeginPutFiles();
+     void CommitPutFiles (HANDLE hRestoreScreen, int Success);
+     int PutOneFile (PluginPanelItem &PanelItem);
+-
++    void FindSearchResultsPanel();
+     int SetFindList(const struct PluginPanelItem *PanelItem,int ItemsNumber);
+     int ProcessEvent(int Event,void *Param);
+     int ProcessKey(int Key,unsigned int ControlState);

@@ -1,0 +1,16 @@
+!if exists(../make_vc_defs)
+!include ../make_vc_defs
+!endif
+
+NAME = TmpPanel
+LINK_OBJS = $(OBJDIR)\TmpPanel.obj \
+$(OBJDIR)\TmpCfg.obj \
+$(OBJDIR)\TmpClass.obj \
+$(OBJDIR)\TmpMix.obj
+DOCS = TmpEng.hlf TmpRus.hlf TmpEng.lng TmpRus.lng shortcuts.eng.reg shortcuts.rus.reg disks.eng.temp disks.rus.temp shortcuts.eng.temp shortcuts.rus.temp
+
+NEEDENTRY = 1
+
+!include ..\makefile_vc_def_inc
+
+!include ..\makefile_vc_target_inc
