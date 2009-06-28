@@ -718,6 +718,45 @@ Index: TmpClass.cpp
    }
  
    if (Opt.SafeModePanel && ControlState == PKF_CONTROL && Key == VK_PRIOR)
+@@ -824,17 +859,31 @@
+     return;
+   }
+ 
+-  DWORD BytesWritten;
++  DWORD BytesWritten=0,BytesToWrite=0;
+ #ifdef UNICODE
+-  static const unsigned short bom = BOM_UCS2;
+-  WriteFile (hFile, &bom, sizeof(bom), &BytesWritten, NULL);
++  const DWORD bom = 0xBFBBEF;
++  WriteFile (hFile, &bom, 3, &BytesWritten, NULL);
+ #endif
+   int i = 0;
++  static const CHAR *CRLF = "\r\n";
++  TCHAR *FName=0; LPSTR Buffer=0;
++
+   do {
+-    static const TCHAR *CRLF = _T("\r\n");
+-    const TCHAR *FName = TmpPanelItem [i].FindData.cFileName;
+-    WriteFile (hFile, FName, sizeof(TCHAR)*lstrlen(FName), &BytesWritten, NULL);
+-    WriteFile (hFile, CRLF, 2*sizeof(TCHAR), &BytesWritten, NULL);
++    FName=TmpPanelItem[i].FindData.cFileName;
++#ifdef UNICODE
++    int Size=WideCharToMultiByte(CP_UTF8,0,FName,-1,NULL,0,NULL,NULL);
++    if (Size)
++    {
++      Buffer=(LPSTR)malloc(Size);
++      if (Buffer)
++        BytesToWrite=WideCharToMultiByte(CP_UTF8,0,FName,-1,Buffer,Size,NULL,NULL);
++    }
++    WriteFile (hFile, Buffer, BytesToWrite-1, &BytesWritten, NULL);
++    free(Buffer); Buffer=0;
++#else
++    WriteFile (hFile, FName, lstrlen(FName), &BytesWritten, NULL);
++#endif
++    WriteFile (hFile, CRLF, 2, &BytesWritten, NULL);
+   }while(++i < TmpItemsNumber);
+   CloseHandle (hFile);
+ }
 Index: TmpEng.lng
 ===================================================================
 --- TmpEng.lng	(revision 3200)
