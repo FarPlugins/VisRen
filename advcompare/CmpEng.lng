@@ -1,0 +1,86 @@
+.Language=English,English
+
+"Advanced compare"
+
+"Ok"
+"From cache"
+"Cancel"
+
+"A file &mask or several file masks:"
+"Compare:"
+"&names,"
+"ignore c&ase"
+"&size"
+"&time"
+"two seconds &precision"
+"ignore time &zone differences"
+"&contents,"
+"process up t&o"
+"100%"
+" 75%"
+" 50%"
+" 25%"
+"fi&lter:"
+"ignore all whitespace characters"
+"ignore differences in new line characters"
+"ignore whitespace and tabs"
+"(Test!)Edit: Del,Ins,F4"
+
+// " C O M P A R E "
+""
+"Sub&folders,"
+"maximum dept&h"
+"Process s&elected items only"
+"Compare till the fi&rst difference"
+"P&ut differences to the panel"
+" Ctrl-Enter - ignore cache "
+
+"S&tartup with mask "*.*""
+"&Cache the comparison results"
+"Display &messages,"
+"with &sounds"
+"Size of the compare &buffer, Kb"
+"External &program of the comparison, path:"
+
+"Comparing files..."
+" Comparing "%s": "
+" with "%s": "
+" Files processed in current folders: %s of %s "
+" Total found differences: %s (%s - %s) "
+"Data processing. Please wait several seconds..."
+
+"Active panel | Passive panel"
+"Name"
+"Size"
+"Time"
+
+"No differences"
+"The compared files seem to be identical"
+
+"Files under cursor"
+"Identical"
+"Differ"
+"Differ, run external program of the comparison?"
+
+"Paths being compared are equal"
+"The panels contain the same folder. Cancel the comparison?"
+
+"Found a difference"
+"Do you really want to cancel comparison?"
+
+"Two file panels are required to perform the compare"
+
+"Not enough memory"
+"Not enough memory to initialize plugin"
+
+"Wrong FAR version"
+"Advanced Compare plugin requires FAR 1.70 Release or later"
+
+"Warning"
+"File-mask string contains errors!"
+
+"Clear cache"
+"Do you really want to clear cache?"
+
+"Operation was interrupted"
+"Do you really want to cancel it?"
