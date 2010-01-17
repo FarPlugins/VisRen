@@ -59,7 +59,7 @@
 "   Log renaming"
 
 "Word delimiters"
-"The default value is "-.<space>_&&""
+"The default value is "-.<space>_&""
 
 "File name"
 "Old name"
