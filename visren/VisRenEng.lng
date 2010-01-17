@@ -21,6 +21,7 @@
 "[U]  UPPER CASE           "
 "[F]  First capital        "
 "[T]  Title Case           "
+"[M]  Music files          "
 ""
 "[#]  Track number         "
 "[t]  Song title           "
@@ -58,7 +59,7 @@
 "   Log renaming"
 
 "Word delimiters"
-"The default value is "-.<space>_""
+"The default value is "-.<space>_&&""
 
 "File name"
 "Old name"

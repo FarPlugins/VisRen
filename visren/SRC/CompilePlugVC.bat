@@ -8,13 +8,13 @@ rem =============== Use Microsoft Visual Studio .NET 2003 ======================
 rem  ======================== Set name and version ... =========================
 
 @set PlugName=VisRen
-@set fileversion=1,71,0,8
-@set fileversion_str=1.71 build 8
+@set fileversion=1,71,0,9
+@set fileversion_str=1.75 build 9
 @set MyDir=%CD%
 @set MyFarDir=C:\Program Files\Far
 @set companyname=Eugene Roshal ^& FAR Group
 @set filedescription=Visual renaming files for FAR Manager
-@set legalcopyright=Copyright © 2007,2008 Alexey Samlyukov
+@set legalcopyright=Copyright © 2007-2010 Alexey Samlyukov
 
 
 rem  ==================== Make %PlugName%.def file... ==========================
@@ -62,7 +62,7 @@ echo Make %PlugName%.rc file...
 @echo.                                                          >> %PlugName%.rc
 @echo VERSIONINFO_1  VERSIONINFO                                >> %PlugName%.rc
 @echo FILEVERSION    %fileversion%                              >> %PlugName%.rc
-@echo PRODUCTVERSION 1,71,0,0                                   >> %PlugName%.rc
+@echo PRODUCTVERSION 1,75,0,0                                   >> %PlugName%.rc
 @echo FILEFLAGSMASK  0x0                                        >> %PlugName%.rc
 @echo FILEFLAGS      0x0                                        >> %PlugName%.rc
 @echo FILEOS         0x4                                        >> %PlugName%.rc
@@ -80,7 +80,7 @@ echo Make %PlugName%.rc file...
 @echo       VALUE "LegalCopyright",   "%legalcopyright%\0"      >> %PlugName%.rc
 @echo       VALUE "OriginalFilename", "%PlugName%.dll\0"        >> %PlugName%.rc
 @echo       VALUE "ProductName",      "FAR Manager\0"           >> %PlugName%.rc
-@echo       VALUE "ProductVersion",   "1.71\0"                  >> %PlugName%.rc
+@echo       VALUE "ProductVersion",   "1.75\0"                  >> %PlugName%.rc
 @echo       VALUE "Comments",         "%comments%\0"            >> %PlugName%.rc
 @echo     }                                                     >> %PlugName%.rc
 @echo   }                                                       >> %PlugName%.rc

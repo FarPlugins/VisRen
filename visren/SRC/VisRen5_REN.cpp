@@ -1,9 +1,9 @@
 /****************************************************************************
  * VisRen5_REN.cpp
  *
- * Plugin module for FAR Manager 1.71
+ * Plugin module for FAR Manager 1.75
  *
- * Copyright (c) 2007, 2008 Alexey Samlyukov
+ * Copyright (c) 2007-2010 Alexey Samlyukov
  ****************************************************************************/
 
 enum {
@@ -16,7 +16,9 @@ enum {
   CASE_EXT_LOWER   = 0x00000040,
   CASE_EXT_UPPER   = 0x00000080,
   CASE_EXT_FIRST   = 0x00000100,
-  CASE_EXT_TITLE   = 0x00000200
+  CASE_EXT_TITLE   = 0x00000200,
+
+  CASE_NAME_MUSIC  = 0x00000400  // музыкальный файл - обрабатывается особо
 };
 
 enum {
@@ -267,6 +269,11 @@ static bool GetNewNameExt(const TCHAR *src, TCHAR *destName, TCHAR *destExt,
       else if (!strncmp(pMask, _T("[T]"), 3))
       {
         *dwCase|=(Index==0 ? CASE_NAME_TITLE : CASE_EXT_TITLE);
+        pMask+=3;
+      }
+      else if (!strncmp(pMask, _T("[M]"), 3))
+      {
+        *dwCase|=(Index==0 ? CASE_NAME_MUSIC : CASE_EXT_NONE);
         pMask+=3;
       }
       else if (!strncmp(pMask, _T("[#]"), 3))
@@ -593,7 +600,6 @@ static void Translit(TCHAR *Name, TCHAR *Ext, DWORD dwTranslit)
   }
 }
 
-
 /****************************************************************************
  * Изменение регистра имен файлов.
  ****************************************************************************/
@@ -611,6 +617,7 @@ static void Case(TCHAR *Name, TCHAR *Ext, DWORD dwCase)
      FSF.LStrlwr(Name+1);
   }
   else if (dwCase&CASE_NAME_TITLE)
+  {
     for (int i=0; Name[i]; i++)
     {
       if (!i || memchr(Opt.WordDiv, Name[i-1], lstrlen(Opt.WordDiv)))
@@ -618,6 +625,41 @@ static void Case(TCHAR *Name, TCHAR *Ext, DWORD dwCase)
       else
         Name[i]=(TCHAR)FSF.LLower((BYTE)Name[i]);
     }
+  }
+  // музыкальный файл обрабатывается особо:
+  // все слова до " - " или "_-_" будут в CASE_NAME_TITLE, а после в - CASE_NAME_FIRST
+  else if (dwCase&CASE_NAME_MUSIC)
+  {
+    int lenName=lstrlen(Name);
+    int Ptr=lenName;
+    for (int i=0; i<lenName; i++)
+    {
+      if (!strncmp(Name+i, _T(" - "), 3) || !strncmp(Name+i, _T("_-_"), 3))
+      {
+        if (i>0 && FSF.LIsAlpha((BYTE)Name[i-1]))
+        {
+          Ptr=i;
+          break;
+        }
+      }
+    }
+    for (int i=0; Name[i] && i<Ptr; i++)
+    {
+      if (!i || memchr(Opt.WordDiv, Name[i-1], lstrlen(Opt.WordDiv)))
+        Name[i]=(TCHAR)FSF.LUpper((BYTE)Name[i]);
+      else
+        Name[i]=(TCHAR)FSF.LLower((BYTE)Name[i]);
+      if (i>0 && Name[i+1] && memchr(Opt.WordDiv, Name[i-1], lstrlen(Opt.WordDiv))
+          && ((BYTE)Name[i])==0x88 && memchr(Opt.WordDiv, Name[i+1], lstrlen(Opt.WordDiv)))
+       Name[i]=(TCHAR)FSF.LLower((BYTE)Name[i]);
+    }
+    if (Ptr!=lenName)
+    {
+      *(Name+Ptr+3) = (TCHAR)FSF.LUpper((BYTE)*(Name+Ptr+3));
+       FSF.LStrlwr(Name+Ptr+3+1);
+    }
+  }
+
   // регистр расширения
   if (dwCase&CASE_EXT_LOWER)
     FSF.LStrlwr(Ext);

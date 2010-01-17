@@ -3,7 +3,7 @@
 .Options CtrlColorChar=\
 
 @Contents
-$^ #Visual renaming files#
+$^ #Visual renaming files - 1.75 build 9#
    Far  plugin   for   visual   files   renaming   with   additional
 capabilities.
 
@@ -54,12 +54,24 @@ capabilities.
    [F]       First name character will be in uppercase, other -
              lowercase.
    [T]       First character oh the each word will be uppercase.
-             Words separators by default: "#-.<space>_#".
+             Words separators by default: "#-.<space>_&#".
              By pressing #F4# on template you can change its value.
 
              REMARK: If there are several register change templates,
              then highest in list will be applied.
              Register change templates applies last.
+   [M]       Музыкальные файлы, в этом режиме, имя до связки символов
+             #"_-_"# или #" - "# будет восприниматься, как имя
+             исполнителя. В результате каждое слово будет начинаться
+             с заглавной буквы. Все слова после этой связки будут
+             восприняты, как название песни и только первое слово
+             будет начинаться с заглавной буквы, остальные будут
+             преобразованы в строчные. Связка символов #" И "# в
+             имени исполнителя будет прообразована в строчные буквы.
+             Например, исходный файл с именем:
+               "НАдеЖДА кАДЫШЕва И АнТОН ЗАЦепин - широка рЕка.mp3"
+             в конечном варианте будет:
+               "Надежда Кадышева и Антон Зацепин - Широка река.mp3".
 
    [##]       Track number from MP3-tag.
    [t]       Song title.

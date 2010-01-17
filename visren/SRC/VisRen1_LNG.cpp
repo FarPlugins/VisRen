@@ -1,9 +1,9 @@
 /****************************************************************************
  * VisRen1_LNG.cpp
  *
- * Plugin module for FAR Manager 1.71
+ * Plugin module for FAR Manager 1.75
  *
- * Copyright (c) 2007, 2008 Alexey Samlyukov
+ * Copyright (c) 2007-2010 Alexey Samlyukov
  ****************************************************************************/
 
 
@@ -34,23 +34,24 @@ enum {
   MTempl_6,
   MTempl_7,
   MTempl_8,
-  MTempl_9,  //< SEPARATOR
-  MTempl_10,
+  MTempl_9,
+  MTempl_10, //< SEPARATOR
   MTempl_11,
   MTempl_12,
   MTempl_13,
   MTempl_14,
   MTempl_15,
-  MTempl_16, //< SEPARATOR
-  MTempl_17,
+  MTempl_16,
+  MTempl_17, //< SEPARATOR
   MTempl_18,
   MTempl_19,
   MTempl_20,
-  MTempl_21, //< SEPARATOR
-  MTempl_22,
+  MTempl_21,
+  MTempl_22, //< SEPARATOR
   MTempl_23,
   MTempl_24,
   MTempl_25,
+  MTempl_26,
 //-----
   MTempl2_1,
   MTempl2_2,

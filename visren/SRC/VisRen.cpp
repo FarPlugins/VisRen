@@ -1,12 +1,12 @@
 /****************************************************************************
  * VisRen.cpp
  *
- * Plugin module for FAR Manager 1.71
+ * Plugin module for FAR Manager 1.75
  *
- * Copyright (c) 2007, 2008 Alexey Samlyukov
+ * Copyright (c) 2007-2010 Alexey Samlyukov
  ****************************************************************************/
 
-/* $ Revision: 8.3 $ */
+/* $ Revision: 9.0 $ */
 
 #define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA
@@ -117,7 +117,7 @@ static bool YesNoMsg(DWORD Title, DWORD Body)
 }
 
 // Сообщение для отладки
-static int DebugMsg(TCHAR *msg, TCHAR *msg2 = _T(" "), int i = 1000)
+static int DebugMsg(TCHAR *msg, TCHAR *msg2 = _T(" "), unsigned int i = 1000)
 {
   TCHAR *MsgItems[] = {_T("DebugMsg"), _T(""), _T(""), _T("")};
   TCHAR buf[80]; FSF.itoa(i, buf,10);
@@ -146,7 +146,7 @@ static bool bOldFAR=false, bWin9x=false;
  * Эти функции плагина FAR вызывает в первую очередь
  ****************************************************************************/
 // установим минимально поддерживаемую версию FARа...
-int WINAPI _export GetMinFarVersion() { return MAKEFARVERSION(1,71,2368); }
+int WINAPI _export GetMinFarVersion() { return MAKEFARVERSION(1,75,2616); }
 
 // заполним структуру PluginStartupInfo и сделаем ряд полезных действий...
 void WINAPI _export SetStartupInfo(const struct PluginStartupInfo *Info)

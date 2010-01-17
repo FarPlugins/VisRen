@@ -1,9 +1,9 @@
 /****************************************************************************
  * VisRen6_DLG.cpp
  *
- * Plugin module for FAR Manager 1.71
+ * Plugin module for FAR Manager 1.75
  *
- * Copyright (c) 2007, 2008 Alexey Samlyukov
+ * Copyright (c) 2007-2010 Alexey Samlyukov
  ****************************************************************************/
 
 /****************************************************************************
@@ -313,23 +313,24 @@ static bool SetMask(HANDLE hDlg, DWORD dwMask, DWORD dwTempl)
       case 5:  lstrcpy(templ, _T("[U]"));      break;
       case 6:  lstrcpy(templ, _T("[F]"));      break;
       case 7:  lstrcpy(templ, _T("[T]"));      break;
+      case 8:  lstrcpy(templ, _T("[M]"));      break;
       //---
-      case 9:  lstrcpy(templ, _T("[#]"));      break;
-      case 10: lstrcpy(templ, _T("[t]"));      break;
-      case 11: lstrcpy(templ, _T("[a]"));      break;
-      case 12: lstrcpy(templ, _T("[l]"));      break;
-      case 13: lstrcpy(templ, _T("[y]"));      break;
-      case 14: lstrcpy(templ, _T("[g]"));      break;
+      case 10:  lstrcpy(templ, _T("[#]"));      break;
+      case 11: lstrcpy(templ, _T("[t]"));      break;
+      case 12: lstrcpy(templ, _T("[a]"));      break;
+      case 13: lstrcpy(templ, _T("[l]"));      break;
+      case 14: lstrcpy(templ, _T("[y]"));      break;
+      case 15: lstrcpy(templ, _T("[g]"));      break;
       //---
-      case 16: lstrcpy(templ, _T("[c]"));     break;
-      case 17: lstrcpy(templ, _T("[m]"));     break;
-      case 18: lstrcpy(templ, _T("[d]"));     break;
-      case 19: lstrcpy(templ, _T("[r]"));     break;
+      case 17: lstrcpy(templ, _T("[c]"));     break;
+      case 18: lstrcpy(templ, _T("[m]"));     break;
+      case 19: lstrcpy(templ, _T("[d]"));     break;
+      case 20: lstrcpy(templ, _T("[r]"));     break;
       //---
-      case 21: lstrcpy(templ, _T("[DM]"));     break;
-      case 22: lstrcpy(templ, _T("[TM]"));     break;
-      case 23: lstrcpy(templ, _T("[TL]"));     break;
-      case 24: lstrcpy(templ, _T("[TR]"));     break;
+      case 22: lstrcpy(templ, _T("[DM]"));     break;
+      case 23: lstrcpy(templ, _T("[TM]"));     break;
+      case 24: lstrcpy(templ, _T("[TL]"));     break;
+      case 25: lstrcpy(templ, _T("[TR]"));     break;
     }
   }
   else
@@ -558,7 +559,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
       {
         Opt.Search[0]=_T('\0');
         Opt.Replace[0]=_T('\0');
-        lstrcpy(Opt.WordDiv, _T("-. _"));
+        lstrcpy(Opt.WordDiv, _T("-. _&"));
         if (HKEY hKey=CreateOrOpenRegKey(false, PluginRootKey))
         {
           TCHAR cpRegValue[NM];
@@ -1186,11 +1187,11 @@ static int ShowDialog()
   InitDialogItems(InitItems, DialogItems, sizeof(InitItems) / sizeof(InitItems[0]));
 
   // комбинированный список с шаблонами
-  FarListItem itemTempl1[25];
+  FarListItem itemTempl1[26];
   int n = sizeof(itemTempl1) / sizeof(itemTempl1[0]);
   for (int i = 0; i < n; i++)
   {
-    itemTempl1[i].Flags = ((i==3 || i==8 || i==15 || i==20)?LIF_SEPARATOR:0);
+    itemTempl1[i].Flags = ((i==3 || i==9 || i==16 || i==21)?LIF_SEPARATOR:0);
     lstrcpy(itemTempl1[i].Text, GetMsg(MTempl_1+i));
   }
   FarList Templates1 = {n, itemTempl1};

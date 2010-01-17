@@ -1,9 +1,9 @@
 /****************************************************************************
  * VisRen4_JPG.cpp
  *
- * Plugin module for FAR Manager 1.71
+ * Plugin module for FAR Manager 1.75
  *
- * Copyright (c) 2007, 2008 Alexey Samlyukov
+ * Copyright (c) 2007-2010 Alexey Samlyukov
  ****************************************************************************/
 
 
