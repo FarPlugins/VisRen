@@ -91,6 +91,8 @@
 "Incorrect list of file names"
 "File editing aborted. No files renamed."
 
+"Do you really want to renaming?"
+
 "Error create protocol of renaming"
 
 "Undo renaming files"

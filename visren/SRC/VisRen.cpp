@@ -6,7 +6,7 @@
  * Copyright (c) 2007-2010 Alexey Samlyukov
  ****************************************************************************/
 
-/* $ Revision: 9.0 $ */
+/* $ Revision: 10.0 $ */
 
 #define _FAR_NO_NAMELESS_UNIONS
 #define _FAR_USE_FARFINDDATA

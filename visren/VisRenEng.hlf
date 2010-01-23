@@ -3,7 +3,7 @@
 .Options CtrlColorChar=\
 
 @Contents
-$^ #Visual renaming files - 1.75 build 9#
+$^ #Visual renaming files - 1.75 build 10#
    Far  plugin   for   visual   files   renaming   with   additional
 capabilities.
 
@@ -167,7 +167,6 @@ capabilities.
    #F4#   Put files list in Far editor.
 
    #F5#   Maximize/minimize plugin dialog.
-        Also works #left# mouse click on plugin title.
 
    #F6#   Load elements for undo action.
 

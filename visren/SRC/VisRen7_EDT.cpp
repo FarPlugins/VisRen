@@ -34,9 +34,9 @@ static int CreateList(TCHAR *TempFileName)
     TCHAR *p=sFI.ppi[i].FindData.cFileName;
     DWORD BytesWritten;
     if (Opt.ShowOrgName)
-      FSF.sprintf(buf, _T("\"%s\"%*c\"%s\"\n"), p, width-lstrlen(p), _T(' '), p);
+      FSF.sprintf(buf, _T("\"%s\"%*c\"%s\"\n"), p, width-lstrlen(p), _T(' '), bError?p:sFI.DestFileName[i]);
     else
-      FSF.sprintf(buf, _T("\"%s\"\n"), p);
+      FSF.sprintf(buf, _T("\"%s\"\n"), bError?p:sFI.DestFileName[i]);
     if (!WriteFile(hFile, buf, lstrlen(buf), &BytesWritten, 0))
     {
       CloseHandle(hFile); return -1;
@@ -111,8 +111,21 @@ static void RenameInEditor(PanelInfo *PInfo)
   {
     case 3:       // Загрузка файла прервана пользователем
       ErrorMsg(MVRenTitle, MAborted);
-    case 2:       // Файл не был изменен
       goto END;
+    case 2:       // Файл не был изменен
+      {
+        bool ren=false;
+        for (int i=0; i<sFI.iCount; i++)     // имена могли измениться после шаблонов!
+        {
+          if (lstrcmp(sFI.ppi[i].FindData.cFileName,sFI.DestFileName[i]))
+          {
+            if (YesNoMsg(MVRenTitle,MEditorRename)) ren=true;
+            break;
+          }
+        }
+        if (!ren) goto END;
+        break;
+      }
     case 0:       // Ошибка открытия файла
       ErrorMsg(MVRenTitle, MErrorOpenList);
       goto END;

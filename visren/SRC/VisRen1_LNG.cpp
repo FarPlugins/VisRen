@@ -108,6 +108,8 @@ enum {
   MErrorReadList,
   MAborted,
 
+  MEditorRename,
+
   MErrorCreateLog,
 
   MUndoTitle,

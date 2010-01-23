@@ -16,32 +16,33 @@
  ****************************************************************************/
 enum {
   DlgBORDER = 0,    // 0
-  DlgLMASKNAME,     // 1
-  DlgEMASKNAME,     // 2
-  DlgLTEMPL,        // 3
-  DlgETEMPLNAME,    // 4
-  DlgBTEMPLNAME,    // 5
+  DlgSIZEICON,      // 1
+  DlgLMASKNAME,     // 2
+  DlgEMASKNAME,     // 3
+  DlgLTEMPL,        // 4
+  DlgETEMPLNAME,    // 5
+  DlgBTEMPLNAME,    // 6
 
-  DlgLMASKEXT,      // 6
-  DlgEMASKEXT,      // 7
-  DlgETEMPLEXT,     // 8
-  DlgBTEMPLEXT,     // 9
+  DlgLMASKEXT,      // 7
+  DlgEMASKEXT,      // 8
+  DlgETEMPLEXT,     // 9
+  DlgBTEMPLEXT,     //10
 
-  DlgSEP1,          //10
-  DlgLSEARCH,       //11
-  DlgESEARCH,       //12
-  DlgLREPLACE,      //13
-  DlgEREPLACE,      //14
-  DlgCASE,          //15
-  DlgREGEX,         //16
+  DlgSEP1,          //11
+  DlgLSEARCH,       //12
+  DlgESEARCH,       //13
+  DlgLREPLACE,      //14
+  DlgEREPLACE,      //15
+  DlgCASE,          //16
+  DlgREGEX,         //17
 
-  DlgSEP2,          //17
-  DlgLIST,          //18
-  DlgSEP3_LOG,      //19
-  DlgREN,           //20
-  DlgUNDO,          //21
-  DlgEDIT,          //22
-  DlgCANCEL         //23
+  DlgSEP2,          //18
+  DlgLIST,          //19
+  DlgSEP3_LOG,      //20
+  DlgREN,           //21
+  DlgUNDO,          //22
+  DlgEDIT,          //23
+  DlgCANCEL         //24
 };
 
 
@@ -235,6 +236,9 @@ static void DlgResize(HANDLE hDlg, bool bF5=false)
         Item.X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-1;
         Item.Y2=(DlgSize.Full?DlgSize.mH:DlgSize.H)-1;
         break;
+      case DlgSIZEICON:
+         Item.X1=(DlgSize.Full?DlgSize.mW:DlgSize.W)-4;
+         break;
       case DlgEMASKNAME:
         Item.X2=(DlgSize.Full?DlgSize.mWS:DlgSize.WS)-3;
         break;
@@ -605,6 +609,8 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
 
     case DN_DRAWDIALOG:
 			{
+        Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgSIZEICON, (LONG_PTR)(DlgSize.Full?_T("[]"):_T("[]")));
+
 			  TCHAR buf[MAX_PATH], sep[MAX_PATH];
 
 		    FSF.TruncStr(lstrcpy(buf, sUndoFI.Dir), DlgSize.Full?DlgSize.mW-6:DlgSize.W-6);
@@ -623,7 +629,6 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
             case DlgEMASKEXT:  case DlgETEMPLEXT:  case DlgBTEMPLEXT:
             case DlgESEARCH:   case DlgEREPLACE:   case DlgCASE:
             case DlgREGEX:
-            case DlgEDIT:
               Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(Opt.LoadUndo || !sFI.iCount));
               break;
             case DlgREN:
@@ -631,6 +636,9 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
               break;
             case DlgUNDO:
               Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(!sUndoFI.iCount || Opt.LoadUndo || bError));
+              break;
+            case DlgEDIT:
+              Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(Opt.LoadUndo || bError || !sFI.iCount));
               break;
 			    }
 			  }
@@ -666,7 +674,7 @@ static LONG_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, LONG_PTR
   /************************************************************************/
 
     case DN_MOUSECLICK:
-      if (Param1==DlgBORDER && ((MOUSE_EVENT_RECORD *)Param2)->dwEventFlags==DOUBLE_CLICK)
+      if (Param1==DlgSIZEICON && ((MOUSE_EVENT_RECORD *)Param2)->dwButtonState==FROM_LEFT_1ST_BUTTON_PRESSED)
         goto DLGRESIZE;
       else if (Param1==DlgSEP3_LOG &&
               ((MOUSE_EVENT_RECORD *)Param2)->dwButtonState==FROM_LEFT_1ST_BUTTON_PRESSED)
@@ -1152,35 +1160,36 @@ static int ShowDialog()
 
   struct InitDialogItem InitItems[] = {
     /* 0*/{DI_DOUBLEBOX,0,          0,DlgSize.W-1,DlgSize.H-1, 0, 0,                       0, 0, (TCHAR *)MVRenTitle},
+    /* 1*/{DI_TEXT,     DlgSize.W-4,0,DlgSize.W-2, 0, 0, 0,                                0, 0, _T("")},
 
-    /* 1*/{DI_TEXT,     2,          1,          0, 0, 0, 0,                                0, 0, (TCHAR *)MMaskName},
-    /* 2*/{DI_EDIT,     2,          2,DlgSize.WS-3,0, 1, (int)_T("VisRenMaskName"), DIF_USELASTHISTORY|DIF_HISTORY, 0, _T("")},
-    /* 3*/{DI_TEXT,     2,          3,          0, 0, 0, 0,                                0, 0, (TCHAR *)MTempl},
-    /* 4*/{DI_COMBOBOX, 2,          4,         31, 0, 0, 0,DIF_LISTAUTOHIGHLIGHT|DIF_DROPDOWNLIST|DIF_LISTWRAPMODE, 0, (TCHAR *)MTempl_1},
-    /* 5*/{DI_BUTTON,  34,          4,          0, 0, 0, 0,    DIF_NOBRACKETS|DIF_BTNNOCLOSE, 0, (TCHAR *)MSet},
+    /* 2*/{DI_TEXT,     2,          1,          0, 0, 0, 0,                                0, 0, (TCHAR *)MMaskName},
+    /* 3*/{DI_EDIT,     2,          2,DlgSize.WS-3,0, 1, (int)_T("VisRenMaskName"), DIF_USELASTHISTORY|DIF_HISTORY, 0, _T("")},
+    /* 4*/{DI_TEXT,     2,          3,          0, 0, 0, 0,                                0, 0, (TCHAR *)MTempl},
+    /* 5*/{DI_COMBOBOX, 2,          4,         31, 0, 0, 0,DIF_LISTAUTOHIGHLIGHT|DIF_DROPDOWNLIST|DIF_LISTWRAPMODE, 0, (TCHAR *)MTempl_1},
+    /* 6*/{DI_BUTTON,  34,          4,          0, 0, 0, 0,    DIF_NOBRACKETS|DIF_BTNNOCLOSE, 0, (TCHAR *)MSet},
 
-    /* 6*/{DI_TEXT,     DlgSize.WS, 1,          0, 0, 0, 0,                                0, 0, (TCHAR *)MMaskExt},
-    /* 7*/{DI_EDIT,     DlgSize.WS, 2,DlgSize.W-3, 0, 0, (int)_T("VisRenMaskExt"),  DIF_USELASTHISTORY|DIF_HISTORY, 0, _T("")},
-    /* 8*/{DI_COMBOBOX, DlgSize.WS, 4,DlgSize.W-8, 0, 0, 0,DIF_LISTAUTOHIGHLIGHT|DIF_DROPDOWNLIST|DIF_LISTWRAPMODE, 0, (TCHAR *)MTempl2_1},
-    /* 9*/{DI_BUTTON,   DlgSize.W-5,4,          0, 0, 0, 0,    DIF_NOBRACKETS|DIF_BTNNOCLOSE, 0, (TCHAR *)MSet},
+    /* 7*/{DI_TEXT,     DlgSize.WS, 1,          0, 0, 0, 0,                                0, 0, (TCHAR *)MMaskExt},
+    /* 8*/{DI_EDIT,     DlgSize.WS, 2,DlgSize.W-3, 0, 0, (int)_T("VisRenMaskExt"),  DIF_USELASTHISTORY|DIF_HISTORY, 0, _T("")},
+    /* 9*/{DI_COMBOBOX, DlgSize.WS, 4,DlgSize.W-8, 0, 0, 0,DIF_LISTAUTOHIGHLIGHT|DIF_DROPDOWNLIST|DIF_LISTWRAPMODE, 0, (TCHAR *)MTempl2_1},
+    /*10*/{DI_BUTTON,   DlgSize.W-5,4,          0, 0, 0, 0,    DIF_NOBRACKETS|DIF_BTNNOCLOSE, 0, (TCHAR *)MSet},
 
 
-    /*10*/{DI_TEXT,     0,          5,          0, 0, 0, 0,                    DIF_SEPARATOR, 0, _T("")},
-    /*11*/{DI_TEXT,     2,          6,         14, 0, 0, 0,                                0, 0, (TCHAR *)MSearch},
-    /*12*/{DI_EDIT,    15,          6,DlgSize.WS-3,0, 0, (int)_T("VisRenSearch"),  DIF_HISTORY, 0, _T("")},
-    /*13*/{DI_TEXT,     2,          7,         14, 0, 0, 0,                                0, 0, (TCHAR *)MReplace},
-    /*14*/{DI_EDIT,    15,          7,DlgSize.WS-3,0, 0, (int)_T("VisRenReplace"), DIF_HISTORY, 0, _T("")},
-    /*15*/{DI_CHECKBOX, DlgSize.WS, 6,         19, 0, 0, 1,                                0, 0, (TCHAR *)MCase},
-    /*16*/{DI_CHECKBOX, DlgSize.WS, 7,         19, 0, 0, 0,                                0, 0, (TCHAR *)MRegEx},
+    /*11*/{DI_TEXT,     0,          5,          0, 0, 0, 0,                    DIF_SEPARATOR, 0, _T("")},
+    /*12*/{DI_TEXT,     2,          6,         14, 0, 0, 0,                                0, 0, (TCHAR *)MSearch},
+    /*13*/{DI_EDIT,    15,          6,DlgSize.WS-3,0, 0, (int)_T("VisRenSearch"),  DIF_HISTORY, 0, _T("")},
+    /*14*/{DI_TEXT,     2,          7,         14, 0, 0, 0,                                0, 0, (TCHAR *)MReplace},
+    /*15*/{DI_EDIT,    15,          7,DlgSize.WS-3,0, 0, (int)_T("VisRenReplace"), DIF_HISTORY, 0, _T("")},
+    /*16*/{DI_CHECKBOX, DlgSize.WS, 6,         19, 0, 0, 1,                                0, 0, (TCHAR *)MCase},
+    /*17*/{DI_CHECKBOX, DlgSize.WS, 7,         19, 0, 0, 0,                                0, 0, (TCHAR *)MRegEx},
 
-    /*17*/{DI_TEXT,     0,          8,          0, 0, 0, 0,                    DIF_SEPARATOR, 0, _T("")},
-    /*18*/{DI_LISTBOX,  2,          9,DlgSize.W-2,DlgSize.H-4, 0, 0, DIF_LISTNOCLOSE|DIF_LISTNOBOX, 0, _T("")},
-    /*19*/{DI_TEXT,     0,DlgSize.H-3,          0, 0, 0, 0,                    DIF_SEPARATOR, 0, _T("")},
+    /*18*/{DI_TEXT,     0,          8,          0, 0, 0, 0,                    DIF_SEPARATOR, 0, _T("")},
+    /*19*/{DI_LISTBOX,  2,          9,DlgSize.W-2,DlgSize.H-4, 0, 0, DIF_LISTNOCLOSE|DIF_LISTNOBOX, 0, _T("")},
+    /*20*/{DI_TEXT,     0,DlgSize.H-3,          0, 0, 0, 0,                    DIF_SEPARATOR, 0, _T("")},
 
-    /*20*/{DI_BUTTON,   0,DlgSize.H-2,          0, 0, 0, 0,                  DIF_CENTERGROUP, 1, (TCHAR *)MRen},
-    /*21*/{DI_BUTTON,   0,DlgSize.H-2,          0, 0, 0, 0,   DIF_BTNNOCLOSE|DIF_CENTERGROUP, 0, (TCHAR *)MUndo},
-    /*22*/{DI_BUTTON,   0,DlgSize.H-2,          0, 0, 0, 0,                  DIF_CENTERGROUP, 0, (TCHAR *)MEdit},
-    /*23*/{DI_BUTTON,   0,DlgSize.H-2,          0, 0, 0, 0,                  DIF_CENTERGROUP, 0, (TCHAR *)MCancel}
+    /*21*/{DI_BUTTON,   0,DlgSize.H-2,          0, 0, 0, 0,                  DIF_CENTERGROUP, 1, (TCHAR *)MRen},
+    /*22*/{DI_BUTTON,   0,DlgSize.H-2,          0, 0, 0, 0,   DIF_BTNNOCLOSE|DIF_CENTERGROUP, 0, (TCHAR *)MUndo},
+    /*23*/{DI_BUTTON,   0,DlgSize.H-2,          0, 0, 0, 0,                  DIF_CENTERGROUP, 0, (TCHAR *)MEdit},
+    /*24*/{DI_BUTTON,   0,DlgSize.H-2,          0, 0, 0, 0,                  DIF_CENTERGROUP, 0, (TCHAR *)MCancel}
   };
   struct FarDialogItem DialogItems[sizeof(InitItems) / sizeof(InitItems[0])];
   memset(DialogItems, 0, sizeof(DialogItems));
