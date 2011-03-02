@@ -1,0 +1,103 @@
+﻿.Language=English,English
+
+"Visual renaming files"
+
+"Ok"
+
+"&Rename"
+"F6-&Undo"
+"F4-&In editor"
+"C&ancel"
+
+"Mask for file &name:"
+"&extension:"
+"&Templates:"
+//----
+"[N]    Name               "
+"[N#-#] Range              "
+"[C#+#] Counter            "
+""
+"[L]  lower case           "
+"[U]  UPPER CASE           "
+"[F]  First capital        "
+"[T]  Title Case           "
+"[M]  Music files          "
+""
+"[#]  Track number         "
+"[t]  Song title           "
+"[a]  Artist               "
+"[l]  Album                "
+"[y]  Year                 "
+"[g]  Genre                "
+""
+"[c]  Camera               "
+"[m]  Model                "
+"[d]  Date picture         "
+"[r]  Resolution           "
+""
+"[DM]  Date modification   "
+"[TM]  Time modification   "
+"[TL]  Translit, latin     "
+"[TR]  Translit, russian   "
+//----
+"[E]    Extension          "
+"[E#-#] Range              "
+"[C#+#] Counter            "
+""
+"[L]  lower case           "
+"[U]  UPPER CASE           "
+"[F]  First capital        "
+"[T]  Title Case           "
+//----
+"[+]"
+"&Search for:"
+"Re&place with:"
+"&Case sensitive"
+"Re&gular expressions"
+"name before - name after"
+"Log renaming"
+
+"Word delimiters"
+"The default value is "-.<space>_&""
+
+"File name"
+"Old name"
+"New name"
+
+"Is required non-plugin file panel with selected objects"
+
+"Not enough memory to initialize plugin"
+
+"Collection of information on files"
+
+"Operation was interrupted"
+"Do you really want to cancel it?"
+
+"<Error!>"
+
+"Clearing log renaming"
+"Do you really want to clearing log?"
+
+"Rename list of files"
+"Show files name in two columns:"
+""Source" "New""
+
+"Can not create files list"
+"Error open file for editing"
+"Incorrect list of file names"
+"File editing aborted. No files renamed."
+
+"Do you really want to renaming?"
+
+"Error create protocol of renaming"
+
+"Undo renaming files"
+"Do you really want to return previous file names?"
+
+"Error renaming file"
+"to"
+"&Skip"
+"Ski&p all"
+"&Retry"
+
+"Processed %d of %d file(s)"

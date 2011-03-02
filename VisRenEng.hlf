@@ -1,0 +1,191 @@
+﻿.Language=English,English
+.PluginContents=Visual renaming files
+.Options CtrlColorChar=\
+
+@Contents
+$^ #Visual renaming files#
+$^ #2.0 build 14#
+$^ #Copyright (C) 2007-2010 Alexey Samlyukov#
+   Far  plugin   for   visual   files   renaming   with   additional
+capabilities.
+
+   Plugin dialog elements:
+
+ #Mask for file name#
+   In this line you can  create  definition  for  new  files  names.
+   Situated lower pulldown menu allows add special  expressions  for
+   file old name substitution, its part, counter or date/time.  This
+   expressions allways enclosed with [ ], and all  other  characters
+   without brackets will be put in new file name without change.
+   All allowed expressions follows.
+
+ #Extension mask#
+   Extension definition line.
+   All allowed expressions follows.
+
+ #Templates#
+   [N]       Old file name WITHOUT extension.
+   [N2]      2-nd character from old name.
+   [N2-5]    Characters from 2-nd to 5-th from old name.
+             (4 characters total).
+   [N2,5]    5 characters, begins from 2-nd.
+   [N2-]     All characters, begins from 2-nd.
+   [N-2]     2-nd character counted from the end of name.
+   [N2--5]   Characters from 2-nd from beginning to 5-th from end.
+   [N-8-5]   Characters from 8-th to 5-th from end.
+   [N-8,5]   5 characters counted from 8-th from end.
+   [N-5-]    Sumbols from 5-th from end to the end of name.
+
+             Before placing template to mask line, plugin determines
+             longest name and extension in source files list -  this
+             length range places in template.
+
+             REMARK: Characters count begins from the 1-st.
+
+   [E]       Extension.
+   [E1-2]    Extension characters 1-2 (Other numbers as in [N]).
+
+   [C001+5]  Adds counter. In current example, couter begins from 1,
+             increments by 5 each step, counter width -  3  numerals
+             (because 001).
+
+             REMARK: Counter width must not exceed 9 numerals.
+
+   [L]       All characters in lowercase.
+   [U]       All characters in uppercase.
+   [F]       First name character will be in uppercase, other -
+             lowercase.
+   [T]       First character oh the each word will be uppercase.
+             Words separators by default: "#-.<space>_&#".
+             By pressing #F4# on template you can change its value.
+   [M]       Music files. In this mode, characters before #"_-_"#
+             or #" - "# will be treated as artist name.
+             First character in every word will be capitalized.
+             All characters after that sequence will be treated as
+             song title and only first character in the first word 
+             will be capitalized.
+             For example:
+               "j.lAsT - lonEsoMe ShePheRD.mp3"
+             after:
+               "J.Last - Lonesome shepherd.mp3"
+
+             REMARK: If there are several register change templates,
+             then highest in list will be applied.
+             Register change templates applies last.
+
+   [##]       Track number from MP3-tag.
+   [t]       Song title.
+   [a]       Artist.
+   [l]       Album.
+   [y]       Year.
+   [g]       Genre.
+
+             REMARK:
+             Used sources from module #Mp3# of #Anamorphosis# plugin,
+             autor - ~WARP ItSelf~@mailto:WARP_ItSelf@@inbox.ru@ (big thanks for code ;-)
+
+   [c]       Camera from EXIF-tag JPG files.
+   [m]       Model.
+   [d]       Date picture: YYYY.MM.DD hh-mm-ss.
+   [r]       Resolution.
+
+             REMARK:
+             Used sources from ~Jhead~@http://www.sentex.net/~mwandel/jhead@.
+
+   [DM]      File last modification date: YYYY.MM.DD.
+   [TM]      File last modification time: hh-mm-ss.
+
+   [TL]      Name transliteration: русский -> russkij.
+   [TR]      Name transliteration: russkij -> русский.
+
+   [[]       Puts opening square bracket.
+   []]       Puts closing square bracket.
+
+ #Search for#
+ #Replace with#
+   Allows to find some sequence of  characters  in  file  name,  and
+   replace it with other sequence.
+
+   With "#Regular expressions#" checked, you can put links on  founded
+   subexpressions  in  "Replace  with"  string  (text  fragments  in
+   parenthesis). Links format: #$0#, #$1#, ... up to 99 links.
+
+ #Case sensitive#
+   The case will be taken into account while searching.
+
+ #Regular expressions#
+   Basic regular expressions support in "Search for" line.
+   ~Regular expressions in Far Manager~@:RegExp@
+
+ #Log renaming#
+   By default, plugin creates in memory log of  succesfully  renamed
+   files at last start, uncheck it to disable log creation.
+   Log presence is indicated by asterix - "#Log renaming*#".
+
+
+
+ #Rename#
+   Starts renaming.
+
+   If undo elements previously loaded  (#F6-Undo#), then  you will  be
+   asked for confirmation to return to the old files names.
+
+ #F6-Undo#
+   Key allows to load undo elements, only if previous  renaming  log
+   still in memory.
+   In list title will be shown path to the folder,  where  was  last
+   renaming.
+
+ #F4-In editor#
+   Loads renaming file list in Far editor.
+   Character table must be "DOS text".
+   List load possible in two ways: file list in two columns -  "name
+   before" and "name after" or in one - "name after".
+
+   \CF WARNING! \-
+   #IN NO CIRCUMSTANCES do not delete files  from  list  and  do not#
+   #change their source names! I warn you, that in case you do that,#
+   #you LOOSE YOUR FILES!#
+
+ #Cancel#
+   Close plugin dialog.
+
+
+^ #In dialog the following buttons are available:#
+
+   #F2#   Turn off log renaming.
+
+   #F3#   See full long file name.
+        Also shows by #right# mouse click on files list.
+
+   #F4#   Put files list in Far editor.
+
+   #F5#   Maximize/minimize plugin dialog.
+
+   #F6#   Load elements for undo action.
+
+   #F8#   Clear renaming log.
+        Also works #right# mouse click on "#Log renaming#".
+
+   #F12#  Move focus on files list and/or back.
+
+   #Ins#  Add selected template to mask line without focus change if
+        current position - "#Templates#";
+        and with input focus change to mask line if current
+        position "#[+]#".
+
+   #Del#  Remove element from files list.
+
+   #Ctrl-Up/Ctrl-Dn#       Move list item up/down, may need on
+                         counter use.
+
+   #Ctrl-Left/Ctrl-Right#  Change files list width.
+
+   #Ctrl-Numpad5#          Restore default width value.
+
+   #Alt-Left/Alt-Right#    Roll files names in "name before" column.
+
+   #Left/Right#            Roll files names in "name after" column.
+
+   #Ctrl-PgUp#             Go to selected file.
+                         Also works on #left# mouse doubleclick.
