@@ -4,7 +4,7 @@
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
              http://code.google.com/p/farplug-alvls/
 
-  Распространяется под той же лицензией, что и сам FAR Manager, т.е.:
+  Распространяется под той же лицензией, что и сам Far Manager, т.е.:
 
 Copyright (c) 2007-2011 Alexey Samlyukov
 All rights reserved.

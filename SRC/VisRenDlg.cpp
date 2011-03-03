@@ -566,6 +566,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 					FarSettingsItem item={Root,L"WordDiv",FST_STRING};
 					if (Info.SettingsControl(settings.Handle,SCTL_GET,0,(INT_PTR)&item))
 						StrOpt.WordDiv=item.String;
+					Info.SettingsControl(settings.Handle,SCTL_FREE,0,0);
 				}
 
 				Opt.CurBorder=Opt.srcCurCol=Opt.destCurCol=0;
