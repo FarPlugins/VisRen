@@ -64,7 +64,7 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 		PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.Control(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,0));
 		if (CurPanelItem)
 		{
-			Info.Control(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,(LONG_PTR)CurPanelItem);
+			Info.Control(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,(INT_PTR)CurPanelItem);
 			if (CurPanelItem->FileName)
 			{
 				add.strSrcFileName=CurPanelItem->FileName;
@@ -82,7 +82,7 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 	// получим strPanelDir
 	size_t size=Info.Control(PANEL_ACTIVE,FCTL_GETPANELDIR,0,0);
 	wchar_t *buf=strPanelDir.get(size); 
-	Info.Control(PANEL_ACTIVE,FCTL_GETPANELDIR,size,(LONG_PTR)buf);
+	Info.Control(PANEL_ACTIVE,FCTL_GETPANELDIR,size,(INT_PTR)buf);
 	strPanelDir.updsize();
 
 	// получим strNativePanelDir - "\\?\dir\"
