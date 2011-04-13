@@ -514,19 +514,19 @@ void VisRenDlg::ShowName(int Pos)
 	}
 
 	struct FarDialogItem DialogItems[] = {
-		//			Type	X1	Y1	X2	Y2	Selected	History	Mask	Flags	UserParam	PtrData	MaxLen
-		/* 0*/{DI_DOUBLEBOX,0, 0,70,14, 0, 0, 0,                  0, 0, GetMsg(MFullFileName), 0},
-		/* 1*/{DI_SINGLEBOX,2, 1,68, 6, 0, 0, 0,       DIF_LEFTTEXT, 0, GetMsg(MOldName), 0},
-		/* 2*/{DI_TEXT,     3, 2, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, 0, srcName[0],0},
-		/* 3*/{DI_TEXT,     3, 3, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, 0, srcName[1],0},
-		/* 4*/{DI_TEXT,     3, 4, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, 0, srcName[2],0},
-		/* 5*/{DI_TEXT,     3, 5, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, 0, srcName[3],0},
-		/* 6*/{DI_SINGLEBOX,2, 7,68,12, 0, 0, 0,       DIF_LEFTTEXT, 0, GetMsg(MNewName), 0},
-		/* 7*/{DI_TEXT,     3, 8, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, 0, destName[0],0},
-		/* 8*/{DI_TEXT,     3, 9, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, 0, destName[1],0},
-		/* 9*/{DI_TEXT,     3,10, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, 0, destName[2],0},
-		/*10*/{DI_TEXT,     3,11, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, 0, destName[3],0},
-		/*11*/{DI_BUTTON,   0,13, 0, 0, 0, 0, 0,DIF_CENTERGROUP|DIF_DEFAULTBUTTON, 0, GetMsg(MOK),0},
+		//			Type	X1	Y1	X2	Y2	Selected	History	Mask	Flags	Data	MaxLen	UserParam	
+		/* 0*/{DI_DOUBLEBOX,0, 0,70,14, 0, 0, 0,                  0, GetMsg(MFullFileName), 0,0},
+		/* 1*/{DI_SINGLEBOX,2, 1,68, 6, 0, 0, 0,       DIF_LEFTTEXT, GetMsg(MOldName), 0,0},
+		/* 2*/{DI_TEXT,     3, 2, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, srcName[0],0,0},
+		/* 3*/{DI_TEXT,     3, 3, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, srcName[1],0,0},
+		/* 4*/{DI_TEXT,     3, 4, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, srcName[2],0,0},
+		/* 5*/{DI_TEXT,     3, 5, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, srcName[3],0,0},
+		/* 6*/{DI_SINGLEBOX,2, 7,68,12, 0, 0, 0,       DIF_LEFTTEXT, GetMsg(MNewName), 0,0},
+		/* 7*/{DI_TEXT,     3, 8, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, destName[0],0,0},
+		/* 8*/{DI_TEXT,     3, 9, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, destName[1],0,0},
+		/* 9*/{DI_TEXT,     3,10, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, destName[2],0,0},
+		/*10*/{DI_TEXT,     3,11, 0, 0, 0, 0, 0,       DIF_LEFTTEXT, destName[3],0,0},
+		/*11*/{DI_BUTTON,   0,13, 0, 0, 0, 0, 0,DIF_CENTERGROUP|DIF_DEFAULTBUTTON, GetMsg(MOK),0,0},
 	};
 
 	HANDLE hDlg=Info.DialogInit(&MainGuid,&DlgNameGuid,-1,-1,71,15,L"Contents", DialogItems,sizeof(DialogItems)/sizeof(DialogItems[0]),0,FDLG_SMALLDIALOG,0,0);
@@ -1131,13 +1131,13 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 					Param1==DlgESEARCH || Param1==DlgEREPLACE )
 			{
 				if (Param1==DlgEMASKNAME)
-					StrOpt.MaskName=((FarDialogItem *)Param2)->PtrData;
+					StrOpt.MaskName=((FarDialogItem *)Param2)->Data;
 				else if (Param1==DlgEMASKEXT)
-					StrOpt.MaskExt=((FarDialogItem *)Param2)->PtrData;
+					StrOpt.MaskExt=((FarDialogItem *)Param2)->Data;
 				else if (Param1==DlgESEARCH)
-					StrOpt.Search=((FarDialogItem *)Param2)->PtrData;
+					StrOpt.Search=((FarDialogItem *)Param2)->Data;
 				else if (Param1==DlgEREPLACE)
-					StrOpt.Replace=((FarDialogItem *)Param2)->PtrData;
+					StrOpt.Replace=((FarDialogItem *)Param2)->Data;
 
 				if (ProcessFileName())
 				{
@@ -1210,38 +1210,38 @@ int VisRenDlg::ShowDialog()
 	GetDlgSize();
 
 	struct FarDialogItem DialogItems[] = {
-		//			Type	X1	Y1	X2	Y2	Selected	History	Mask	Flags	UserParam	PtrData	MaxLen
-		/* 0*/{DI_DOUBLEBOX,0,          0,DlgSize.W-1,DlgSize.H-1, 0, 0,                0, 0, 0, GetMsg(MVRenTitle), 0},
-		/* 1*/{DI_TEXT,     DlgSize.W-4,0,DlgSize.W-2,          0, 0, 0,                0, 0, 0, L"", 0},
+		//			Type	X1	Y1	X2	Y2	Selected	History	Mask	Flags	Data	MaxLen	UserParam
+		/* 0*/{DI_DOUBLEBOX,0,          0,DlgSize.W-1,DlgSize.H-1, 0, 0,                0, 0, GetMsg(MVRenTitle), 0,0},
+		/* 1*/{DI_TEXT,     DlgSize.W-4,0,DlgSize.W-2,          0, 0, 0,                0, 0, L"", 0,0},
 
-		/* 2*/{DI_TEXT,     2,          1,          0,          0, 0, 0,                0, 0, 0, GetMsg(MMaskName), 0},
-		/* 3*/{DI_EDIT,     2,          2,DlgSize.WS-3,         0, 0, L"VisRenMaskName",0, DIF_USELASTHISTORY|DIF_HISTORY|DIF_FOCUS, 0,  L"", 0},
-		/* 4*/{DI_TEXT,     2,          3,          0,          0, 0, 0,                0, 0, 0, GetMsg(MTempl), 0},
-		/* 5*/{DI_COMBOBOX, 2,          4,         31,          0, 0, 0, 0, DIF_LISTAUTOHIGHLIGHT|DIF_DROPDOWNLIST|DIF_LISTWRAPMODE, 0, GetMsg(MTempl_1), 0},
-		/* 6*/{DI_BUTTON,  34,          4,          0,          0, 0, 0,                0, DIF_NOBRACKETS|DIF_BTNNOCLOSE, 0, GetMsg(MSet), 0},
+		/* 2*/{DI_TEXT,     2,          1,          0,          0, 0, 0,                0, 0, GetMsg(MMaskName), 0,0},
+		/* 3*/{DI_EDIT,     2,          2,DlgSize.WS-3,         0, 0, L"VisRenMaskName",0, DIF_USELASTHISTORY|DIF_HISTORY|DIF_FOCUS, L"", 0,0},
+		/* 4*/{DI_TEXT,     2,          3,          0,          0, 0, 0,                0, 0, GetMsg(MTempl), 0,0},
+		/* 5*/{DI_COMBOBOX, 2,          4,         31,          0, 0, 0, 0, DIF_LISTAUTOHIGHLIGHT|DIF_DROPDOWNLIST|DIF_LISTWRAPMODE, GetMsg(MTempl_1), 0,0},
+		/* 6*/{DI_BUTTON,  34,          4,          0,          0, 0, 0,                0, DIF_NOBRACKETS|DIF_BTNNOCLOSE, GetMsg(MSet), 0,0},
 
-		/* 7*/{DI_TEXT,     DlgSize.WS, 1,          0,          0, 0, 0,                0, 0, 0, GetMsg(MMaskExt), 0},
-		/* 8*/{DI_EDIT,     DlgSize.WS, 2,DlgSize.W-3,          0, 0, L"VisRenMaskExt", 0, DIF_USELASTHISTORY|DIF_HISTORY, 0, L"", 0},
-		/* 9*/{DI_COMBOBOX, DlgSize.WS, 4,DlgSize.W-8,          0, 0, 0,  0,  DIF_LISTAUTOHIGHLIGHT|DIF_DROPDOWNLIST|DIF_LISTWRAPMODE, 0, GetMsg(MTempl2_1), 0},
-		/*10*/{DI_BUTTON,   DlgSize.W-5,4,          0,          0, 0, 0,                0, DIF_NOBRACKETS|DIF_BTNNOCLOSE, 0, GetMsg(MSet), 0},
+		/* 7*/{DI_TEXT,     DlgSize.WS, 1,          0,          0, 0, 0,                0, 0, GetMsg(MMaskExt), 0,0},
+		/* 8*/{DI_EDIT,     DlgSize.WS, 2,DlgSize.W-3,          0, 0, L"VisRenMaskExt", 0, DIF_USELASTHISTORY|DIF_HISTORY, L"", 0,0},
+		/* 9*/{DI_COMBOBOX, DlgSize.WS, 4,DlgSize.W-8,          0, 0, 0,  0,  DIF_LISTAUTOHIGHLIGHT|DIF_DROPDOWNLIST|DIF_LISTWRAPMODE, GetMsg(MTempl2_1), 0,0},
+		/*10*/{DI_BUTTON,   DlgSize.W-5,4,          0,          0, 0, 0,                0, DIF_NOBRACKETS|DIF_BTNNOCLOSE, GetMsg(MSet), 0,0},
 
 
-		/*11*/{DI_TEXT,     0,          5,          0,          0, 0, 0,                0, DIF_SEPARATOR, 0, L"", 0},
-		/*12*/{DI_TEXT,     2,          6,         14,          0, 0, 0,                0, 0, 0, GetMsg(MSearch), 0},
-		/*13*/{DI_EDIT,    15,          6,DlgSize.WS-3,         0, 0, L"VisRenSearch",  0, DIF_HISTORY, 0, L"", 0},
-		/*14*/{DI_TEXT,     2,          7,         14,          0, 0, 0,                0, 0, 0, GetMsg(MReplace), 0},
-		/*15*/{DI_EDIT,    15,          7,DlgSize.WS-3,         0, 0, L"VisRenReplace", 0, DIF_HISTORY, 0, L"", 0},
-		/*16*/{DI_CHECKBOX, DlgSize.WS, 6,         19,          0, 1, 0,                0, 0, 0, GetMsg(MCase), 0},
-		/*17*/{DI_CHECKBOX, DlgSize.WS, 7,         19,          0, 0, 0,                0, 0, 0, GetMsg(MRegEx), 0},
+		/*11*/{DI_TEXT,     0,          5,          0,          0, 0, 0,                0, DIF_SEPARATOR, L"", 0,0},
+		/*12*/{DI_TEXT,     2,          6,         14,          0, 0, 0,                0, 0, GetMsg(MSearch), 0,0},
+		/*13*/{DI_EDIT,    15,          6,DlgSize.WS-3,         0, 0, L"VisRenSearch",  0, DIF_HISTORY, L"", 0,0},
+		/*14*/{DI_TEXT,     2,          7,         14,          0, 0, 0,                0, 0, GetMsg(MReplace), 0,0},
+		/*15*/{DI_EDIT,    15,          7,DlgSize.WS-3,         0, 0, L"VisRenReplace", 0, DIF_HISTORY, L"", 0,0},
+		/*16*/{DI_CHECKBOX, DlgSize.WS, 6,         19,          0, 1, 0,                0, 0, GetMsg(MCase), 0,0},
+		/*17*/{DI_CHECKBOX, DlgSize.WS, 7,         19,          0, 0, 0,                0, 0, GetMsg(MRegEx), 0,0},
 
-		/*18*/{DI_TEXT,     0,          8,          0,          0, 0, 0,                0, DIF_SEPARATOR, 0, L"", 0},
-		/*19*/{DI_LISTBOX,  2,          9,DlgSize.W-2,DlgSize.H-4, 0, 0,                0, DIF_LISTNOCLOSE|DIF_LISTNOBOX, 0, L"", 0},
-		/*20*/{DI_TEXT,     0,DlgSize.H-3,          0,          0, 0, 0,                0, DIF_SEPARATOR, 0, L"", 0},
+		/*18*/{DI_TEXT,     0,          8,          0,          0, 0, 0,                0, DIF_SEPARATOR, L"", 0,0},
+		/*19*/{DI_LISTBOX,  2,          9,DlgSize.W-2,DlgSize.H-4, 0, 0,                0, DIF_LISTNOCLOSE|DIF_LISTNOBOX, L"", 0,0},
+		/*20*/{DI_TEXT,     0,DlgSize.H-3,          0,          0, 0, 0,                0, DIF_SEPARATOR, L"", 0,0},
 
-		/*21*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_CENTERGROUP|DIF_DEFAULTBUTTON, 0, GetMsg(MRen), 0},
-		/*22*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_BTNNOCLOSE|DIF_CENTERGROUP, 0, GetMsg(MUndo), 0},
-		/*23*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_CENTERGROUP, 0, GetMsg(MEdit), 0},
-		/*24*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_CENTERGROUP, 0, GetMsg(MCancel), 0}
+		/*21*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_CENTERGROUP|DIF_DEFAULTBUTTON, GetMsg(MRen), 0,0},
+		/*22*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_BTNNOCLOSE|DIF_CENTERGROUP, GetMsg(MUndo), 0,0},
+		/*23*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_CENTERGROUP, GetMsg(MEdit), 0,0},
+		/*24*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_CENTERGROUP, GetMsg(MCancel), 0,0}
 	};
 
 	// комбинированный список с шаблонами
