@@ -47,8 +47,8 @@ class VisRenDlg: public RenFile
 		void MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY);
 		int ListMouseRightClick(HANDLE hDlg, DWORD dwMousePosX, DWORD dwMousePosY);
 		void ShowName(int Pos);
-		static INT_PTR WINAPI ShowDialogProcThunk(HANDLE hDlg, int Msg, int Param1, INT_PTR Param2);
-		INT_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_PTR Param2);
+		static INT_PTR WINAPI ShowDialogProcThunk(HANDLE hDlg, int Msg, int Param1, void *Param2);
+		INT_PTR WINAPI ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void *Param2);
 
 	public:
 		VisRenDlg() { }

@@ -61,10 +61,10 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 	for (int i=0; i<SelectedItemsNumber; i++)
 	{
 		File add;
-		PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.Control(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,0));
+		PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,0));
 		if (CurPanelItem)
 		{
-			Info.Control(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,(INT_PTR)CurPanelItem);
+			Info.PanelControl(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,CurPanelItem);
 			if (CurPanelItem->FileName)
 			{
 				add.strSrcFileName=CurPanelItem->FileName;
@@ -80,9 +80,9 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 	}
 
 	// получим strPanelDir
-	size_t size=Info.Control(PANEL_ACTIVE,FCTL_GETPANELDIR,0,0);
+	size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIR,0,0);
 	wchar_t *buf=strPanelDir.get(size); 
-	Info.Control(PANEL_ACTIVE,FCTL_GETPANELDIR,size,(INT_PTR)buf);
+	Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIR,size,buf);
 	strPanelDir.updsize();
 
 	// получим strNativePanelDir - "\\?\dir\"
@@ -492,7 +492,7 @@ bool RenFile::Replase(string &strSrc)
 	{
 		HANDLE re;
 		int start_offset=0;
-		if (!Info.RegExpControl(0,RECTL_CREATE,0,(INT_PTR)&re)) return false;
+		if (!Info.RegExpControl(0,RECTL_CREATE,0,&re)) return false;
 
 		string Search=L"/";
 		if (StrOpt.Search.length()>0 && StrOpt.Search[(size_t)0]==L'/') 
@@ -502,7 +502,7 @@ bool RenFile::Replase(string &strSrc)
 			Search+=L"/";
 		if (Search.length()>0 && Search[(size_t)(Search.length()-1)]==L'/' && !Opt.CaseSensitive)
 			Search+=L"i";
-		if (Info.RegExpControl(re,RECTL_COMPILE,0,(INT_PTR)Search.get()))
+		if (Info.RegExpControl(re,RECTL_COMPILE,0,Search.get()))
 		{
 			int brackets=Info.RegExpControl(re,RECTL_BRACKETSCOUNT,0,0);
 			if (!brackets) { Info.RegExpControl(re,RECTL_FREE,0,0); return false; }
@@ -512,7 +512,7 @@ bool RenFile::Replase(string &strSrc)
 			{
 				RegExpSearch search= { src,start_offset,lenSrc,match,brackets,0 };
 
-				if (Info.RegExpControl(re,RECTL_SEARCHEX,0,(INT_PTR)&search))
+				if (Info.RegExpControl(re,RECTL_SEARCHEX,0,&search))
 				{
 					// копируем ДО паттерна
 					for (int i=start_offset; i<match[0].start; i++)
@@ -756,7 +756,7 @@ bool RenFile::CheckForEsc(HANDLE hConInp)
 		if ( rec.EventType == KEY_EVENT && rec.Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE &&
 					rec.Event.KeyEvent.bKeyDown )
 			// Опциональное подтверждение прерывания по Esc
-			if ( Info.AdvControl(&MainGuid, ACTL_GETCONFIRMATIONS, NULL) & FCS_INTERRUPTOPERATION )
+			if ( Info.AdvControl(&MainGuid, ACTL_GETCONFIRMATIONS, 0,0) & FCS_INTERRUPTOPERATION )
 			{
 				if (YesNoMsg(MEscTitle, MEscBody)) return true;
 			}
@@ -873,11 +873,11 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 	PanelRedrawInfo RInfo={0,0};
 	SetLastError(ERROR_SUCCESS);
 
-	Info.Control(PANEL_ACTIVE,FCTL_BEGINSELECTION,0,0);
+	Info.PanelControl(PANEL_ACTIVE,FCTL_BEGINSELECTION,0,0);
 
 	// вначале снимем выделение на панели
 	for (int j=0; j<SelectedItemsNumber; j++)
-		Info.Control(PANEL_ACTIVE,FCTL_CLEARSELECTION,j,0);
+		Info.PanelControl(PANEL_ACTIVE,FCTL_CLEARSELECTION,j,0);
 
 	if (!Opt.Undo)
 	{
@@ -917,13 +917,13 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 			{
 				for (int j=0; j<ItemsNumber; j++)
 				{
-					PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
+					PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
 					if (CurPanelItem)
 					{
-						Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,j,(INT_PTR)CurPanelItem);
+						Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,CurPanelItem);
 						if (!FSF.LStricmp(CurPanelItem->FileName, src))
 						{
-							Info.Control(PANEL_ACTIVE,FCTL_SETSELECTION,j,true);
+							Info.PanelControl(PANEL_ACTIVE,FCTL_SETSELECTION,j,(void*)true);
 							free(CurPanelItem);
 							break;
 						}
@@ -953,13 +953,13 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 					// не переименовали - отметим
 					for (int j=0; j<ItemsNumber; j++)
 					{
-						PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
+						PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
 						if (CurPanelItem)
 						{
-							Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,j,(INT_PTR)CurPanelItem);
+							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,CurPanelItem);
 							if (!FSF.LStricmp(CurPanelItem->FileName, src))
 							{
-								Info.Control(PANEL_ACTIVE,FCTL_SETSELECTION,j,true);
+								Info.PanelControl(PANEL_ACTIVE,FCTL_SETSELECTION,j,(void*)true);
 								free(CurPanelItem);
 								break;
 							}
@@ -973,13 +973,13 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 					{
 						for (int j=0; j<ItemsNumber; j++)
 						{
-							PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
+							PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
 							if (CurPanelItem)
 							{
-								Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,j,(INT_PTR)CurPanelItem);
+								Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,CurPanelItem);
 								if (!FSF.LStricmp(CurPanelItem->FileName, Item->strSrcFileName.get()))
 								{
-									Info.Control(PANEL_ACTIVE,FCTL_SETSELECTION,j,true);
+									Info.PanelControl(PANEL_ACTIVE,FCTL_SETSELECTION,j,(void*)true);
 									free(CurPanelItem);
 									break;
 								}
@@ -1040,23 +1040,23 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
  BREAK:
 		if (i<0) i=0;
 		// установим каталог
-		Info.Control(PANEL_ACTIVE,FCTL_SETPANELDIR,0,(INT_PTR)Undo.Dir);
+		Info.PanelControl(PANEL_ACTIVE,FCTL_SETPANELDIR,0,Undo.Dir);
 		// отметим файлы
 		struct PanelInfo PInfo;
 		PInfo.StructSize=sizeof(PanelInfo);
-		Info.Control(PANEL_ACTIVE,FCTL_GETPANELINFO,0,(INT_PTR)&PInfo);
+		Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELINFO,0,&PInfo);
 		for (int k=i; k<Count; k++)
 		{
 			for (int j=0; j<PInfo.ItemsNumber; j++)
 			{
-				PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
+				PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
 				if (CurPanelItem)
 				{
-					Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,j,(INT_PTR)CurPanelItem);
+					Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,CurPanelItem);
 					if (!FSF.LStricmp(CurPanelItem->FileName, Undo.OldFileName[k]))
 					{
 						if (k==i) RInfo.TopPanelItem=RInfo.CurrentItem=j;
-						Info.Control(PANEL_ACTIVE,FCTL_SETSELECTION,j,true);
+						Info.PanelControl(PANEL_ACTIVE,FCTL_SETSELECTION,j,(void*)true);
 						free(CurPanelItem);
 						break;
 					}
@@ -1096,9 +1096,9 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 									sizeof(MsgItems) / sizeof(MsgItems[0]), 1 );
 	}
 
-	Info.Control(PANEL_ACTIVE,FCTL_ENDSELECTION,0,0);
-	Info.Control(PANEL_ACTIVE,FCTL_REDRAWPANEL,0, Opt.Undo?(INT_PTR)&RInfo:0);
-	Info.Control(PANEL_ACTIVE,FCTL_UPDATEPANEL,1,0);
+	Info.PanelControl(PANEL_ACTIVE,FCTL_ENDSELECTION,0,0);
+	Info.PanelControl(PANEL_ACTIVE,FCTL_REDRAWPANEL,0, Opt.Undo?&RInfo:0);
+	Info.PanelControl(PANEL_ACTIVE,FCTL_UPDATEPANEL,1,0);
 
 	return true;
 }

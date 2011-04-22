@@ -156,7 +156,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *OInfo)
 	PInfo.StructSize=sizeof(PanelInfo);
 
 	// Если не удалось запросить информацию о панели...
-	if (!Info.Control(PANEL_ACTIVE,FCTL_GETPANELINFO,0,(LONG_PTR)&PInfo))
+	if (!Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELINFO,0,&PInfo))
 		return hPlugin;
 
 	if (PInfo.PanelType!=PTYPE_FILEPANEL || (PInfo.Flags&PFLAGS_PLUGIN) || !PInfo.ItemsNumber || !PInfo.SelectedItemsNumber)

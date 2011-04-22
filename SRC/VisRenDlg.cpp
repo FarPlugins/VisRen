@@ -137,7 +137,7 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 	else AddNumber=0;
 	// запросим информацию
 	FarListInfo ListInfo;
-	Info.SendDlgMessage(hDlg,DM_LISTINFO,DlgLIST,(INT_PTR)&ListInfo);
+	Info.SendDlgMessage(hDlg,DM_LISTINFO,DlgLIST,&ListInfo);
 
 	if (ListInfo.ItemsNumber)
 		Info.SendDlgMessage(hDlg,DM_LISTDELETE,DlgLIST,0);
@@ -182,13 +182,13 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 		else if (posDest>lenDest-widthDest) posDest=lenDest-widthDest;
 
 		FSF.sprintf( buf, L"%-*.*s%c%-*.*s", widthSrc, widthSrc, src+posSrc, 0x2502, widthDest, widthDest, (bError?GetMsg(MError):dest+posDest) );
-		Info.SendDlgMessage(hDlg,DM_LISTADDSTR,DlgLIST,(INT_PTR)buf);
+		Info.SendDlgMessage(hDlg,DM_LISTADDSTR,DlgLIST,buf);
 	}
 
 	for (int i=ItemsNumber; i<ItemsNumber+AddNumber; i++)
 	{
 		FSF.sprintf( buf, L"%-*.*s%c%-*.*s", widthSrc, widthSrc, L"", 0x2502, widthDest, widthDest, L"" );
-		Info.SendDlgMessage(hDlg,DM_LISTADDSTR,DlgLIST,(INT_PTR)buf);
+		Info.SendDlgMessage(hDlg,DM_LISTADDSTR,DlgLIST,buf);
 	}
 
 	if (buf) free(buf);
@@ -198,9 +198,9 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 	static bool bOldFull=bFull;
 	if (bOldFull!=bFull) { ListPos.TopPos=-1; bOldFull=bFull; }
 	else ListPos.TopPos=ListInfo.TopPos;
-	Info.SendDlgMessage(hDlg,DM_LISTSETCURPOS,DlgLIST,(INT_PTR)&ListPos);
+	Info.SendDlgMessage(hDlg,DM_LISTSETCURPOS,DlgLIST,&ListPos);
 
-	Info.SendDlgMessage(hDlg,DM_LISTSETMOUSEREACTION,DlgLIST,(INT_PTR)LMRT_NEVER);
+	Info.SendDlgMessage(hDlg,DM_LISTSETMOUSEREACTION,DlgLIST,(void*)LMRT_NEVER);
 	return true;
 }
 
@@ -235,7 +235,7 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 	{
 		FarDialogItem *Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
 		if (!Item) return;
-		Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, (INT_PTR)Item);
+		Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, Item);
 		switch (i)
 		{
 			case DlgBORDER:
@@ -287,13 +287,13 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 				Item->Y1=(DlgSize.Full?DlgSize.mH:DlgSize.H)-2;
 				break;
 		}
-		Info.SendDlgMessage(hDlg, DM_SETDLGITEM, i, (INT_PTR)Item);
+		Info.SendDlgMessage(hDlg, DM_SETDLGITEM, i, Item);
 		free(Item);
 	}
-	Info.SendDlgMessage(hDlg, DM_RESIZEDIALOG, 0, (INT_PTR)&c);
+	Info.SendDlgMessage(hDlg, DM_RESIZEDIALOG, 0, &c);
 	c.X=c.Y=-1;
-	Info.SendDlgMessage(hDlg, DM_MOVEDIALOG, true, (INT_PTR)&c);
-	Info.SendDlgMessage(hDlg, DM_LISTSETMOUSEREACTION, DlgLIST, (INT_PTR)LMRT_NEVER);
+	Info.SendDlgMessage(hDlg, DM_MOVEDIALOG, true, &c);
+	Info.SendDlgMessage(hDlg, DM_LISTSETMOUSEREACTION, DlgLIST, (void*)LMRT_NEVER);
 	Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
 	return;
 }
@@ -305,7 +305,7 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 {
 	wchar_t templ[15];
 	FarListPos ListPos;
-	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, IdTempl, (INT_PTR)&ListPos);
+	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, IdTempl, &ListPos);
 
 	if (IdTempl==DlgETEMPLNAME) // список с шаблонами имени
 	{
@@ -355,9 +355,9 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 	}
 
 	COORD Pos;
-	Info.SendDlgMessage(hDlg, DM_GETCURSORPOS, IdMask, (INT_PTR)&Pos);
+	Info.SendDlgMessage(hDlg, DM_GETCURSORPOS, IdMask, &Pos);
 	EditorSelect es;
-	Info.SendDlgMessage(hDlg, DM_GETSELECTION, IdMask, (INT_PTR)&es);
+	Info.SendDlgMessage(hDlg, DM_GETSELECTION, IdMask, &es);
 	string strBuf((const wchar_t*)Info.SendDlgMessage(hDlg, DM_GETCONSTTEXTPTR, IdMask, 0));
 	size_t length=strBuf.length();
 	string strBuf2;
@@ -379,12 +379,12 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 		strBuf+=templ;
 		strBuf+=strBuf2.get();
 	}
-	Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, IdMask, (INT_PTR)FSF.Trim(strBuf.get()));
+	Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, IdMask, FSF.Trim(strBuf.get()));
 	Info.SendDlgMessage(hDlg, DM_SETFOCUS, IdMask, 0);
 	Pos.X+=wcslen(templ);
-	Info.SendDlgMessage(hDlg, DM_SETCURSORPOS, IdMask, (INT_PTR)&Pos);
+	Info.SendDlgMessage(hDlg, DM_SETCURSORPOS, IdMask, &Pos);
 	es.BlockType=BTYPE_NONE;
-	Info.SendDlgMessage(hDlg, DM_SETSELECTION, IdMask, (INT_PTR)&es);
+	Info.SendDlgMessage(hDlg, DM_SETSELECTION, IdMask, &es);
 	return true;
 }
 
@@ -394,11 +394,11 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 void VisRenDlg::MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY)
 {
 	FarListPos ListPos;
-	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, (INT_PTR)&ListPos);
+	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, &ListPos);
 	if (ListPos.SelectPos>=FileList.Count()) return;
 
 	SMALL_RECT dlgRect;
-	Info.SendDlgMessage(hDlg, DM_GETDLGRECT, 0, (INT_PTR)&dlgRect);
+	Info.SendDlgMessage(hDlg, DM_GETDLGRECT, 0, &dlgRect);
 	int CurPos=ListPos.TopPos+(dwMousePosY-(dlgRect.Top+9));
 
 	if (CurPos<0) CurPos=0;
@@ -434,15 +434,15 @@ void VisRenDlg::MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY)
 						FarDialogItem *Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
 						if (Item)
 						{
-							Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, (INT_PTR)Item);
-							Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, (INT_PTR)Item);
+							Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, Item);
+							Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, Item);
 							free(Item);
 							break;
 						}
 					}
 				}
 			bUp?ListPos.SelectPos--:ListPos.SelectPos++;
-			Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, (INT_PTR)&ListPos);
+			Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, &ListPos);
 			Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
 		}
 	}
@@ -455,9 +455,9 @@ void VisRenDlg::MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY)
 int VisRenDlg::ListMouseRightClick(HANDLE hDlg, DWORD dwMousePosX, DWORD dwMousePosY)
 {
 	SMALL_RECT dlgRect;
-	Info.SendDlgMessage(hDlg, DM_GETDLGRECT, 0, (INT_PTR)&dlgRect);
+	Info.SendDlgMessage(hDlg, DM_GETDLGRECT, 0, &dlgRect);
 	FarListPos ListPos;
-	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, (INT_PTR)&ListPos);
+	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, &ListPos);
 	int Pos=ListPos.TopPos+(dwMousePosY-(dlgRect.Top+9));
 	if ( Pos>=(Opt.LoadUndo?Undo.iCount:FileList.Count())
 				// щелкнули за пределами границ DlgLIST
@@ -466,7 +466,7 @@ int VisRenDlg::ListMouseRightClick(HANDLE hDlg, DWORD dwMousePosX, DWORD dwMouse
 		)
 		return -1;
 	ListPos.SelectPos=Pos;
-	Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, (INT_PTR)&ListPos);
+	Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, &ListPos);
 	return Pos;
 }
 
@@ -538,7 +538,7 @@ void VisRenDlg::ShowName(int Pos)
 	return;
 }
 
-INT_PTR WINAPI VisRenDlg::ShowDialogProcThunk(HANDLE hDlg, int Msg, int Param1, INT_PTR Param2)
+INT_PTR WINAPI VisRenDlg::ShowDialogProcThunk(HANDLE hDlg, int Msg, int Param1, void *Param2)
 {
 	VisRenDlg* Class=(VisRenDlg*)Info.SendDlgMessage(hDlg,DM_GETDLGDATA,0,0);
 	return Class->ShowDialogProc(hDlg,Msg,Param1,Param2);
@@ -547,7 +547,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProcThunk(HANDLE hDlg, int Msg, int Param1, 
 /****************************************************************************
  * Обработчик диалога для ShowDialog
  ****************************************************************************/
-INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_PTR Param2)
+INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void *Param2)
 {
 	switch (Msg)
 	{
@@ -560,11 +560,11 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 				StrOpt.WordDiv=L"-. _&";
 
 				FarSettingsCreate settings={sizeof(FarSettingsCreate),MainGuid,INVALID_HANDLE_VALUE};
-				if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,(INT_PTR)&settings))
+				if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,&settings))
 				{
 					int Root=0; // корень ключа
 					FarSettingsItem item={Root,L"WordDiv",FST_STRING};
-					if (Info.SettingsControl(settings.Handle,SCTL_GET,0,(INT_PTR)&item))
+					if (Info.SettingsControl(settings.Handle,SCTL_GET,0,&item))
 						StrOpt.WordDiv=item.String;
 					Info.SettingsControl(settings.Handle,SCTL_FREE,0,0);
 				}
@@ -576,13 +576,13 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 				bError=false;
 				SaveItemFocus=DlgEMASKNAME;
 
-				Info.SendDlgMessage(hDlg, DM_SETCOMBOBOXEVENT, DlgETEMPLNAME, (INT_PTR)CBET_KEY);
-				Info.SendDlgMessage(hDlg, DM_SETCOMBOBOXEVENT, DlgETEMPLEXT, (INT_PTR)CBET_KEY);
+				Info.SendDlgMessage(hDlg, DM_SETCOMBOBOXEVENT, DlgETEMPLNAME, (void*)CBET_KEY);
+				Info.SendDlgMessage(hDlg, DM_SETCOMBOBOXEVENT, DlgETEMPLEXT, (void*)CBET_KEY);
 
 				if (!Opt.UseLastHistory)
 				{
-					Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgEMASKNAME, (INT_PTR)L"[N]");
-					Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgEMASKEXT, (INT_PTR)L"[E]");
+					Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgEMASKNAME, L"[N]");
+					Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgEMASKEXT, L"[E]");
 				}
 				// установим предыдущий размер диалога
 				DlgResize(hDlg);
@@ -592,15 +592,15 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 				Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,0));
 				if (Item)
 				{
-					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,(INT_PTR)Item);
-					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKNAME,(INT_PTR)Item);
+					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,Item);
+					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKNAME,Item);
 					free(Item);
 				}
 				Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKEXT,0));
 				if (Item)
 				{
-					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKEXT,(INT_PTR)Item);
-					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKEXT,(INT_PTR)Item);
+					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKEXT,Item);
+					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKEXT,Item);
 					free(Item);
 				}
 				break;
@@ -617,7 +617,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 
 		case DN_DRAWDIALOG:
 			{
-				Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgSIZEICON, (INT_PTR)(DlgSize.Full?L"[]":L"[]"));
+				Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgSIZEICON, (DlgSize.Full?L"[]":L"[]"));
 				string buf;
 				if (Opt.LoadUndo && Undo.Dir)
 				{
@@ -628,14 +628,14 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 				string sep=L" ";
 				sep+=Opt.LoadUndo?buf.get():GetMsg(MSep);
 				sep+=L" ";
-				Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgSEP2, (INT_PTR)sep.get());
+				Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgSEP2, sep.get());
 
 				sep=L" ";
 				sep+=Opt.LogRen?0x221a:L' ';
 				sep+=L' ';
 				sep+=GetMsg(MCreateLog);
 				sep+=Undo.iCount?L"* ":L" ";
-				Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgSEP3_LOG, (INT_PTR)sep.get());
+				Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgSEP3_LOG, sep.get());
 
 				for (int i=DlgEMASKNAME; i<=DlgEDIT; i++)
 				{
@@ -645,16 +645,16 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 						case DlgEMASKEXT:  case DlgETEMPLEXT:  case DlgBTEMPLEXT:
 						case DlgESEARCH:   case DlgEREPLACE:   case DlgCASE:
 						case DlgREGEX:
-							Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(Opt.LoadUndo || !FileList.Count()));
+							Info.SendDlgMessage(hDlg, DM_ENABLE, i, (void*)!(Opt.LoadUndo || !FileList.Count()));
 							break;
 						case DlgREN:
-							Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(!FileList.Count() || bError || (Opt.LoadUndo && !Undo.iCount)));
+							Info.SendDlgMessage(hDlg, DM_ENABLE, i, (void*)!(!FileList.Count() || bError || (Opt.LoadUndo && !Undo.iCount)));
 							break;
 						case DlgUNDO:
-							Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(!Undo.iCount || Opt.LoadUndo || bError));
+							Info.SendDlgMessage(hDlg, DM_ENABLE, i, (void*)!(!Undo.iCount || Opt.LoadUndo || bError));
 							break;
 						case DlgEDIT:
-							Info.SendDlgMessage(hDlg, DM_ENABLE, i, !(Opt.LoadUndo || bError || !FileList.Count()));
+							Info.SendDlgMessage(hDlg, DM_ENABLE, i, (void*)!(Opt.LoadUndo || bError || !FileList.Count()));
 							break;
 					}
 				}
@@ -674,12 +674,12 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 			}
 			else if (Param1==DlgCASE || Param1==DlgREGEX)
 			{
-				Param1==DlgCASE?Opt.CaseSensitive=Param2:Opt.RegEx=Param2;
+				Param1==DlgCASE?Opt.CaseSensitive=(int)Param2:Opt.RegEx=(int)Param2;
 				FarDialogItem *Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgESEARCH,0));
 				if (Item)
 				{
-					Info.SendDlgMessage(hDlg, DM_GETDLGITEM, DlgESEARCH, (INT_PTR)Item);
-					Info.SendDlgMessage(hDlg, DN_EDITCHANGE, DlgESEARCH, (INT_PTR)Item);
+					Info.SendDlgMessage(hDlg, DM_GETDLGITEM, DlgESEARCH, Item);
+					Info.SendDlgMessage(hDlg, DN_EDITCHANGE, DlgESEARCH, Item);
 					free(Item);
 				}
 			}
@@ -751,12 +751,12 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 							{
 								StrOpt.WordDiv=WordDiv;
 								FarSettingsCreate settings={sizeof(FarSettingsCreate),MainGuid,INVALID_HANDLE_VALUE};
-								if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,(INT_PTR)&settings))
+								if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,&settings))
 								{
 									int Root=0; // корень ключа
 									FarSettingsItem item={Root,L"WordDiv",FST_STRING};
 									item.String=WordDiv;
-									Info.SettingsControl(settings.Handle,SCTL_SET,0,(INT_PTR)&item);
+									Info.SettingsControl(settings.Handle,SCTL_SET,0,&item);
 									Info.SettingsControl(settings.Handle,SCTL_FREE,0,0);
 								}
 							}
@@ -834,7 +834,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 					Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
 					FarListPos ListPos={Pos, -1};
 					FarListDelete ListDel={Pos, 1};
-					Info.SendDlgMessage(hDlg, DM_LISTDELETE, DlgLIST, (INT_PTR)&ListDel);
+					Info.SendDlgMessage(hDlg, DM_LISTDELETE, DlgLIST, &ListDel);
 
 					if (Opt.LoadUndo)
 					{
@@ -857,7 +857,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 						if (cur) FileList.Delete(cur);
 					}
 
-					Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, (INT_PTR)&ListPos);
+					Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, &ListPos);
 					UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo);
 					Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
 					return true;
@@ -868,7 +868,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 									 Key==(KEY_CTRL|KEY_DOWN) || Key==(KEY_RCTRL|KEY_DOWN)) )
 				{
 					FarListPos ListPos;
-					Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, (INT_PTR)&ListPos);
+					Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, &ListPos);
 					if (ListPos.SelectPos>=FileList.Count()) 
 						return false;
 					bool bUp=(Key==(KEY_CTRL|KEY_UP) || Key==(KEY_RCTRL|KEY_UP));
@@ -899,15 +899,15 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 									FarDialogItem *Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
 									if (Item)
 									{
-										Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, (INT_PTR)Item);
-										Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, (INT_PTR)Item);
+										Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, Item);
+										Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, Item);
 										free(Item);
 										break;
 									}
 								}
 							}
 						bUp?ListPos.SelectPos--:ListPos.SelectPos++;
-						Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, (INT_PTR)&ListPos);
+						Info.SendDlgMessage(hDlg, DM_LISTSETCURPOS, DlgLIST, &ListPos);
 						Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
 						return true;
 					}
@@ -1003,17 +1003,17 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 					if (Pos>=(Opt.LoadUndo?Undo.iCount:FileList.Count())) 
 						return true;
 					string name;
-					size_t size=Info.Control(PANEL_ACTIVE,FCTL_GETPANELDIR,0,0);
+					size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIR,0,0);
 					wchar_t *buf=name.get(size);
-					Info.Control(PANEL_ACTIVE,FCTL_GETPANELDIR,size,(INT_PTR)buf);
+					Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIR,size,buf);
 					name.updsize();
 
 					if (Opt.LoadUndo && FSF.LStricmp(name.get(),Undo.Dir))
-						Info.Control(PANEL_ACTIVE,FCTL_SETPANELDIR,0,(INT_PTR)Undo.Dir);
+						Info.PanelControl(PANEL_ACTIVE,FCTL_SETPANELDIR,0,Undo.Dir);
 
 					PanelInfo PInfo;
 					PInfo.StructSize=sizeof(PanelInfo);
-					Info.Control(PANEL_ACTIVE,FCTL_GETPANELINFO,0,(INT_PTR)&PInfo);
+					Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELINFO,0,&PInfo);
 					PanelRedrawInfo RInfo;
 					RInfo.CurrentItem=PInfo.CurrentItem;
 					RInfo.TopPanelItem=PInfo.TopPanelItem;
@@ -1031,10 +1031,10 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 
 					for (int i=0; i<PInfo.ItemsNumber; i++)
 					{
-						PluginPanelItem *PPI=(PluginPanelItem*)malloc(Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,i,0));
+						PluginPanelItem *PPI=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,0));
 						if (PPI)
 						{
-							Info.Control(PANEL_ACTIVE,FCTL_GETPANELITEM,i,(INT_PTR)PPI);
+							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,PPI);
 							if (!FSF.LStricmp(name.get(), PPI->FileName))
 							{
 								RInfo.CurrentItem=i;
@@ -1045,7 +1045,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 								free(PPI);
 						}
 					}
-					Info.Control(PANEL_ACTIVE,FCTL_REDRAWPANEL,0,(INT_PTR)&RInfo);
+					Info.PanelControl(PANEL_ACTIVE,FCTL_REDRAWPANEL,0,&RInfo);
 					Info.SendDlgMessage(hDlg,DM_CLOSE,DlgCANCEL,0);
 					return true;
 				}
@@ -1073,7 +1073,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 				*            а для клавы "DN_DRAWDLGITEM"
 				*       учтем этот нюанс для DN_CTLCOLORDLGITEM:
 				*/
-				Info.SendDlgMessage(hDlg, DM_SHOWITEM, DlgSEP2, 1);
+				Info.SendDlgMessage(hDlg, DM_SHOWITEM, DlgSEP2, (void*)1);
 					/* $ */
 				if (Ret) Info.SendDlgMessage(hDlg, DM_SETMOUSEEVENTNOTIFY, 1, 0);
 			}
@@ -1160,20 +1160,21 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, INT_P
 			// красим сепаратор над листбоксом...
 			if (Param1==DlgSEP2)
 			{
-				int color=Info.AdvControl(&MainGuid, ACTL_GETCOLOR, (void *)COL_DIALOGBOX);
+				int color=Info.AdvControl(&MainGuid, ACTL_GETCOLOR, COL_DIALOGBOX,0);
+				int color2;
 				// ... если листбокс в фокусе, то красим в выделенный цвет
 				if (DlgLIST==Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0))
 				{
-					Param2=Info.AdvControl(&MainGuid, ACTL_GETCOLOR, (void *)COL_DIALOGHIGHLIGHTBOXTITLE);
-					Param2|=(color<<16);
+					color2=Info.AdvControl(&MainGuid, ACTL_GETCOLOR, COL_DIALOGHIGHLIGHTBOXTITLE,0);
+					color2|=(color<<16);
 				}
 				// ... иначе - в обычный цвет
 				else
 				{
-					Param2=color;
-					Param2|=(color<<16);
+					color2=color;
+					color2|=(color<<16);
 				}
-				return Param2;
+				return (INT_PTR)(Param2=(void*)color2);
 			}
 			break;
 
@@ -1274,7 +1275,7 @@ int VisRenDlg::ShowDialog()
                                sizeof(DialogItems) / sizeof(DialogItems[0]),
                                0, FDLG_SMALLDIALOG,
                                ShowDialogProcThunk,
-                               (INT_PTR) this );
+                               this );
 
 	int ExitCode=3;
 
