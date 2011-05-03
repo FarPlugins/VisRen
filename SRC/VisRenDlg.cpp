@@ -235,7 +235,7 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 	for (int i=DlgBORDER; i<=DlgCANCEL; i++)
 	{
 		FGDI.Size=0; FGDI.Item=0;
-		FGDI.Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,&FGDI));
+		FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,&FGDI));
 		if (!FGDI.Item) return;
 		Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, &FGDI);
 		switch (i)
@@ -1035,7 +1035,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					for (int i=0; i<PInfo.ItemsNumber; i++)
 					{
 						FGPPI.Size=0; FGPPI.Item=0;
-						FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,&FGPPI));
+						FGPPI.Item=(PluginPanelItem*)malloc(FGPPI.Size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,&FGPPI));
 						if (FGPPI.Item)
 						{
 							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,&FGPPI);

@@ -63,7 +63,7 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 	{
 		File add;
 		FGPPI.Size=0; FGPPI.Item=0;
-		FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,&FGPPI));
+		FGPPI.Item=(PluginPanelItem*)malloc(FGPPI.Size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,&FGPPI));
 		if (FGPPI.Item)
 		{
 			Info.PanelControl(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,&FGPPI);
@@ -921,7 +921,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 				for (int j=0; j<ItemsNumber; j++)
 				{
 					FGPPI.Size=0; FGPPI.Item=0;
-					FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
+					FGPPI.Item=(PluginPanelItem*)malloc(FGPPI.Size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
 					if (FGPPI.Item)
 					{
 						Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI);
@@ -960,7 +960,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 					for (int j=0; j<ItemsNumber; j++)
 					{
 						FGPPI.Size=0; FGPPI.Item=0;
-						FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
+						FGPPI.Item=(PluginPanelItem*)malloc(FGPPI.Size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
 						if (FGPPI.Item)
 						{
 							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI);
@@ -984,7 +984,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 						for (int j=0; j<ItemsNumber; j++)
 						{
 							FGPPI.Size=0; FGPPI.Item=0;
-							FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
+							FGPPI.Item=(PluginPanelItem*)malloc(FGPPI.Size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
 							if (FGPPI.Item)
 							{
 								Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI);
@@ -1063,7 +1063,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 			for (int j=0; j<PInfo.ItemsNumber; j++)
 			{
 				FGPPI.Size=0; FGPPI.Item=0;
-				FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
+				FGPPI.Item=(PluginPanelItem*)malloc(FGPPI.Size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
 				if (FGPPI.Item)
 				{
 					Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI);
