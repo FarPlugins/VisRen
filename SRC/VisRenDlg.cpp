@@ -231,64 +231,66 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 	Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
 	Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0;
 
+	FarGetDialogItem FGDI;
 	for (int i=DlgBORDER; i<=DlgCANCEL; i++)
 	{
-		FarDialogItem *Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
-		if (!Item) return;
-		Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, Item);
+		FGDI.Size=0; FGDI.Item=0;
+		FGDI.Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,&FGDI));
+		if (!FGDI.Item) return;
+		Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, &FGDI);
 		switch (i)
 		{
 			case DlgBORDER:
-				Item->X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-1;
-				Item->Y2=(DlgSize.Full?DlgSize.mH:DlgSize.H)-1;
+				FGDI.Item->X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-1;
+				FGDI.Item->Y2=(DlgSize.Full?DlgSize.mH:DlgSize.H)-1;
 				break;
 				case DlgSIZEICON:
-				Item->X1=(DlgSize.Full?DlgSize.mW:DlgSize.W)-4;
+				FGDI.Item->X1=(DlgSize.Full?DlgSize.mW:DlgSize.W)-4;
 				break;
 			case DlgEMASKNAME:
-				Item->X2=(DlgSize.Full?DlgSize.mWS:DlgSize.WS)-3;
+				FGDI.Item->X2=(DlgSize.Full?DlgSize.mWS:DlgSize.WS)-3;
 				break;
 			case DlgLMASKEXT:
 			case DlgCASE:
 			case DlgREGEX:
-				Item->X1=(DlgSize.Full?DlgSize.mWS:DlgSize.WS);
+				FGDI.Item->X1=(DlgSize.Full?DlgSize.mWS:DlgSize.WS);
 				break;
 			case DlgEMASKEXT:
-				Item->X1=(DlgSize.Full?DlgSize.mWS:DlgSize.WS);
-				Item->X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-3;
+				FGDI.Item->X1=(DlgSize.Full?DlgSize.mWS:DlgSize.WS);
+				FGDI.Item->X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-3;
 				break;
 			case DlgETEMPLEXT:
-				Item->X1=(DlgSize.Full?DlgSize.mWS:DlgSize.WS);
-				Item->X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-8;
+				FGDI.Item->X1=(DlgSize.Full?DlgSize.mWS:DlgSize.WS);
+				FGDI.Item->X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-8;
 				break;
 			case DlgBTEMPLEXT:
-				Item->X1=(DlgSize.Full?DlgSize.mW:DlgSize.W)-5;
+				FGDI.Item->X1=(DlgSize.Full?DlgSize.mW:DlgSize.W)-5;
 				break;
 			case DlgESEARCH:
 			case DlgEREPLACE:
-				Item->X2=(DlgSize.Full?DlgSize.mWS:DlgSize.WS)-3;
+				FGDI.Item->X2=(DlgSize.Full?DlgSize.mWS:DlgSize.WS)-3;
 				break;
 			case DlgLIST:
 			{
-				Item->X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-2;
-				Item->Y2=(DlgSize.Full?DlgSize.mH:DlgSize.H)-4;
+				FGDI.Item->X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-2;
+				FGDI.Item->Y2=(DlgSize.Full?DlgSize.mH:DlgSize.H)-4;
 
 				// !!! Обходим некузявость FARa по возврату ListItems из FarDialogItem
 				UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo);
 				break;
 			}
 			case DlgSEP3_LOG:
-				Item->Y1=(DlgSize.Full?DlgSize.mH:DlgSize.H)-3;
+				FGDI.Item->Y1=(DlgSize.Full?DlgSize.mH:DlgSize.H)-3;
 				break;
 			case DlgREN:
 			case DlgUNDO:
 			case DlgEDIT:
 			case DlgCANCEL:
-				Item->Y1=(DlgSize.Full?DlgSize.mH:DlgSize.H)-2;
+				FGDI.Item->Y1=(DlgSize.Full?DlgSize.mH:DlgSize.H)-2;
 				break;
 		}
-		Info.SendDlgMessage(hDlg, DM_SETDLGITEM, i, Item);
-		free(Item);
+		Info.SendDlgMessage(hDlg, DM_SETDLGITEM, i, FGDI.Item);
+		free(FGDI.Item);
 	}
 	Info.SendDlgMessage(hDlg, DM_RESIZEDIALOG, 0, &c);
 	c.X=c.Y=-1;
@@ -1029,20 +1031,22 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 						if (cur) name=cur->strSrcFileName;
 					}
 
+					FarGetPluginPanelItem FGPPI;
 					for (int i=0; i<PInfo.ItemsNumber; i++)
 					{
-						PluginPanelItem *PPI=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,0));
-						if (PPI)
+						FGPPI.Size=0; FGPPI.Item=0;
+						FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,&FGPPI));
+						if (FGPPI.Item)
 						{
-							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,PPI);
-							if (!FSF.LStricmp(name.get(), PPI->FileName))
+							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,&FGPPI);
+							if (!FSF.LStricmp(name.get(),FGPPI.Item->FileName))
 							{
 								RInfo.CurrentItem=i;
-								free(PPI);
+								free(FGPPI.Item);
 								break;
 							}
 							else
-								free(PPI);
+								free(FGPPI.Item);
 						}
 					}
 					Info.PanelControl(PANEL_ACTIVE,FCTL_REDRAWPANEL,0,&RInfo);

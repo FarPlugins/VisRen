@@ -58,22 +58,24 @@ enum {
  ****************************************************************************/
 bool RenFile::InitFileList(int SelectedItemsNumber)
 {
+	FarGetPluginPanelItem FGPPI;
 	for (int i=0; i<SelectedItemsNumber; i++)
 	{
 		File add;
-		PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,0));
-		if (CurPanelItem)
+		FGPPI.Size=0; FGPPI.Item=0;
+		FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,&FGPPI));
+		if (FGPPI.Item)
 		{
-			Info.PanelControl(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,CurPanelItem);
-			if (CurPanelItem->FileName)
+			Info.PanelControl(PANEL_ACTIVE,FCTL_GETSELECTEDPANELITEM,i,&FGPPI);
+			if (FGPPI.Item->FileName)
 			{
-				add.strSrcFileName=CurPanelItem->FileName;
-				add.strDestFileName=CurPanelItem->FileName;
-				add.ftLastWriteTime.dwLowDateTime=CurPanelItem->LastWriteTime.dwLowDateTime;
-				add.ftLastWriteTime.dwHighDateTime=CurPanelItem->LastWriteTime.dwHighDateTime;
+				add.strSrcFileName=FGPPI.Item->FileName;
+				add.strDestFileName=FGPPI.Item->FileName;
+				add.ftLastWriteTime.dwLowDateTime=FGPPI.Item->LastWriteTime.dwLowDateTime;
+				add.ftLastWriteTime.dwHighDateTime=FGPPI.Item->LastWriteTime.dwHighDateTime;
 				FileList.Push(&add);
 			}
-			free(CurPanelItem);
+			free(FGPPI.Item);
 		}
 		else
 			return false;
@@ -915,19 +917,21 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 			// не переименовали - отметим
 			if (bSkipAll)
 			{
+				FarGetPluginPanelItem FGPPI;
 				for (int j=0; j<ItemsNumber; j++)
 				{
-					PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
-					if (CurPanelItem)
+					FGPPI.Size=0; FGPPI.Item=0;
+					FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
+					if (FGPPI.Item)
 					{
-						Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,CurPanelItem);
-						if (!FSF.LStricmp(CurPanelItem->FileName, src))
+						Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI);
+						if (!FSF.LStricmp(FGPPI.Item->FileName, src))
 						{
 							Info.PanelControl(PANEL_ACTIVE,FCTL_SETSELECTION,j,(void*)true);
-							free(CurPanelItem);
+							free(FGPPI.Item);
 							break;
 						}
-						free(CurPanelItem);
+						free(FGPPI.Item);
 					}
 				}
 				continue;
@@ -950,44 +954,52 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 				case 1:     // Пропустить все
 					bSkipAll=true;
 				case 0:     // Пропустить
+				{
 					// не переименовали - отметим
+					FarGetPluginPanelItem FGPPI;
 					for (int j=0; j<ItemsNumber; j++)
 					{
-						PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
-						if (CurPanelItem)
+						FGPPI.Size=0; FGPPI.Item=0;
+						FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
+						if (FGPPI.Item)
 						{
-							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,CurPanelItem);
-							if (!FSF.LStricmp(CurPanelItem->FileName, src))
+							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI);
+							if (!FSF.LStricmp(FGPPI.Item->FileName, src))
 							{
 								Info.PanelControl(PANEL_ACTIVE,FCTL_SETSELECTION,j,(void*)true);
-								free(CurPanelItem);
+								free(FGPPI.Item);
 								break;
 							}
-							free(CurPanelItem);
+							free(FGPPI.Item);
 						}
 					}
 					break;
+				}
 				default:    // Отменить
+				{
 					// не переименовали - отметим
+					FarGetPluginPanelItem FGPPI;
 					for ( ; Item != NULL; Item=FileList.Next(Item))
 					{
 						for (int j=0; j<ItemsNumber; j++)
 						{
-							PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
-							if (CurPanelItem)
+							FGPPI.Size=0; FGPPI.Item=0;
+							FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
+							if (FGPPI.Item)
 							{
-								Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,CurPanelItem);
-								if (!FSF.LStricmp(CurPanelItem->FileName, Item->strSrcFileName.get()))
+								Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI);
+								if (!FSF.LStricmp(FGPPI.Item->FileName, Item->strSrcFileName.get()))
 								{
 									Info.PanelControl(PANEL_ACTIVE,FCTL_SETSELECTION,j,(void*)true);
-									free(CurPanelItem);
+									free(FGPPI.Item);
 									break;
 								}
-								free(CurPanelItem);
+								free(FGPPI.Item);
 							}
 						}
 					}
 					goto NEXT;
+				}
 			}
 		}
 	}
@@ -1045,22 +1057,24 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 		struct PanelInfo PInfo;
 		PInfo.StructSize=sizeof(PanelInfo);
 		Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELINFO,0,&PInfo);
+		FarGetPluginPanelItem FGPPI;
 		for (int k=i; k<Count; k++)
 		{
 			for (int j=0; j<PInfo.ItemsNumber; j++)
 			{
-				PluginPanelItem *CurPanelItem=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0));
-				if (CurPanelItem)
+				FGPPI.Size=0; FGPPI.Item=0;
+				FGPPI.Item=(PluginPanelItem*)malloc(Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI));
+				if (FGPPI.Item)
 				{
-					Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,CurPanelItem);
-					if (!FSF.LStricmp(CurPanelItem->FileName, Undo.OldFileName[k]))
+					Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,&FGPPI);
+					if (!FSF.LStricmp(FGPPI.Item->FileName, Undo.OldFileName[k]))
 					{
 						if (k==i) RInfo.TopPanelItem=RInfo.CurrentItem=j;
 						Info.PanelControl(PANEL_ACTIVE,FCTL_SETSELECTION,j,(void*)true);
-						free(CurPanelItem);
+						free(FGPPI.Item);
 						break;
 					}
-					free(CurPanelItem);
+					free(FGPPI.Item);
 				}
 			}
 		}
