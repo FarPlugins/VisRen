@@ -111,7 +111,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
 	Info->StructSize=sizeof(GlobalInfo);
 	Info->MinFarVersion=FARMANAGERVERSION;
-	Info->Version=MAKEFARVERSION(3,0,0,15);
+	Info->Version=MAKEFARVERSION(3,0,0,15,VS_RC);
 	Info->Guid=MainGuid;
 	Info->Title=L"Visual renaming";
 	Info->Description=L"Visual renaming files plugin for Far Manager v3.0";
@@ -182,7 +182,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *OInfo)
 /****************************************************************************
  * Эту функцию FAR вызывает перед выгрузкой плагина
  ****************************************************************************/
-void WINAPI ExitFARW()
+void WINAPI ExitFARW(const struct ExitInfo *Info)
 {
 	//Освободим память в случае выгрузки плагина
 	FreeUndo();
