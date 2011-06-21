@@ -1164,21 +1164,16 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 			// красим сепаратор над листбоксом...
 			if (Param1==DlgSEP2)
 			{
-				int color=Info.AdvControl(&MainGuid, ACTL_GETCOLOR, COL_DIALOGBOX,0);
-				int color2;
+				FarColor Color;
+				struct FarDialogItemColors *Colors=(FarDialogItemColors*)Param2;
+
 				// ... если листбокс в фокусе, то красим в выделенный цвет
 				if (DlgLIST==Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0))
-				{
-					color2=Info.AdvControl(&MainGuid, ACTL_GETCOLOR, COL_DIALOGHIGHLIGHTBOXTITLE,0);
-					color2|=(color<<16);
-				}
+					Info.AdvControl(&MainGuid, ACTL_GETCOLOR, COL_DIALOGHIGHLIGHTBOXTITLE,&Color);
 				// ... иначе - в обычный цвет
 				else
-				{
-					color2=color;
-					color2|=(color<<16);
-				}
-				return (INT_PTR)(Param2=(void*)color2);
+					Info.AdvControl(&MainGuid, ACTL_GETCOLOR, COL_DIALOGBOX,&Color);
+				Colors->Colors[0]=Color;
 			}
 			break;
 
