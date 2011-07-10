@@ -789,7 +789,7 @@ bool RenFile::ProcessFileName()
 			wchar_t buf[15];
 			FSF.itoa(Index, buf, 10);
 			static wchar_t *MsgItems[]={(wchar_t *)GetMsg(MVRenTitle), (wchar_t *)GetMsg(MLoadFiles), buf};
-			Info.Message(&MainGuid, 0, 0, MsgItems, 3, 0);
+			Info.Message(&MainGuid,&LoadFilesMsgGuid, 0, 0, MsgItems, 3, 0);
 
 			if (CheckForEsc(hConInp))
 			{
@@ -945,7 +945,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 				dest,
 				GetMsg(MSkip), GetMsg(MSkipAll), GetMsg(MRetry), GetMsg(MCancel)
 			};
-			int Ret=Info.Message( &MainGuid, FMSG_WARNING|FMSG_ERRORTYPE, 0,
+			int Ret=Info.Message( &MainGuid, &RenameFailMsgGuid, FMSG_WARNING|FMSG_ERRORTYPE, 0,
 														MsgItems, sizeof(MsgItems) / sizeof(MsgItems[0]), 4 );
 			switch (Ret)
 			{
@@ -1035,7 +1035,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 				destFull.get(),
 				GetMsg(MSkip), GetMsg(MSkipAll), GetMsg(MRetry), GetMsg(MCancel)
 			};
-			int Ret=Info.Message( &MainGuid, FMSG_WARNING|FMSG_ERRORTYPE, 0,
+			int Ret=Info.Message( &MainGuid, &RenameFailMsgGuid, FMSG_WARNING|FMSG_ERRORTYPE, 0,
 														MsgItems, sizeof(MsgItems) / sizeof(MsgItems[0]), 4 );
 			switch (Ret)
 			{
@@ -1106,7 +1106,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 		wchar_t tmp[80];
 		FSF.sprintf(tmp, GetMsg(MProcessedFmt), iRen, Count);
 		const wchar_t *MsgItems[]={GetMsg(MVRenTitle), tmp, GetMsg(MOK)};
-		Info.Message( &MainGuid, 0, 0, MsgItems,
+		Info.Message( &MainGuid, &RenMsgGuid, 0, 0, MsgItems,
 									sizeof(MsgItems) / sizeof(MsgItems[0]), 1 );
 	}
 
@@ -1134,7 +1134,7 @@ int RenFile::CreateList(const wchar_t *TempFileName)
 		return -1;
 
 	const wchar_t *MsgItems[]={ GetMsg(MVRenTitle), GetMsg(MShowOrgName), GetMsg(MShowOrgName2) };
-	Opt.ShowOrgName=!Info.Message(&MainGuid, FMSG_MB_YESNO, 0, MsgItems, 3, 0);
+	Opt.ShowOrgName=!Info.Message(&MainGuid, &ShowOrgNameMsgGuid, FMSG_MB_YESNO, 0, MsgItems, 3, 0);
 
 	int width=0;
 	if (Opt.ShowOrgName) width=Opt.lenFileName;

@@ -716,16 +716,16 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 				}
 				return false;
 			}
-			if (record->EventType==KEY_EVENT)
+			if (record->EventType==KEY_EVENT && record->Event.KeyEvent.bKeyDown)
 			{
-				long Key=FSF.FarInputRecordToKey(record);
+				WORD Key=record->Event.KeyEvent.wVirtualKeyCode;
 
-				if (Key==KEY_F1 && (Param1==DlgETEMPLNAME || Param1==DlgETEMPLEXT))
+				if (IsNone(record) && Key==VK_F1 && (Param1==DlgETEMPLNAME || Param1==DlgETEMPLEXT))
 				{
 					Info.ShowHelp(Info.ModuleName, 0, 0);
 					return true;
 				}
-				else if (Key==KEY_F2 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
+				else if (IsNone(record) && Key==VK_F2 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
 				{
  LOGREN:
 					if (Opt.LogRen) Opt.LogRen=0;
@@ -734,14 +734,14 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					return true;
 				}
 				//----
-				else if (Key==KEY_F3)
+				else if (IsNone(record) && Key==VK_F3)
 				{
 					int Pos=Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, 0);
 					if (Pos<(Opt.LoadUndo?Undo.iCount:FileList.Count())) ShowName(Pos);
 					return true;
 				}
 				//----
-				else if (Key==KEY_F4)
+				else if (IsNone(record) && Key==VK_F4)
 				{
 					if ( (Param1==DlgETEMPLNAME || Param1==DlgETEMPLEXT) && Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0) )
 					{
@@ -769,14 +769,14 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					return true;
 				}
 				//----
-				else if (Key==KEY_F5 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
+				else if (IsNone(record) && Key==VK_F5 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
 				{
  DLGRESIZE:
 					DlgResize(hDlg, true);  //true - т.к. нажали F5
 					return true;
 				}
 				//----
-				else if (Key==KEY_F6 && Undo.iCount && !bError && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
+				else if (IsNone(record) && Key==VK_F6 && Undo.iCount && !bError && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
 				{
 					Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0;
 					UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo=1);
@@ -785,7 +785,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					return true;
 				}
 				//----
-				else if (Key==KEY_F8 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
+				else if (IsNone(record) && Key==VK_F8 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
 				{
  CLEARLOGREN:
 					if (Undo.iCount && !Opt.LoadUndo && YesNoMsg(MClearLogTitle, MClearLogBody))
@@ -799,7 +799,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					return false;
 				}
 				//----
-				else if (Key==KEY_F12 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
+				else if (IsNone(record) && Key==VK_F12 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
 				{
 					int ItemFocus=Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0);
 					if (ItemFocus!=DlgLIST) SaveItemFocus=ItemFocus;
@@ -807,7 +807,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					return true;
 				}
 				//----
-				else if (Key==KEY_INS)
+				else if (IsNone(record) && Key==VK_INSERT)
 				{
 					if (Param1==DlgETEMPLNAME || Param1==DlgBTEMPLNAME)
 					{
@@ -829,7 +829,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					}
 				}
 				//----
-				else if (Key==KEY_DEL && Param1==DlgLIST)
+				else if (IsNone(record) && Key==VK_DELETE && Param1==DlgLIST)
 				{
 					int Pos=Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, 0);
 					if (Pos>=(Opt.LoadUndo?Undo.iCount:FileList.Count())) return false;
@@ -865,16 +865,14 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					return true;
 				}
 				//----
-				else if ( Param1==DlgLIST && !Opt.LoadUndo &&
-									(Key==(KEY_CTRL|KEY_UP) || Key==(KEY_RCTRL|KEY_UP) ||
-									 Key==(KEY_CTRL|KEY_DOWN) || Key==(KEY_RCTRL|KEY_DOWN)) )
+				else if ( Param1==DlgLIST && !Opt.LoadUndo && IsCtrl(record) && (Key==VK_UP || Key==VK_DOWN) )
 				{
 					FarListPos ListPos;
 					Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, &ListPos);
 					if (ListPos.SelectPos>=FileList.Count()) 
 						return false;
-					bool bUp=(Key==(KEY_CTRL|KEY_UP) || Key==(KEY_RCTRL|KEY_UP));
-						if (bUp?ListPos.SelectPos>0:ListPos.SelectPos<FileList.Count()-1)
+					bool bUp=(Key==VK_UP);
+					if (bUp?ListPos.SelectPos>0:ListPos.SelectPos<FileList.Count()-1)
 					{
 						Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
 						File add, *cur=NULL; unsigned index;
@@ -915,15 +913,12 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					}
 				}
 				//----
-				else if ( Param1==DlgLIST &&
-									(Key==(KEY_CTRL|KEY_LEFT) || Key==(KEY_RCTRL|KEY_LEFT) ||
-									Key==(KEY_CTRL|KEY_RIGHT) || Key==(KEY_RCTRL|KEY_RIGHT) ||
-									Key==(KEY_CTRL|KEY_NUMPAD5) || Key==(KEY_RCTRL|KEY_NUMPAD5)) )
+				else if ( Param1==DlgLIST && IsCtrl(record) && (Key==VK_LEFT || Key==VK_RIGHT || Key==VK_NUMPAD5) )
 				{
-					bool bLeft=(Key==(KEY_CTRL|KEY_LEFT) || Key==(KEY_RCTRL|KEY_LEFT));
+					bool bLeft=(Key==VK_LEFT);
 					int maxBorder=(DlgSize.Full?DlgSize.mW2:DlgSize.W2)-2-5;
 					bool Ret=false;
-					if (Key==(KEY_CTRL|KEY_NUMPAD5) || Key==(KEY_RCTRL|KEY_NUMPAD5))
+					if (Key==VK_NUMPAD5)
 					{
 						Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0; Ret=true;
 					}
@@ -949,13 +944,10 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					}
 				}
 				//----
-				else if ( Param1==DlgLIST &&
-									(Key==KEY_LEFT || Key==KEY_RIGHT ||
-									Key==(KEY_ALT|KEY_LEFT) || Key==(KEY_RALT|KEY_LEFT) ||
-									Key==(KEY_ALT|KEY_RIGHT) || Key==(KEY_RALT|KEY_RIGHT)) )
+				else if ( Param1==DlgLIST && ((IsNone(record) && (Key==VK_LEFT || Key==VK_RIGHT)) || (IsAlt(record) && (Key==VK_LEFT || Key==VK_RIGHT))) )
 				{
 					bool Ret=false;
-					if (Key==KEY_LEFT || Key==KEY_RIGHT)
+					if (IsNone(record))
 					{
 						int maxDestCol=Opt.lenDestFileName-((DlgSize.Full?DlgSize.mW2:DlgSize.W2)-2)+Opt.CurBorder;
 						if (Opt.destCurCol>maxDestCol)
@@ -963,11 +955,11 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 							if (maxDestCol>0) Opt.destCurCol=maxDestCol;
 							else Opt.destCurCol=0;
 						}
-						if (Key==KEY_LEFT && Opt.destCurCol>0)
+						if (Key==VK_LEFT && Opt.destCurCol>0)
 						{
 							Opt.destCurCol-=1; Ret=true;
 						}
-						else if (Key==KEY_RIGHT && Opt.destCurCol<maxDestCol)
+						else if (Key==VK_RIGHT && Opt.destCurCol<maxDestCol)
 						{
 							Opt.destCurCol+=1; Ret=true;
 						}
@@ -980,11 +972,11 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 							if (maxSrcCol>0) Opt.srcCurCol=maxSrcCol;
 							else Opt.srcCurCol=0;
 						}
-						if ((Key==(KEY_ALT|KEY_LEFT) || Key==(KEY_RALT|KEY_LEFT)) && Opt.srcCurCol>0)
+						if (Key==VK_LEFT && Opt.srcCurCol>0)
 						{
 							Opt.srcCurCol-=1; Ret=true;
 						}
-						else if ((Key==(KEY_ALT|KEY_RIGHT) || Key==(KEY_RALT|KEY_RIGHT)) && Opt.srcCurCol<maxSrcCol)
+						else if (Key==VK_RIGHT && Opt.srcCurCol<maxSrcCol)
 						{
 							Opt.srcCurCol+=1; Ret=true;
 						}
@@ -998,7 +990,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					return true;
 				}
 				//----
-				else if ( Param1==DlgLIST && (Key==(KEY_CTRL|KEY_PGUP) || Key==(KEY_RCTRL|KEY_PGUP)) )
+				else if ( Param1==DlgLIST && IsCtrl(record) && Key==VK_PRIOR )
 				{
  GOTOFILE:
 					int Pos=Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, 0);
@@ -1183,7 +1175,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 			if (Param1==DlgREN && Opt.LoadUndo)
 			{
 				const wchar_t *MsgItems[]={ GetMsg(MUndoTitle), GetMsg(MUndoBody) };
-				switch (Info.Message(&MainGuid,FMSG_WARNING|FMSG_MB_YESNOCANCEL,0,MsgItems,2,0))
+				switch (Info.Message(&MainGuid,&LoadUndoMsgGuid,FMSG_WARNING|FMSG_MB_YESNOCANCEL,0,MsgItems,2,0))
 				{
 					case 0:
 						Opt.Undo=1; return true;
