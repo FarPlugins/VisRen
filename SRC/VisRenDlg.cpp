@@ -749,7 +749,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 									Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgETEMPLEXT, 0)==7)
 						{
 							wchar_t WordDiv[20];
-							if (Info.InputBox(&MainGuid,GetMsg(MWordDivTitle), GetMsg(MWordDivBody), L"VisRenWordDiv", StrOpt.WordDiv.get(),WordDiv,19, 0, FIB_BUTTONS ))
+							if (Info.InputBox(&MainGuid,&InputBoxGuid, GetMsg(MWordDivTitle), GetMsg(MWordDivBody), L"VisRenWordDiv", StrOpt.WordDiv.get(),WordDiv,19, 0, FIB_BUTTONS ))
 							{
 								StrOpt.WordDiv=WordDiv;
 								FarSettingsCreate settings={sizeof(FarSettingsCreate),MainGuid,INVALID_HANDLE_VALUE};
