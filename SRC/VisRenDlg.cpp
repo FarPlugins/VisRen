@@ -913,12 +913,12 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					}
 				}
 				//----
-				else if ( Param1==DlgLIST && IsCtrl(record) && (Key==VK_LEFT || Key==VK_RIGHT || Key==VK_NUMPAD5) )
+				else if ( Param1==DlgLIST && IsCtrl(record) && (Key==VK_LEFT || Key==VK_RIGHT || Key==VK_NUMPAD5 || Key==VK_CLEAR) )
 				{
 					bool bLeft=(Key==VK_LEFT);
 					int maxBorder=(DlgSize.Full?DlgSize.mW2:DlgSize.W2)-2-5;
 					bool Ret=false;
-					if (Key==VK_NUMPAD5)
+					if (Key==VK_NUMPAD5 || Key==VK_CLEAR)
 					{
 						Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0; Ret=true;
 					}
