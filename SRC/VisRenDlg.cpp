@@ -200,7 +200,6 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 	else ListPos.TopPos=ListInfo.TopPos;
 	Info.SendDlgMessage(hDlg,DM_LISTSETCURPOS,DlgLIST,&ListPos);
 
-	Info.SendDlgMessage(hDlg,DM_LISTSETMOUSEREACTION,DlgLIST,(void*)LMRT_NEVER);
 	return true;
 }
 
@@ -295,7 +294,6 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 	Info.SendDlgMessage(hDlg, DM_RESIZEDIALOG, 0, &c);
 	c.X=c.Y=-1;
 	Info.SendDlgMessage(hDlg, DM_MOVEDIALOG, true, &c);
-	Info.SendDlgMessage(hDlg, DM_LISTSETMOUSEREACTION, DlgLIST, (void*)LMRT_NEVER);
 	Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, true, 0);
 	return;
 }
