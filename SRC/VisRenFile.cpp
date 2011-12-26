@@ -540,7 +540,7 @@ bool RenFile::Replase(string &strSrc)
 							{
 								Digit[k]=L'\0';
 								iDigit=FSF.atoi(Digit);
-								if (iDigit<=brackets)
+								if (brackets && iDigit<=(brackets-1))
 								{
 									i+=k;
 									for (k=match[iDigit].start; k<match[iDigit].end; k++)
