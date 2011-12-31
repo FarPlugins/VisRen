@@ -995,13 +995,22 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					if (Pos>=(Opt.LoadUndo?Undo.iCount:FileList.Count())) 
 						return true;
 					string name;
-					size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIR,0,0);
-					wchar_t *buf=name.get(size);
-					Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIR,size,buf);
-					name.updsize();
-
+					size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIRECTORY,0,0);
+					if (size)
+					{
+						FarPanelDirectory *buf=(FarPanelDirectory*)malloc(size);
+						if (buf)
+						{
+							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIRECTORY,size,buf);
+							name=buf->Name;
+							free(buf);
+						}
+					}
 					if (Opt.LoadUndo && FSF.LStricmp(name.get(),Undo.Dir))
-						Info.PanelControl(PANEL_ACTIVE,FCTL_SETPANELDIR,0,Undo.Dir);
+					{
+						FarPanelDirectory dirInfo={sizeof(FarPanelDirectory),Undo.Dir,NULL,{0},NULL};
+						Info.PanelControl(PANEL_ACTIVE,FCTL_SETPANELDIRECTORY,0,&dirInfo);
+					}
 
 					PanelInfo PInfo;
 					PInfo.StructSize=sizeof(PanelInfo);

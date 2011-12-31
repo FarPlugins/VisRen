@@ -82,14 +82,20 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 	}
 
 	// получим strPanelDir
-	size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIR,0,0);
-	wchar_t *buf=strPanelDir.get(size); 
-	Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIR,size,buf);
-	strPanelDir.updsize();
-
+	size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIRECTORY,0,0);
+	if (size)
+	{
+		FarPanelDirectory *dirbuf=(FarPanelDirectory*)malloc(size);
+		if (dirbuf)
+		{
+			Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIRECTORY,size,dirbuf);
+			strPanelDir=dirbuf->Name;
+			free(dirbuf);
+		}
+	}
 	// получим strNativePanelDir - "\\?\dir\"
 	size=FSF.ConvertPath(CPM_NATIVE,strPanelDir.get(),0,0);
-	buf=strNativePanelDir.get(size+1); //+1 для FSF.AddEndSlash()
+	wchar_t *buf=strNativePanelDir.get(size+1); //+1 для FSF.AddEndSlash()
 	FSF.ConvertPath(CPM_NATIVE,strPanelDir.get(),buf,size);
 	strNativePanelDir.updsize();
 	FSF.AddEndSlash(buf);
@@ -1052,7 +1058,8 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
  BREAK:
 		if (i<0) i=0;
 		// установим каталог
-		Info.PanelControl(PANEL_ACTIVE,FCTL_SETPANELDIR,0,Undo.Dir);
+		FarPanelDirectory dirInfo={sizeof(FarPanelDirectory),Undo.Dir,NULL,{0},NULL};
+		Info.PanelControl(PANEL_ACTIVE,FCTL_SETPANELDIRECTORY,0,&dirInfo);
 		// отметим файлы
 		struct PanelInfo PInfo;
 		PInfo.StructSize=sizeof(PanelInfo);
