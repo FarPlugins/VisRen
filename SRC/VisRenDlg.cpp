@@ -1052,6 +1052,11 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					Info.SendDlgMessage(hDlg,DM_CLOSE,DlgCANCEL,0);
 					return true;
 				}
+				else if ( Param1==DlgLIST && (record->Event.KeyEvent.dwControlKeyState&ControlKeyCtrlMask) &&
+									(record->Event.KeyEvent.dwControlKeyState&ControlKeyAltMask) && Key==0x46 /*VK_F*/ )
+				{
+					return true;
+				}
 			}
 		}
 		break;
