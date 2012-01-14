@@ -3,7 +3,7 @@
  *
  * Plugin module for Far Manager 3.0
  *
- * Copyright (c) 2007-2011 Alexey Samlyukov
+ * Copyright (c) 2007-2012 Alexey Samlyukov
  ****************************************************************************/
 /*
 Redistribution and use in source and binary forms, with or without
@@ -1001,6 +1001,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 						FarPanelDirectory *buf=(FarPanelDirectory*)malloc(size);
 						if (buf)
 						{
+							buf->StructSize=sizeof(FarPanelDirectory);
 							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIRECTORY,size,buf);
 							name=buf->Name;
 							free(buf);

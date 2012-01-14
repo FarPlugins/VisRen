@@ -3,7 +3,7 @@
  *
  * Plugin module for Far Manager 3.0
  *
- * Copyright (c) 2007-2011 Alexey Samlyukov
+ * Copyright (c) 2007-2012 Alexey Samlyukov
  ****************************************************************************/
 /*
 Redistribution and use in source and binary forms, with or without
@@ -88,6 +88,7 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 		FarPanelDirectory *dirbuf=(FarPanelDirectory*)malloc(size);
 		if (dirbuf)
 		{
+			dirbuf->StructSize=sizeof(FarPanelDirectory);
 			Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIRECTORY,size,dirbuf);
 			strPanelDir=dirbuf->Name;
 			free(dirbuf);
