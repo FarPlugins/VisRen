@@ -228,6 +228,7 @@ struct ID3v2TagFrame {
 	};
 };
 
+#if 0
 int I4 (int X)
 {
 	__asm {
@@ -237,6 +238,13 @@ int I4 (int X)
 		rol ax,8
 	}
 }
+#else
+#define I4(x) ( \
+   (((x) & 0xFF) << 24) | \
+   (((x) & 0xFF00) << 8) | \
+   (((x) & 0xFF0000) >> 8) | \
+   (((x) & 0xFF000000) >> 24))
+#endif
 
 bool doReadFrame(HANDLE hFile, ID3v2TagFrame *pFrame, bool bSkip)
 {
