@@ -487,7 +487,7 @@ void VisRenDlg::ShowName(int Pos)
 	for (cur=FileList.First(), index=0; cur && index<Pos; cur=FileList.Next(cur), index++)
 			;
 	// старое имя
-	wchar_t *src=Opt.LoadUndo?Undo.CurFileName[Pos]:cur->strSrcFileName.get();
+	wchar_t *src=Opt.LoadUndo?Undo.CurFileName[Pos]:(cur?cur->strSrcFileName.get():NULL);
 	int len=wcslen(src);
 	for (i=0; i<4; i++, len-=65)
 	{
@@ -500,7 +500,7 @@ void VisRenDlg::ShowName(int Pos)
 			lstrcpyn(srcName[i], src+i*65, 66);
 	}
 	// новое имя
-	wchar_t *dest=Opt.LoadUndo?Undo.OldFileName[Pos]:cur->strDestFileName.get();
+	wchar_t *dest=Opt.LoadUndo?Undo.OldFileName[Pos]:(cur?cur->strDestFileName.get():NULL);
 	len=wcslen(dest);
 	for (i=0; i<4; i++, len-=65)
 	{

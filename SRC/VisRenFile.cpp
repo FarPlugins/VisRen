@@ -684,7 +684,7 @@ void RenFile::Case(wchar_t *Name, wchar_t *Ext, DWORD dwCase)
 	{
 		for (int i=0; Name[i]; i++)
 		{
-			if (!i || wmemchr(StrOpt.WordDiv.get(), Name[i-1], StrOpt.WordDiv.length()*sizeof(wchar_t)))
+			if (!i || wmemchr(StrOpt.WordDiv.get(), Name[i-1], StrOpt.WordDiv.length()))
 				Name[i]=(wchar_t)FSF.LUpper((wchar_t)Name[i]);
 			else
 				Name[i]=(wchar_t)FSF.LLower((wchar_t)Name[i]);
@@ -709,12 +709,12 @@ void RenFile::Case(wchar_t *Name, wchar_t *Ext, DWORD dwCase)
 		}
 		for (int i=0; Name[i] && i<Ptr; i++)
 		{
-			if (!i || wmemchr(StrOpt.WordDiv.get(), Name[i-1], StrOpt.WordDiv.length()*sizeof(wchar_t)))
+			if (!i || wmemchr(StrOpt.WordDiv.get(), Name[i-1], StrOpt.WordDiv.length()))
 				Name[i]=(wchar_t)FSF.LUpper((wchar_t)Name[i]);
 			else
 				Name[i]=(wchar_t)FSF.LLower((wchar_t)Name[i]);
-			if (i>0 && Name[i+1] && wmemchr(StrOpt.WordDiv.get(), Name[i-1], StrOpt.WordDiv.length()*sizeof(wchar_t))
-					&& ((wchar_t)Name[i])==0x418 && wmemchr(StrOpt.WordDiv.get(), Name[i+1], StrOpt.WordDiv.length()*sizeof(wchar_t)))
+			if (i>0 && Name[i+1] && wmemchr(StrOpt.WordDiv.get(), Name[i-1], StrOpt.WordDiv.length())
+					&& ((wchar_t)Name[i])==0x418 && wmemchr(StrOpt.WordDiv.get(), Name[i+1], StrOpt.WordDiv.length()))
 				Name[i]=(wchar_t)FSF.LLower((wchar_t)Name[i]);
 		}
 		if (Ptr!=lenName)
@@ -737,7 +737,7 @@ void RenFile::Case(wchar_t *Name, wchar_t *Ext, DWORD dwCase)
 	else if (dwCase&EXT_CASE_TITLE)
 		for (int i=0; Ext[i]; i++)
 		{
-			if (!i || wmemchr(StrOpt.WordDiv.get(), Ext[i-1], StrOpt.WordDiv.length()*sizeof(wchar_t)))
+			if (!i || wmemchr(StrOpt.WordDiv.get(), Ext[i-1], StrOpt.WordDiv.length()))
 				Ext[i]=(wchar_t)FSF.LUpper((wchar_t)Ext[i]);
 			else
 				Ext[i]=(wchar_t)FSF.LLower((wchar_t)Ext[i]);
