@@ -233,8 +233,7 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 	FarGetDialogItem FGDI;
 	for (int i=DlgBORDER; i<=DlgCANCEL; i++)
 	{
-		FGDI.Size=0; FGDI.Item=0;
-		FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,&FGDI));
+		FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
 		if (!FGDI.Item) return;
 		Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, &FGDI);
 		switch (i)
@@ -431,12 +430,13 @@ void VisRenDlg::MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY)
 					case DlgEMASKNAME: case DlgEMASKEXT:
 					case DlgESEARCH:   case DlgEREPLACE:
 					{
-						FarDialogItem *Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
-						if (Item)
+						FarGetDialogItem FGDI;
+						FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
+						if (FGDI.Item)
 						{
-							Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, Item);
-							Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, Item);
-							free(Item);
+							Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, &FGDI);
+							Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, FGDI.Item);
+							free(FGDI.Item);
 							break;
 						}
 					}
@@ -588,20 +588,20 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 				DlgResize(hDlg);
 
 				// для корректного использования масок из истории
-				FarDialogItem *Item;
-				Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,0));
-				if (Item)
+				FarGetDialogItem FGDI;
+				FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,0));
+				if (FGDI.Item)
 				{
-					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,Item);
-					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKNAME,Item);
-					free(Item);
+					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,&FGDI);
+					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKNAME,FGDI.Item);
+					free(FGDI.Item);
 				}
-				Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKEXT,0));
-				if (Item)
+				FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKEXT,0));
+				if (FGDI.Item)
 				{
-					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKEXT,Item);
-					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKEXT,Item);
-					free(Item);
+					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKEXT,&FGDI);
+					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKEXT,FGDI.Item);
+					free(FGDI.Item);
 				}
 				break;
 			}
@@ -675,12 +675,13 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 			else if (Param1==DlgCASE || Param1==DlgREGEX)
 			{
 				Param1==DlgCASE?Opt.CaseSensitive=(int)Param2:Opt.RegEx=(int)Param2;
-				FarDialogItem *Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgESEARCH,0));
-				if (Item)
+				FarGetDialogItem FGDI;
+				FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgESEARCH,0));
+				if (FGDI.Item)
 				{
-					Info.SendDlgMessage(hDlg, DM_GETDLGITEM, DlgESEARCH, Item);
-					Info.SendDlgMessage(hDlg, DN_EDITCHANGE, DlgESEARCH, Item);
-					free(Item);
+					Info.SendDlgMessage(hDlg, DM_GETDLGITEM, DlgESEARCH,&FGDI);
+					Info.SendDlgMessage(hDlg, DN_EDITCHANGE, DlgESEARCH,FGDI.Item);
+					free(FGDI.Item);
 				}
 			}
 			else if (Param1==DlgUNDO)
@@ -894,12 +895,13 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 								case DlgEMASKNAME: case DlgEMASKEXT:
 								case DlgESEARCH:   case DlgEREPLACE:
 								{
-									FarDialogItem *Item=(FarDialogItem *)malloc(Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
-									if (Item)
+									FarGetDialogItem FGDI;
+									FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
+									if (FGDI.Item)
 									{
-										Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, Item);
-										Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, Item);
-										free(Item);
+										Info.SendDlgMessage(hDlg, DM_GETDLGITEM, i, &FGDI);
+										Info.SendDlgMessage(hDlg, DN_EDITCHANGE, i, FGDI.Item);
+										free(FGDI.Item);
 										break;
 									}
 								}
