@@ -242,11 +242,11 @@ bool RenFile::GetNewNameExt(const wchar_t *src, string &strDest,unsigned ItemInd
 						iEnd=FSF.atoi(strEnd.get());
 						if (!iEnd || *pMask!=L']')
 							return false;
-						wchar_t *ptr=(wchar_t *)malloc((iEnd+2)*sizeof(wchar_t));
-						if (ptr)
+						wchar_t *ptrcur=(wchar_t *)malloc((iEnd+2)*sizeof(wchar_t));
+						if (ptrcur)
 						{
-							lstrcpyn(ptr, (bName?Name.get():Ext.get())+iStart, iEnd+1);
-							buf+=ptr;  free(ptr);  pMask++;
+							lstrcpyn(ptrcur, (bName?Name.get():Ext.get())+iStart, iEnd+1);
+							buf+=ptrcur;  free(ptrcur);  pMask++;
 						}
 					}
 					// копируем диапазон символов...
@@ -279,11 +279,11 @@ bool RenFile::GetNewNameExt(const wchar_t *src, string &strDest,unsigned ItemInd
 							}
 							else
 								if (iEnd<=iStart) return false;
-							wchar_t *ptr=(wchar_t *)malloc((iEnd+2)*sizeof(wchar_t));
-							if (ptr)
+							wchar_t *ptrcur=(wchar_t *)malloc((iEnd+2)*sizeof(wchar_t));
+							if (ptrcur)
 							{
-								lstrcpyn(ptr, (bName?Name.get():Ext.get()), iEnd+1);
-								buf+=(ptr+iStart);  free(ptr);  pMask++;
+								lstrcpyn(ptrcur, (bName?Name.get():Ext.get()), iEnd+1);
+								buf+=(ptrcur+iStart);  free(ptrcur);  pMask++;
 							}
 						}
 					}
