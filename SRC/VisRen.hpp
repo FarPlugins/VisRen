@@ -65,6 +65,9 @@ inline int __cdecl Strncmp(const wchar_t *s1, const wchar_t *s2, int n=-1) { ret
 /****************************************************************************
  * GUID
  ****************************************************************************/
+
+// {00000000-0000-0000-0000-000000000000}
+DEFINE_GUID(FarGuid,0,0,0,0,0,0,0,0,0,0,0);
 // {E80B8002-EED3-4563-9C78-2E3C3246F8D3}
 DEFINE_GUID(MainGuid, 0xe80b8002, 0xeed3, 0x4563, 0x9c, 0x78, 0x2e, 0x3c, 0x32, 0x46, 0xf8, 0xd3);
 // {F8A515F3-A57C-4c91-9C07-9A196143550A}
@@ -222,3 +225,4 @@ void ErrorMsg(DWORD Title, DWORD Body);
 bool YesNoMsg(DWORD Title, DWORD Body);
 void FreeUndo();
 int DebugMsg(wchar_t *msg, wchar_t *msg2 = L" ", unsigned int i = 1000);
+__int64 GetFarSetting(FARSETTINGS_SUBFOLDERS Root,const wchar_t* Name);
