@@ -168,18 +168,18 @@ void WINAPI GetPluginInfoW(struct PluginInfo *Info)
  ****************************************************************************/
 HANDLE WINAPI OpenW(const struct OpenInfo *OInfo)
 {
-	HANDLE hPlugin = INVALID_HANDLE_VALUE;
+	HANDLE hPanel = NULL;
 	struct PanelInfo PInfo;
 	PInfo.StructSize=sizeof(PanelInfo);
 
 	// Если не удалось запросить информацию о панели...
 	if (!Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELINFO,0,&PInfo))
-		return hPlugin;
+		return hPanel;
 
 	if (PInfo.PanelType!=PTYPE_FILEPANEL || (PInfo.Flags&PFLAGS_PLUGIN) || !PInfo.ItemsNumber || !PInfo.SelectedItemsNumber)
 	{
 		ErrorMsg(MVRenTitle, MFilePanelsRequired);
-		return hPlugin;
+		return hPanel;
 	}
 
 	class VisRenDlg RenDlg;
@@ -193,7 +193,7 @@ HANDLE WINAPI OpenW(const struct OpenInfo *OInfo)
 			RenDlg.RenameInEditor(PInfo.SelectedItemsNumber, PInfo.ItemsNumber); break;
 	}
 
-	return hPlugin;
+	return hPanel;
 }
 
 /****************************************************************************
