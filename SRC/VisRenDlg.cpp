@@ -500,11 +500,11 @@ void VisRenDlg::ShowName(int Pos)
 	{
 		if (len<65)
 		{
-			lstrcpyn(srcName[i], src+i*65, len+1);
+			lstrcpyn(srcName[i], (src+i*65)?(src+i*65):L"", len+1);
 			break;
 		}
 		else
-			lstrcpyn(srcName[i], src+i*65, 66);
+			lstrcpyn(srcName[i], (src+i*65)?(src+i*65):L"", 66);
 	}
 	// новое имя
 	wchar_t *dest=Opt.LoadUndo?Undo.OldFileName[Pos]:(cur?cur->strDestFileName.get():NULL);
@@ -513,11 +513,11 @@ void VisRenDlg::ShowName(int Pos)
 	{
 		if (len<65)
 		{
-			lstrcpyn(destName[i], dest+i*65, len+1);
+			lstrcpyn(destName[i], (dest+i*65)?(dest+i*65):L"", len+1);
 			break;
 		}
 		else
-			lstrcpyn(destName[i], dest+i*65, 66);
+			lstrcpyn(destName[i], (dest+i*65)?(dest+i*65):L"", 66);
 	}
 
 	struct FarDialogItem DialogItems[] = {
