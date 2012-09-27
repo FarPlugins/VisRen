@@ -136,8 +136,7 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 	if (ItemsNumber<AddNumber) AddNumber-=ItemsNumber;
 	else AddNumber=0;
 	// запросим информацию
-	FarListInfo ListInfo;
-	ListInfo.StructSize=sizeof(FarListInfo);
+	FarListInfo ListInfo={sizeof(FarListInfo)};
 	Info.SendDlgMessage(hDlg,DM_LISTINFO,DlgLIST,&ListInfo);
 
 	if (ListInfo.ItemsNumber)
@@ -194,8 +193,7 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 
 	if (buf) free(buf);
 	// восстановим положение курсора
-	FarListPos ListPos;
-	ListPos.StructSize=sizeof(FarListPos);
+	FarListPos ListPos={sizeof(FarListPos)};
 	ListPos.SelectPos=ListInfo.SelectPos<ItemsNumber?ListInfo.SelectPos:(ListInfo.SelectPos-1<0?0:ListInfo.SelectPos-1);
 	static bool bOldFull=bFull;
 	if (bOldFull!=bFull) { ListPos.TopPos=-1; bOldFull=bFull; }
@@ -232,8 +230,7 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 	Info.SendDlgMessage(hDlg, DM_ENABLEREDRAW, false, 0);
 	Opt.srcCurCol=Opt.destCurCol=Opt.CurBorder=0;
 
-	FarGetDialogItem FGDI;
-	FGDI.StructSize=sizeof(FarGetDialogItem);
+	FarGetDialogItem FGDI={sizeof(FarGetDialogItem)};
 	for (int i=DlgBORDER; i<=DlgCANCEL; i++)
 	{
 		FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
@@ -396,8 +393,7 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
  ****************************************************************************/
 void VisRenDlg::MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY)
 {
-	FarListPos ListPos;
-	ListPos.StructSize=sizeof(FarListPos);
+	FarListPos ListPos={sizeof(FarListPos)};
 	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, &ListPos);
 	if (ListPos.SelectPos>=FileList.Count()) return;
 
@@ -435,8 +431,7 @@ void VisRenDlg::MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY)
 					case DlgEMASKNAME: case DlgEMASKEXT:
 					case DlgESEARCH:   case DlgEREPLACE:
 					{
-						FarGetDialogItem FGDI;
-						FGDI.StructSize=sizeof(FarGetDialogItem);
+						FarGetDialogItem FGDI={sizeof(FarGetDialogItem)};
 						FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
 						if (FGDI.Item)
 						{
@@ -462,8 +457,7 @@ int VisRenDlg::ListMouseRightClick(HANDLE hDlg, DWORD dwMousePosX, DWORD dwMouse
 {
 	SMALL_RECT dlgRect;
 	Info.SendDlgMessage(hDlg, DM_GETDLGRECT, 0, &dlgRect);
-	FarListPos ListPos;
-	ListPos.StructSize=sizeof(FarListPos);
+	FarListPos ListPos={sizeof(FarListPos)};
 	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, &ListPos);
 	int Pos=ListPos.TopPos+(dwMousePosY-(dlgRect.Top+9));
 	if ( Pos>=(Opt.LoadUndo?Undo.iCount:FileList.Count())
@@ -554,7 +548,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProcThunk(HANDLE hDlg, int Msg, int Param1, 
 /****************************************************************************
  * Обработчик диалога для ShowDialog
  ****************************************************************************/
-INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void *Param2)
+intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Param1, void *Param2)
 {
 	switch (Msg)
 	{
@@ -570,7 +564,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 				if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,&settings))
 				{
 					int Root=0; // корень ключа
-					FarSettingsItem item={Root,L"WordDiv",FST_STRING};
+					FarSettingsItem item={sizeof(FarSettingsItem),Root,L"WordDiv",FST_STRING};
 					if (Info.SettingsControl(settings.Handle,SCTL_GET,0,&item))
 						StrOpt.WordDiv=item.String;
 					Info.SettingsControl(settings.Handle,SCTL_FREE,0,0);
@@ -595,8 +589,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 				DlgResize(hDlg);
 
 				// для корректного использования масок из истории
-				FarGetDialogItem FGDI;
-				FGDI.StructSize=sizeof(FarGetDialogItem);
+				FarGetDialogItem FGDI={sizeof(FarGetDialogItem)};
 				FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,0));
 				if (FGDI.Item)
 				{
@@ -683,8 +676,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 			else if (Param1==DlgCASE || Param1==DlgREGEX)
 			{
 				Param1==DlgCASE?Opt.CaseSensitive=(int)Param2:Opt.RegEx=(int)Param2;
-				FarGetDialogItem FGDI;
-				FGDI.StructSize=sizeof(FarGetDialogItem);
+				FarGetDialogItem FGDI={sizeof(FarGetDialogItem)};
 				FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgESEARCH,0));
 				if (FGDI.Item)
 				{
@@ -764,7 +756,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 								if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,&settings))
 								{
 									int Root=0; // корень ключа
-									FarSettingsItem item={Root,L"WordDiv",FST_STRING};
+									FarSettingsItem item={sizeof(FarSettingsItem),Root,L"WordDiv",FST_STRING};
 									item.String=WordDiv;
 									Info.SettingsControl(settings.Handle,SCTL_SET,0,&item);
 									Info.SettingsControl(settings.Handle,SCTL_FREE,0,0);
@@ -875,8 +867,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 				//----
 				else if ( Param1==DlgLIST && !Opt.LoadUndo && IsCtrl(record) && (Key==VK_UP || Key==VK_DOWN) )
 				{
-					FarListPos ListPos;
-					ListPos.StructSize=sizeof(FarListPos);
+					FarListPos ListPos={sizeof(FarListPos)};
 					Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, &ListPos);
 					if (ListPos.SelectPos>=FileList.Count()) 
 						return false;
@@ -905,8 +896,7 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 								case DlgEMASKNAME: case DlgEMASKEXT:
 								case DlgESEARCH:   case DlgEREPLACE:
 								{
-									FarGetDialogItem FGDI;
-									FGDI.StructSize=sizeof(FarGetDialogItem);
+									FarGetDialogItem FGDI={sizeof(FarGetDialogItem)};
 									FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,i,0));
 									if (FGDI.Item)
 									{
@@ -1026,10 +1016,9 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 						Info.PanelControl(PANEL_ACTIVE,FCTL_SETPANELDIRECTORY,0,&dirInfo);
 					}
 
-					PanelInfo PInfo;
-					PInfo.StructSize=sizeof(PanelInfo);
+					PanelInfo PInfo={sizeof(PanelInfo)};
 					Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELINFO,0,&PInfo);
-					PanelRedrawInfo RInfo;
+					PanelRedrawInfo RInfo={sizeof(PanelRedrawInfo)};
 					RInfo.CurrentItem=PInfo.CurrentItem;
 					RInfo.TopPanelItem=PInfo.TopPanelItem;
 
@@ -1047,19 +1036,20 @@ INT_PTR WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, int Msg, int Param1, void 
 					FarGetPluginPanelItem FGPPI;
 					for (int i=0; i<PInfo.ItemsNumber; i++)
 					{
-						FGPPI.Size=0; FGPPI.Item=0;
-						FGPPI.Item=(PluginPanelItem*)malloc(FGPPI.Size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,&FGPPI));
-						if (FGPPI.Item)
+						size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,0);
+						PluginPanelItem *PPI=(PluginPanelItem*)malloc(size);
+						if (PPI)
 						{
+							FarGetPluginPanelItem FGPPI={sizeof(FarGetPluginPanelItem),size,PPI};
 							Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,&FGPPI);
 							if (!FSF.LStricmp(name.get(),FGPPI.Item->FileName))
 							{
 								RInfo.CurrentItem=i;
-								free(FGPPI.Item);
+								free(PPI);
 								break;
 							}
 							else
-								free(FGPPI.Item);
+								free(PPI);
 						}
 					}
 					Info.PanelControl(PANEL_ACTIVE,FCTL_REDRAWPANEL,0,&RInfo);
@@ -1271,7 +1261,7 @@ int VisRenDlg::ShowDialog()
 		itemTempl1[i].Text=GetMsg(MTempl_1+i);
 		itemTempl1[i].Reserved[0]=itemTempl1[i].Reserved[1]=itemTempl1[i].Reserved[2]=0;
 	}
-	FarList Templates1 = {n, itemTempl1};
+	FarList Templates1 = {sizeof(FarList), n, itemTempl1};
 	DialogItems[DlgETEMPLNAME].ListItems = &Templates1;
 
 	FarListItem itemTempl2[8];
@@ -1282,7 +1272,7 @@ int VisRenDlg::ShowDialog()
 		itemTempl2[i].Text=GetMsg(MTempl2_1+i);
 		itemTempl2[i].Reserved[0]=itemTempl2[i].Reserved[1]=itemTempl2[i].Reserved[2]=0;
 	}
-	FarList Templates2 = {n, itemTempl2};
+	FarList Templates2 = {sizeof(FarList), n, itemTempl2};
 	DialogItems[DlgETEMPLEXT].ListItems = &Templates2;
 
 	HANDLE hDlg=Info.DialogInit( &MainGuid, &DlgGuid,

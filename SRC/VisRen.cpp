@@ -106,7 +106,7 @@ __int64 GetFarSetting(FARSETTINGS_SUBFOLDERS Root,const wchar_t* Name)
 	HANDLE Settings=Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,&settings)?settings.Handle:0;
 	if (Settings)
 	{
-		FarSettingsItem item={Root,Name,FST_UNKNOWN,{0}};
+		FarSettingsItem item={sizeof(FarSettingsItem),Root,Name,FST_UNKNOWN,{0}};
 		if(Info.SettingsControl(Settings,SCTL_GET,0,&item)&&FST_QWORD==item.Type)
 		{
 			result=item.Number;
@@ -130,7 +130,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 	Info->MinFarVersion=FARMANAGERVERSION;
 	Info->Version=MAKEFARVERSION(3,0,0,15,VS_RC);
 	Info->Guid=MainGuid;
-	Info->Title=L"Visual renaming";
+	Info->Title=L"VisRen";
 	Info->Description=L"Visual renaming files plugin for Far Manager v3.0";
 	Info->Author=L"Alexey Samlyukov";
 }
