@@ -303,8 +303,7 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 {
 	wchar_t templ[15];
-	FarListPos ListPos;
-	ListPos.StructSize=sizeof(FarListPos);
+	FarListPos ListPos={sizeof(FarListPos)};
 	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, IdTempl, &ListPos);
 
 	if (IdTempl==DlgETEMPLNAME) // список с шаблонами имени
@@ -539,7 +538,7 @@ void VisRenDlg::ShowName(int Pos)
 	return;
 }
 
-INT_PTR WINAPI VisRenDlg::ShowDialogProcThunk(HANDLE hDlg, int Msg, int Param1, void *Param2)
+intptr_t WINAPI VisRenDlg::ShowDialogProcThunk(HANDLE hDlg, intptr_t Msg, intptr_t Param1, void *Param2)
 {
 	VisRenDlg* Class=(VisRenDlg*)Info.SendDlgMessage(hDlg,DM_GETDLGDATA,0,0);
 	return Class->ShowDialogProc(hDlg,Msg,Param1,Param2);
@@ -595,14 +594,14 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 				{
 					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,&FGDI);
 					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKNAME,FGDI.Item);
-					free(FGDI.Item);
+					free(FGDI.Item); FGDI.Item=NULL;
 				}
 				FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKEXT,0));
 				if (FGDI.Item)
 				{
 					Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKEXT,&FGDI);
 					Info.SendDlgMessage(hDlg,DN_EDITCHANGE,DlgEMASKEXT,FGDI.Item);
-					free(FGDI.Item);
+					free(FGDI.Item); FGDI.Item=NULL;
 				}
 				break;
 			}
@@ -1033,7 +1032,6 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 						if (cur) name=cur->strSrcFileName;
 					}
 
-					FarGetPluginPanelItem FGPPI;
 					for (int i=0; i<PInfo.ItemsNumber; i++)
 					{
 						size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,i,0);
@@ -1259,7 +1257,7 @@ int VisRenDlg::ShowDialog()
 	{
 		itemTempl1[i].Flags=((i==3 || i==9 || i==16 || i==21)?LIF_SEPARATOR:0);
 		itemTempl1[i].Text=GetMsg(MTempl_1+i);
-		itemTempl1[i].Reserved[0]=itemTempl1[i].Reserved[1]=itemTempl1[i].Reserved[2]=0;
+		itemTempl1[i].Reserved[0]=itemTempl1[i].Reserved[1]=0;
 	}
 	FarList Templates1 = {sizeof(FarList), n, itemTempl1};
 	DialogItems[DlgETEMPLNAME].ListItems = &Templates1;
@@ -1270,7 +1268,7 @@ int VisRenDlg::ShowDialog()
 	{
 		itemTempl2[i].Flags=(i==3?LIF_SEPARATOR:0);
 		itemTempl2[i].Text=GetMsg(MTempl2_1+i);
-		itemTempl2[i].Reserved[0]=itemTempl2[i].Reserved[1]=itemTempl2[i].Reserved[2]=0;
+		itemTempl2[i].Reserved[0]=itemTempl2[i].Reserved[1]=0;
 	}
 	FarList Templates2 = {sizeof(FarList), n, itemTempl2};
 	DialogItems[DlgETEMPLEXT].ListItems = &Templates2;
