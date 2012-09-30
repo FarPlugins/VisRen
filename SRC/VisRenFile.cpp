@@ -880,7 +880,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 {
 	bool bSkipAll=false;
 	int i, Count, iRen=0, iUndo=0;
-	PanelRedrawInfo RInfo={0,0};
+	PanelRedrawInfo RInfo={sizeof(PanelRedrawInfo),0,0};
 	SetLastError(ERROR_SUCCESS);
 
 	Info.PanelControl(PANEL_ACTIVE,FCTL_BEGINSELECTION,0,0);
@@ -1063,8 +1063,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 		FarPanelDirectory dirInfo={sizeof(FarPanelDirectory),Undo.Dir,NULL,{0},NULL};
 		Info.PanelControl(PANEL_ACTIVE,FCTL_SETPANELDIRECTORY,0,&dirInfo);
 		// מעלועטל פאיכû
-		struct PanelInfo PInfo;
-		PInfo.StructSize=sizeof(PanelInfo);
+		struct PanelInfo PInfo={sizeof(PanelInfo)};
 		Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELINFO,0,&PInfo);
 		for (int k=i; k<Count; k++)
 		{
