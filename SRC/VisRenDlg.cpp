@@ -355,7 +355,7 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 
 	COORD Pos;
 	Info.SendDlgMessage(hDlg, DM_GETCURSORPOS, IdMask, &Pos);
-	EditorSelect es;
+	EditorSelect es={sizeof(EditorSelect)};
 	Info.SendDlgMessage(hDlg, DM_GETSELECTION, IdMask, &es);
 	string strBuf((const wchar_t*)Info.SendDlgMessage(hDlg, DM_GETCONSTTEXTPTR, IdMask, 0));
 	size_t length=strBuf.length();
@@ -562,7 +562,7 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 				FarSettingsCreate settings={sizeof(FarSettingsCreate),MainGuid,INVALID_HANDLE_VALUE};
 				if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,&settings))
 				{
-					int Root=0; // корень ключа
+					size_t Root=0; // корень ключа
 					FarSettingsItem item={sizeof(FarSettingsItem),Root,L"WordDiv",FST_STRING};
 					if (Info.SettingsControl(settings.Handle,SCTL_GET,0,&item))
 						StrOpt.WordDiv=item.String;
@@ -754,7 +754,7 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 								FarSettingsCreate settings={sizeof(FarSettingsCreate),MainGuid,INVALID_HANDLE_VALUE};
 								if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,&settings))
 								{
-									int Root=0; // корень ключа
+									size_t Root=0; // корень ключа
 									FarSettingsItem item={sizeof(FarSettingsItem),Root,L"WordDiv",FST_STRING};
 									item.String=WordDiv;
 									Info.SettingsControl(settings.Handle,SCTL_SET,0,&item);
@@ -1286,7 +1286,7 @@ int VisRenDlg::ShowDialog()
 
 	if (hDlg != INVALID_HANDLE_VALUE)
 	{
-		ExitCode=Info.DialogRun(hDlg);
+		ExitCode=(int)Info.DialogRun(hDlg);
 		switch (ExitCode)
 		{
 			case DlgREN:
