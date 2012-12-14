@@ -5,7 +5,7 @@
 /*
   plugin.hpp
 
-  Plugin API for Far Manager 3.0 build 2886
+  Plugin API for Far Manager 3.0 build 2927
 */
 
 /*
@@ -43,7 +43,7 @@ other possible license with no implications from the above license on them.
 #define FARMANAGERVERSION_MAJOR 3
 #define FARMANAGERVERSION_MINOR 0
 #define FARMANAGERVERSION_REVISION 0
-#define FARMANAGERVERSION_BUILD 2886
+#define FARMANAGERVERSION_BUILD 2927
 #define FARMANAGERVERSION_STAGE VS_RELEASE
 
 #ifndef RC_INVOKED
@@ -1076,6 +1076,7 @@ enum FARMACROVARTYPE
 	FMVT_STRING                 = 2,
 	FMVT_DOUBLE                 = 3,
 	FMVT_BOOLEAN                = 4,
+	FMVT_BINARY                 = 5,
 };
 
 struct FarMacroValue
@@ -1083,9 +1084,15 @@ struct FarMacroValue
 	enum FARMACROVARTYPE Type;
 	union
 	{
-		__int64  Integer;
-		double   Double;
+		__int64        Integer;
+		__int64        Boolean;
+		double         Double;
 		const wchar_t *String;
+		struct
+		{
+			void *Data;
+			size_t Size;
+		} Binary;
 	}
 #ifndef __cplusplus
 	Value
@@ -1108,16 +1115,17 @@ enum MACROPLUGINRETURNTYPE
 
 struct MacroPluginReturn
 {
-	struct FarMacroValue *Args;
-	int ArgNum;
+	size_t Count;
+	struct FarMacroValue *Values;
 	enum MACROPLUGINRETURNTYPE ReturnType;
 };
 
 struct FarMacroCall
 {
-	struct FarMacroValue *Args;
-	int ArgNum;
-	void (_cdecl *Callback)(void *CallbackData, struct FarMacroValue *Value);
+	size_t StructSize;
+	size_t Count;
+	struct FarMacroValue *Values;
+	void (WINAPI *Callback)(void *CallbackData, struct FarMacroValue *Values, size_t Count);
 	void *CallbackData;
 };
 
@@ -1214,7 +1222,7 @@ static const VIEWER_OPTIONS
 
 enum VIEWER_SETMODE_TYPES
 {
-	VSMT_HEX                        = 0,
+	VSMT_VIEWMODE                   = 0,
 	VSMT_WRAP                       = 1,
 	VSMT_WORDWRAP                   = 2,
 };
@@ -1277,7 +1285,7 @@ struct ViewerMode
 {
 	uintptr_t CodePage;
 	VIEWER_MODE_FLAGS Flags;
-	enum VIEWER_MODE_TYPE Type;
+	enum VIEWER_MODE_TYPE ViewMode;
 };
 
 struct ViewerInfo
@@ -2342,11 +2350,17 @@ struct OpenMacroInfo
 	struct FarMacroValue *Values;
 };
 
+typedef unsigned __int64 FAROPENSHORTCUTFLAGS;
+static const FAROPENSHORTCUTFLAGS
+	FOSF_ACTIVE = 0x0000000000000001ULL,
+	FOSF_NONE   = 0;
+
 struct OpenShortcutInfo
 {
 	size_t StructSize;
 	const wchar_t *HostFile;
 	const wchar_t *ShortcutData;
+	FAROPENSHORTCUTFLAGS Flags;
 };
 
 struct OpenCommandLineInfo
@@ -2357,8 +2371,6 @@ struct OpenCommandLineInfo
 
 enum OPENFROM
 {
-	OPEN_FROM_MASK          = 0x000000FF,
-
 	OPEN_LEFTDISKMENU       = 0,
 	OPEN_PLUGINSMENU        = 1,
 	OPEN_FINDLIST           = 2,
@@ -2380,6 +2392,14 @@ enum MACROCALLTYPE
 	MCT_MACROSTEP          = 1,
 	MCT_MACROFINAL         = 2,
 	MCT_MACROPARSE         = 3,
+};
+
+struct OpenMacroPluginInfo
+{
+	size_t StructSize;
+	enum MACROCALLTYPE CallType;
+	HANDLE Handle;
+	struct FarMacroCall *Data;
 };
 
 

@@ -1232,7 +1232,7 @@ int VisRenDlg::ShowDialog()
 		/*10*/{DI_BUTTON,   DlgSize.W-5,4,          0,          0, 0, 0,                0, DIF_NOBRACKETS|DIF_BTNNOCLOSE, GetMsg(MSet), 0,0},
 
 
-		/*11*/{DI_TEXT,     0,          5,          0,          0, 0, 0,                0, DIF_SEPARATOR, L"", 0,0},
+		/*11*/{DI_TEXT,    -1,          5,          0,          0, 0, 0,                0, DIF_SEPARATOR, L"", 0,0},
 		/*12*/{DI_TEXT,     2,          6,         14,          0, 0, 0,                0, 0, GetMsg(MSearch), 0,0},
 		/*13*/{DI_EDIT,    15,          6,DlgSize.WS-3,         0, 0, L"VisRenSearch",  0, DIF_HISTORY, L"", 0,0},
 		/*14*/{DI_TEXT,     2,          7,         14,          0, 0, 0,                0, 0, GetMsg(MReplace), 0,0},
@@ -1240,9 +1240,9 @@ int VisRenDlg::ShowDialog()
 		/*16*/{DI_CHECKBOX, DlgSize.WS, 6,         19,          0, 1, 0,                0, 0, GetMsg(MCase), 0,0},
 		/*17*/{DI_CHECKBOX, DlgSize.WS, 7,         19,          0, 0, 0,                0, 0, GetMsg(MRegEx), 0,0},
 
-		/*18*/{DI_TEXT,     0,          8,          0,          0, 0, 0,                0, DIF_SEPARATOR, L"", 0,0},
+		/*18*/{DI_TEXT,    -1,          8,          0,          0, 0, 0,                0, DIF_SEPARATOR, L"", 0,0},
 		/*19*/{DI_LISTBOX,  2,          9,DlgSize.W-2,DlgSize.H-4, 0, 0,                0, DIF_LISTNOCLOSE|DIF_LISTNOBOX, L"", 0,0},
-		/*20*/{DI_TEXT,     0,DlgSize.H-3,          0,          0, 0, 0,                0, DIF_SEPARATOR, L"", 0,0},
+		/*20*/{DI_TEXT,    -1,DlgSize.H-3,          0,          0, 0, 0,                0, DIF_SEPARATOR, L"", 0,0},
 
 		/*21*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_CENTERGROUP|DIF_DEFAULTBUTTON, GetMsg(MRen), 0,0},
 		/*22*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_BTNNOCLOSE|DIF_CENTERGROUP, GetMsg(MUndo), 0,0},

@@ -127,8 +127,8 @@ __int64 GetFarSetting(FARSETTINGS_SUBFOLDERS Root,const wchar_t* Name)
 void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
 	Info->StructSize=sizeof(GlobalInfo);
-	Info->MinFarVersion=FARMANAGERVERSION;
-	Info->Version=MAKEFARVERSION(3,0,0,15,VS_RC);
+	Info->MinFarVersion=MAKEFARVERSION(3,0,0,2927,VS_RELEASE);
+	Info->Version=MAKEFARVERSION(3,0,0,16,VS_RELEASE);
 	Info->Guid=MainGuid;
 	Info->Title=L"VisRen";
 	Info->Description=L"Visual renaming files plugin for Far Manager v3.0";
