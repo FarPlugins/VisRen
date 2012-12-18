@@ -190,10 +190,10 @@ void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsign
 		switch (Tag)
 		{
 			case TAG_MAKE:
-				MultiByteToWideChar(CP_ACP,0,(LPCSTR)ValuePtr,-1,ImageInfo.CameraMake,31);
+				MultiByteToWideChar(CP_ACP,0,(LPCSTR)ValuePtr,-1,ImageInfo.CameraMake,32);
 				break;
 			case TAG_MODEL:
-				MultiByteToWideChar(CP_ACP,0,(LPCSTR)ValuePtr,-1,ImageInfo.CameraModel,39);
+				MultiByteToWideChar(CP_ACP,0,(LPCSTR)ValuePtr,-1,ImageInfo.CameraModel,40);
 				break;
 			case TAG_DATETIME_ORIGINAL:
 			{
@@ -208,7 +208,7 @@ void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsign
 					else DateTime[i]=ValuePtr[i];
 				}
 				DateTime[19]='\0';
-				MultiByteToWideChar(CP_ACP,0,DateTime,-1,ImageInfo.DateTime,19);
+				MultiByteToWideChar(CP_ACP,0,DateTime,-1,ImageInfo.DateTime,20);
 				break;
 			}
 			case TAG_EXIF_OFFSET:

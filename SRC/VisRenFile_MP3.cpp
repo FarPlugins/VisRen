@@ -156,7 +156,7 @@ ID3TagInternal *InitializeInternalTag1(ID3v11TagReal *pRealTag)
 	{
 		int size = MultiByteToWideChar(CP_ACP,0,Genres[pRealTag->btGenre],-1,0,0);
 		pInternalTag->pEntry[TAG_GENRE] = (wchar_t*)malloc(size*sizeof(wchar_t));
-		MultiByteToWideChar(CP_ACP,0,Genres[pRealTag->btGenre],-1,pInternalTag->pEntry[TAG_GENRE],size-1);
+		MultiByteToWideChar(CP_ACP,0,Genres[pRealTag->btGenre],-1,pInternalTag->pEntry[TAG_GENRE],size);
 	}
 
 	return pInternalTag;
@@ -441,7 +441,7 @@ ID3TagInternal *InitializeInternalTag2(ID3v2TagReal *pRealTag)
 		}
 		int size = MultiByteToWideChar(CP_ACP,0,pRealTag->Frames[FRAME_GENRE].Data+nCount,-1,0,0);
 		pInternalTag->pEntry[TAG_GENRE]=(wchar_t*)malloc(size*sizeof(wchar_t));
-		MultiByteToWideChar(CP_ACP,0,pRealTag->Frames[FRAME_GENRE].Data+nCount,-1,pInternalTag->pEntry[TAG_GENRE],size-1);
+		MultiByteToWideChar(CP_ACP,0,pRealTag->Frames[FRAME_GENRE].Data+nCount,-1,pInternalTag->pEntry[TAG_GENRE],size);
 	}
 	return pInternalTag;
 }

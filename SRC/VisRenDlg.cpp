@@ -1054,8 +1054,10 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 					Info.SendDlgMessage(hDlg,DM_CLOSE,DlgCANCEL,0);
 					return true;
 				}
-				else if ( Param1==DlgLIST && (record->Event.KeyEvent.dwControlKeyState&ControlKeyCtrlMask) &&
-									(record->Event.KeyEvent.dwControlKeyState&ControlKeyAltMask) && Key==0x46 /*VK_F*/ )
+				else if ( Param1==DlgLIST && 
+									(((record->Event.KeyEvent.dwControlKeyState&ControlKeyCtrlMask) && (record->Event.KeyEvent.dwControlKeyState&ControlKeyAltMask) && Key==0x46 /*VK_F*/ )
+									|| ((record->Event.KeyEvent.dwControlKeyState&ControlKeyAltMask) && Key==0x12))
+								)
 				{
 					return true;
 				}
