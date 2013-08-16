@@ -3,7 +3,7 @@
  *
  * Plugin module for Far Manager 3.0
  *
- * Copyright (c) 2007-2012 Alexey Samlyukov
+ * Copyright (c) 2007 Alexey Samlyukov
  ****************************************************************************/
 /*
 Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,8 @@ int MotorolaOrder=0;
 #define TAG_MAKE              0x010F
 #define TAG_MODEL             0x0110
 #define TAG_DATETIME_ORIGINAL 0x9003
+#define TAG_DATETIME_DIGITIZED     0x9004
+#define TAG_DATETIME               0x0132
 
 //--------------------------------------------------------------------------
 // Get 16 bits motorola order (always) for jpeg header stuff.
@@ -171,6 +173,8 @@ void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsign
 		int Components = Get32u(DirEntry+4);
 
 		if ((Format-1) >= NUM_FORMATS) continue;
+		if ((unsigned)Components > 0x10000) continue;
+
 		int ByteCount = Components * BytesPerFormat[Format];
 		unsigned char *ValuePtr;
 		if (ByteCount>4)
@@ -196,7 +200,14 @@ void ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsign
 				MultiByteToWideChar(CP_ACP,0,(LPCSTR)ValuePtr,-1,ImageInfo.CameraModel,40);
 				break;
 			case TAG_DATETIME_ORIGINAL:
+			case TAG_DATETIME_DIGITIZED:
+			case TAG_DATETIME:
 			{
+				if (Tag==TAG_DATETIME_DIGITIZED || Tag==TAG_DATETIME)
+				{
+					if (ImageInfo.DateTime[0] && ImageInfo.DateTime[0]>=L'0' && ImageInfo.DateTime[0]<=L'9')
+						break;
+				}
 				char DateTime[20];
 				for (int i=0; i<19; i++)
 				{
@@ -255,10 +266,14 @@ void process_EXIF(unsigned char * ExifSection, unsigned int length)
 	// Check the next value for correctness.
 	if (Get16u(ExifSection+10) != 0x2a) return;
 
-	int FirstOffset = Get32u(ExifSection+12);
+	unsigned int FirstOffset = Get32u(ExifSection+12);
+	if (FirstOffset<8 || FirstOffset>16)
+	{
+		if (FirstOffset<16 || FirstOffset>length-16) return;
+	}
 
 	// First directory starts 16 bytes in.  All offset are relative to 8 bytes in.
-	ProcessExifDir(ExifSection+8+FirstOffset, ExifSection+8, length-6, 0);
+	ProcessExifDir(ExifSection+8+FirstOffset, ExifSection+8, length-8, 0);
 }
 
 //--------------------------------------------------------------------------
@@ -308,6 +323,9 @@ bool ReadJpegSections(HANDLE infile)
 
 		switch (marker)
 		{
+			case M_SOS:
+				if (Data) free(Data);
+				return true;
 			case M_EOI:   // in case it's a tables-only JPEG stream
 				if (Data) free(Data);
 				return false;

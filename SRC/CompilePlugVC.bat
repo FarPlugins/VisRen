@@ -7,12 +7,12 @@ rem ===================== Use Microsoft Visual Studio ==========================
 rem  ======================== Set name and version ... =========================
 
 @set PlugName=VisRen
-@set fileversion=3,0,0,16
-@set fileversion_str=3.0 build 16 x86
+@set fileversion=3,0,0,17
+@set fileversion_str=3.0 build 17 x86
 @set MyDir=%CD%
 @set companyname=Eugene Roshal ^& FAR Group
 @set filedescription=Visual renaming files for Far Manager x86
-@set legalcopyright=Copyright © 2007-2012 Alexey Samlyukov
+@set legalcopyright=Copyright © 2007 Alexey Samlyukov
 
 rem  ==================== Make %PlugName%.def file... ==========================
 
