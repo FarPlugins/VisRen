@@ -336,6 +336,8 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 			case 23: wcscpy(templ, L"[TM]");     break;
 			case 24: wcscpy(templ, L"[TL]");     break;
 			case 25: wcscpy(templ, L"[TR]");     break;
+			case 26: wcscpy(templ, L"[R]");      break;
+			case 27: wcscpy(templ, L"[V]");      break;
 		}
 	}
 	else   // список с шаблонами расширения
@@ -1253,7 +1255,7 @@ int VisRenDlg::ShowDialog()
 	};
 
 	// комбинированный список с шаблонами
-	FarListItem itemTempl1[26];
+	FarListItem itemTempl1[28];
 	int n = sizeof(itemTempl1) / sizeof(itemTempl1[0]);
 	for (int i = 0; i < n; i++)
 	{

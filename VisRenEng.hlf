@@ -98,6 +98,9 @@ capabilities.
    [TL]      Name transliteration: русский -> russkij.
    [TR]      Name transliteration: russkij -> русский.
 
+   [R]       Случайное число от 0 до 32767.
+   [V]       Версия исполнимого файла.
+
    [[]       Puts opening square bracket.
    []]       Puts closing square bracket.
 

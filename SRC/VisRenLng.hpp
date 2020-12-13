@@ -77,6 +77,8 @@ enum {
 	MTempl_24,
 	MTempl_25,
 	MTempl_26,
+	MTempl_27,
+	MTempl_28,
 	//-----
 	MTempl2_1,
 	MTempl2_2,

@@ -451,6 +451,46 @@ bool RenFile::GetNewNameExt(const wchar_t *src, string &strDest,unsigned ItemInd
 			*dwFlags|=(bProcessName?NAME_TRANSLIT_RUS:EXT_TRANSLIT_RUS);
 			pMask+=4;
 		}
+		else if (!Strncmp(pMask, L"[R]", 3))
+		{
+			wchar_t ptr[32];
+			FSF.itoa(rand(), ptr, 10);
+			buf+=ptr;  pMask+=3;
+		}
+		else if (!Strncmp(pMask, L"[V]", 3))
+		{
+//			if (FSF.ProcessName(L"*.exe,*.dll",(wchar_t *)src,0,PN_CMPNAMELIST))
+			{
+				DWORD dwHandle;
+				DWORD dwSize=GetFileVersionInfoSize(FullFilename,&dwHandle);
+				if(dwSize)
+				{
+					LPVOID Data=malloc(dwSize);
+					if(Data)
+					{
+						if(GetFileVersionInfo(FullFilename,NULL,dwSize,Data))
+						{
+							VS_FIXEDFILEINFO *ffi;
+							UINT Len;
+							LPVOID lplpBuffer;
+							if(VerQueryValue(Data,L"\\",&lplpBuffer,&Len))
+							{
+								ffi=(VS_FIXEDFILEINFO*)lplpBuffer;
+								if( (ffi->dwFileType==VFT_APP || ffi->dwFileType==VFT_DLL)
+										&& (LOBYTE(HIWORD(ffi->dwFileVersionMS)) || LOBYTE(LOWORD(ffi->dwFileVersionMS)) || HIWORD(ffi->dwFileVersionLS) || LOWORD(ffi->dwFileVersionLS)) )
+								{
+									wchar_t ptr[256];
+									FSF.sprintf(ptr, L"%d.%d.%d.%d", LOBYTE(HIWORD(ffi->dwFileVersionMS)),LOBYTE(LOWORD(ffi->dwFileVersionMS)),HIWORD(ffi->dwFileVersionLS),LOWORD(ffi->dwFileVersionLS));
+									buf+=ptr;
+								}
+							}
+						}
+						free(Data);
+					}
+				}
+			}
+			pMask+=3;
+		}
 		else if (*pMask==L'[' || *pMask==L']') return false;
 		else buf+=*pMask++;
 	}
@@ -787,6 +827,7 @@ bool RenFile::ProcessFileName()
 	HANDLE hScreen=Info.SaveScreen(0,0,-1,-1);
 	HANDLE hConInp=CreateFileW(L"CONIN$", GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
 	DWORD dwTicks=GetTickCount();
+	srand((unsigned)time(NULL));
 	bool bRet=true;
 
 	File *Item=NULL; unsigned Index;

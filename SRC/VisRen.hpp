@@ -33,6 +33,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <wchar.h>
 #include <initguid.h>
+#include <time.h>
 #include "plugin.hpp"
 #include "farcolor.hpp"
 #include "string.hpp"

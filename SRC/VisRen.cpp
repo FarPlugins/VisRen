@@ -128,7 +128,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
 	Info->StructSize=sizeof(GlobalInfo);
 	Info->MinFarVersion=MAKEFARVERSION(3,0,0,2927,VS_RELEASE);
-	Info->Version=MAKEFARVERSION(3,0,0,17,VS_RELEASE);
+	Info->Version=MAKEFARVERSION(3,0,0,18,VS_RELEASE);
 	Info->Guid=MainGuid;
 	Info->Title=L"VisRen";
 	Info->Description=L"Visual renaming files plugin for Far Manager v3.0";

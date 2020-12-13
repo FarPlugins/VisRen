@@ -39,6 +39,8 @@
 "[TM]  Time modification"
 "[TL]  Translit, latin"
 "[TR]  Translit, russian"
+"[R]   Random number"
+"[V]   Version"
 //----
 "[E]    Extension"
 "[E#-#] Range"
