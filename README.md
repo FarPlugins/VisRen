@@ -1,6 +1,8 @@
 # VisRen
 Plugin for visual rename files in Far Manager 3.
 
+![](VisRen.png)
+
 How to build from source
 ==========
 To build plugin from source, you will need:
