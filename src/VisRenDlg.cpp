@@ -1261,7 +1261,8 @@ int VisRenDlg::ShowDialog()
 	{
 		itemTempl1[i].Flags=((i==3 || i==9 || i==16 || i==21)?LIF_SEPARATOR:0);
 		itemTempl1[i].Text=GetMsg(MTempl_1+i);
-		itemTempl1[i].Reserved[0]=itemTempl1[i].Reserved[1]=0;
+		itemTempl1[i].UserData = 0;
+		itemTempl1[i].Reserved = 0;
 	}
 	FarList Templates1 = {sizeof(FarList), n, itemTempl1};
 	DialogItems[DlgETEMPLNAME].ListItems = &Templates1;
@@ -1272,7 +1273,8 @@ int VisRenDlg::ShowDialog()
 	{
 		itemTempl2[i].Flags=(i==3?LIF_SEPARATOR:0);
 		itemTempl2[i].Text=GetMsg(MTempl2_1+i);
-		itemTempl2[i].Reserved[0]=itemTempl2[i].Reserved[1]=0;
+        itemTempl2[i].UserData = 0;
+        itemTempl2[i].Reserved = 0;
 	}
 	FarList Templates2 = {sizeof(FarList), n, itemTempl2};
 	DialogItems[DlgETEMPLEXT].ListItems = &Templates2;
