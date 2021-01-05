@@ -31,6 +31,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "VisRen.hpp"
 #include "VisRenDlg.hpp"
+#include "version.hpp"
 
 /****************************************************************************
  * Копии стандартных структур FAR
@@ -128,7 +129,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 {
 	Info->StructSize=sizeof(GlobalInfo);
 	Info->MinFarVersion=MAKEFARVERSION(3,0,0,2927,VS_RELEASE);
-	Info->Version=MAKEFARVERSION(3,0,0,18,VS_RELEASE);
+	Info->Version=MAKEFARVERSION(PLUGIN_VER_MAJOR, PLUGIN_VER_MINOR, PLUGIN_VER_PATCH, 0, VS_RELEASE);
 	Info->Guid=MainGuid;
 	Info->Title=L"VisRen";
 	Info->Description=L"Visual renaming files plugin for Far Manager v3.0";
