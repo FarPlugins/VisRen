@@ -94,3 +94,17 @@ set_target_properties(VisRen
     LINK_FLAGS "${LINK_FLAGS}"
     )
 
+#====================================================
+# build misc files
+#====================================================
+# used @@ESCAPE and ESCAPE@@ for escape @ in files
+configure_file(VisRenRus.hlf.in VisRenRus.hlf)
+configure_file(VisRenEng.hlf.in VisRenEng.hlf)
+
+#====================================================
+# install
+#====================================================
+install(TARGETS VisRen RUNTIME DESTINATION .)
+install(FILES $<TARGET_PDB_FILE:${PROJECT_NAME}> ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.map DESTINATION .)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/VisRenRus.hlf ${CMAKE_CURRENT_BINARY_DIR}/VisRenEng.hlf VisRenEng.lng VisRenRus.lng DESTINATION .)
+install(FILES ${PROJECT_SOURCE_DIR}/../WhatsNew_Rus.txt ${PROJECT_SOURCE_DIR}/../Readme.txt DESTINATION .)

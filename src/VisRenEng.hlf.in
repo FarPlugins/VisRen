@@ -4,8 +4,9 @@
 
 @Contents
 $^ #Visual renaming files#
-$^ #3.0 build 17#
+$^ #${PLUGIN_VERSION}#
 $^ #Copyright (C) 2007 Alexey Samlyukov#
+$^ #Copyright (C) 2020 FarPlugins Team#
    Far  plugin   for   visual   files   renaming   with   additional
 capabilities.
 
@@ -82,7 +83,7 @@ capabilities.
 
              REMARK:
              Used sources from module #Mp3# of #Anamorphosis# plugin,
-             autor - ~WARP ItSelf~@mailto:WARP_ItSelf@@inbox.ru@ (big thanks for code ;-)
+             autor - ~WARP ItSelf~@@ESCAPE@mailto:WARP_ItSelf@ESCAPE@@@@ESCAPE@inbox.ru@ESCAPE@@ (big thanks for code ;-)
 
    [c]       Camera from EXIF-tag JPG files.
    [m]       Model.
@@ -90,7 +91,7 @@ capabilities.
    [r]       Resolution.
 
              REMARK:
-             Used sources from ~Jhead~@http://www.sentex.net/~mwandel/jhead@.
+             Used sources from ~Jhead~@@ESCAPE@http://www.sentex.net/~mwandel/jhead@ESCAPE@@.
 
    [DM]      File last modification date: YYYY.MM.DD.
    [TM]      File last modification time: hh-mm-ss.

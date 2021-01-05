@@ -4,8 +4,9 @@
 
 @Contents
 $^ #Визуальное переименование файлов#
-$^ #3.0 build 17#
+$^ #${PLUGIN_VERSION}#
 $^ #Copyright (C) 2007 Alexey Samlyukov#
+$^ #Copyright (C) 2020 FarPlugins Team#
    Плагин к ФАРу для наглядного переименования файлов с дополнительными
 возможностями.
 
@@ -89,7 +90,7 @@ $^ #Copyright (C) 2007 Alexey Samlyukov#
 
              ЗАМЕЧАНИЕ:
              Используются исходники модуля #Mp3# плагин #Anamorphosis#,
-             автор - ~WARP ItSelf~@mailto:WARP_ItSelf@@inbox.ru@ (большое спасибо за код ;-)
+             автор - ~WARP ItSelf~@@ESCAPE@mailto:WARP_ItSelf@ESCAPE@@@@ESCAPE@inbox.ru@ESCAPE@@ (большое спасибо за код ;-)
 
    [c]       Фотокамера из EXIF-тэга JPG файла.
    [m]       Модель фотокамеры.
@@ -97,7 +98,7 @@ $^ #Copyright (C) 2007 Alexey Samlyukov#
    [r]       Разрешение картинки.
 
              ЗАМЕЧАНИЕ:
-             Используются исходники программы ~Jhead~@http://www.sentex.net/~mwandel/jhead@.
+             Используются исходники программы ~Jhead~@@ESCAPE@http://www.sentex.net/~mwandel/jhead@ESCAPE@@.
 
    [DM]      Дата последней модификации файла: YYYY.MM.DD.
    [TM]      Время последней модификации файла: hh-mm-ss.
@@ -127,7 +128,7 @@ $^ #Copyright (C) 2007 Alexey Samlyukov#
 
  #Регулярные выражения#
    Минимальная поддержка регулярных выражений в строке поиска.
-   ~Регулярные выражения в Far Manager~@:RegExp@
+   ~Регулярные выражения в Far Manager~@@ESCAPE@:RegExp@ESCAPE@@
 
  #Протокол переименования#
    По умолчанию в памяти создается протокол, содержащий имена удачно
