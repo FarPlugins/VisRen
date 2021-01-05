@@ -1,69 +1,39 @@
 
 
-       Визуальное переименование файлов - плагин для Far Manager
+       Р’РёР·СѓР°Р»СЊРЅРѕРµ РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёРµ С„Р°Р№Р»РѕРІ - РїР»Р°РіРёРЅ РґР»СЏ Far Manager
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-             http://code.google.com/p/farplug-alvls/
+             https://github.com/FarPlugins/VisRen
 
-  Распространяется под той же лицензией, что и сам Far Manager, т.е.:
-
-Copyright (c) 2007 Alexey Samlyukov
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the distribution.
-3. The name of the authors may not be used to endorse or promote products
-   derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  Р Р°СЃРїСЂРѕСЃС‚СЂР°РЅСЏРµС‚СЃСЏ РїРѕРґ С‚РѕР№ Р¶Рµ Р»РёС†РµРЅР·РёРµР№, С‡С‚Рѕ Рё СЃР°Рј Far Manager, С‚.Рµ. BSD 3-Clause License
 
 
-Установка
+РЈСЃС‚Р°РЅРѕРІРєР°
 ~~~~~~~~~
 
-  Создайте подпапку в каталоге ...\Far\Plugins, скопируйте туда
-содержимое текущего архива.
+  РЎРѕР·РґР°Р№С‚Рµ РїРѕРґРїР°РїРєСѓ РІ РєР°С‚Р°Р»РѕРіРµ ...\Far\Plugins, СЃРєРѕРїРёСЂСѓР№С‚Рµ С‚СѓРґР°
+СЃРѕРґРµСЂР¶РёРјРѕРµ С‚РµРєСѓС‰РµРіРѕ Р°СЂС…РёРІР°.
 
-  Для работы плагина требуется библиотека MSVCR100.dll, входит в 
-"Распространяемый пакет Microsoft Visual C++ 2010", скачать и
-установить можно с сайта Майкрософта:
-- для х86 версии http://www.microsoft.com/ru-ru/download/details.aspx?id=5555
-- для х64 версии http://www.microsoft.com/ru-ru/download/details.aspx?id=14632
 
-Использование
+РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ
 ~~~~~~~~~~~~~
 
-  Запустите плагин:  F11 -> "Визуальное переименование файлов"
-                     и прочитайте справку (нажмите F1).
+  Р—Р°РїСѓСЃС‚РёС‚Рµ РїР»Р°РіРёРЅ:  F11 -> "Р’РёР·СѓР°Р»СЊРЅРѕРµ РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёРµ С„Р°Р№Р»РѕРІ"
+                     Рё РїСЂРѕС‡РёС‚Р°Р№С‚Рµ СЃРїСЂР°РІРєСѓ (РЅР°Р¶РјРёС‚Рµ F1).
 
 
-Благодарности
+Р‘Р»Р°РіРѕРґР°СЂРЅРѕСЃС‚Рё
 ~~~~~~~~~~~~~
 
-  Eugene Roshal & FAR group за лучший в мире файловый менеджер.
+  Eugene Roshal & FAR group Р·Р° Р»СѓС‡С€РёР№ РІ РјРёСЂРµ С„Р°Р№Р»РѕРІС‹Р№ РјРµРЅРµРґР¶РµСЂ.
 
-  Особое спасибо Валентину Скирдину - за дельные советы, без него плагин
-                                      не был бы тем, чем он есть сейчас.
+  РћСЃРѕР±РѕРµ СЃРїР°СЃРёР±Рѕ Р’Р°Р»РµРЅС‚РёРЅСѓ РЎРєРёСЂРґРёРЅСѓ - Р·Р° РґРµР»СЊРЅС‹Рµ СЃРѕРІРµС‚С‹, Р±РµР· РЅРµРіРѕ РїР»Р°РіРёРЅ
+                                      РЅРµ Р±С‹Р» Р±С‹ С‚РµРј, С‡РµРј РѕРЅ РµСЃС‚СЊ СЃРµР№С‡Р°СЃ.
 
-  WARP ItSelf'у   - за предоставленные исходники модуля Mp3.
+  WARP ItSelf'Сѓ   - Р·Р° РїСЂРµРґРѕСЃС‚Р°РІР»РµРЅРЅС‹Рµ РёСЃС…РѕРґРЅРёРєРё РјРѕРґСѓР»СЏ Mp3.
 
-  Вадиму Егорову  - за предоставленные исходники модуля Jpeg.
+  Р’Р°РґРёРјСѓ Р•РіРѕСЂРѕРІСѓ  - Р·Р° РїСЂРµРґРѕСЃС‚Р°РІР»РµРЅРЅС‹Рµ РёСЃС…РѕРґРЅРёРєРё РјРѕРґСѓР»СЏ Jpeg.
 
-  Px              - за перевод файла помощи на английский язык.
+  Px              - Р·Р° РїРµСЂРµРІРѕРґ С„Р°Р№Р»Р° РїРѕРјРѕС‰Рё РЅР° Р°РЅРіР»РёР№СЃРєРёР№ СЏР·С‹Рє.
 
-                                                       Алексей Самлюков ~
+                                                       РђР»РµРєСЃРµР№ РЎР°РјР»СЋРєРѕРІ ~
                                                       samlyukov@gmail.com
