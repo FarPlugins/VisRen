@@ -133,7 +133,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *Info)
 	Info->Guid=MainGuid;
 	Info->Title=L"VisRen";
 	Info->Description=L"Visual renaming files plugin for Far Manager v3.0";
-	Info->Author=L"Alexey Samlyukov";
+	Info->Author=L"Alexey Samlyukov & FarPlugins Team";
 }
 
 // заполним структуру PluginStartupInfo и сделаем ряд полезных действий...
