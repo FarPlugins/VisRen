@@ -37,7 +37,7 @@ enum {
 	isPNG
 };
 
-// работа с EXIF
+// СЂР°Р±РѕС‚Р° СЃ EXIF
 //--------------------------------------------------------------------------
 // Program to pull the information out of various types of EXIF digital
 // camera files and show it in a reasonably consistent way

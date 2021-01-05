@@ -41,7 +41,7 @@ enum {
 	NAME_CASE_UPPER			=0x00000002,
 	NAME_CASE_FIRST			=0x00000004,
 	NAME_CASE_TITLE			=0x00000008,
-	NAME_CASE_MUSIC			=0x00000010, // музыкальный файл - обрабатывается особо
+	NAME_CASE_MUSIC			=0x00000010, // РјСѓР·С‹РєР°Р»СЊРЅС‹Р№ С„Р°Р№Р» - РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ РѕСЃРѕР±Рѕ
 	NAME_TRANSLIT_ENG		=0x00000020,
 	NAME_TRANSLIT_RUS		=0x00000040,
 
@@ -54,7 +54,7 @@ enum {
 };
 
 /****************************************************************************
- * Инициализация элементами для переименования
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЌР»РµРјРµРЅС‚Р°РјРё РґР»СЏ РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЏ
  ****************************************************************************/
 bool RenFile::InitFileList(int SelectedItemsNumber)
 {
@@ -82,7 +82,7 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 			return false;
 	}
 
-	// получим strPanelDir
+	// РїРѕР»СѓС‡РёРј strPanelDir
 	size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELDIRECTORY,0,0);
 	if (size)
 	{
@@ -95,9 +95,9 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 			free(dirbuf);
 		}
 	}
-	// получим strNativePanelDir - "\\?\dir\"
+	// РїРѕР»СѓС‡РёРј strNativePanelDir - "\\?\dir\"
 	size=FSF.ConvertPath(CPM_NATIVE,strPanelDir.get(),0,0);
-	wchar_t *buf=strNativePanelDir.get(size+1); //+1 для FSF.AddEndSlash()
+	wchar_t *buf=strNativePanelDir.get(size+1); //+1 РґР»СЏ FSF.AddEndSlash()
 	FSF.ConvertPath(CPM_NATIVE,strPanelDir.get(),buf,size);
 	strNativePanelDir.updsize();
 	FSF.AddEndSlash(buf);
@@ -107,7 +107,7 @@ bool RenFile::InitFileList(int SelectedItemsNumber)
 }
 
 /****************************************************************************
- * Заполнение структуры элементами для отката
+ * Р—Р°РїРѕР»РЅРµРЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ СЌР»РµРјРµРЅС‚Р°РјРё РґР»СЏ РѕС‚РєР°С‚Р°
  ****************************************************************************/
 bool RenFile::InitUndoItem(const wchar_t *CurFileName, const wchar_t *OldFileName, int Count)
 {
@@ -128,7 +128,7 @@ bool RenFile::InitUndoItem(const wchar_t *CurFileName, const wchar_t *OldFileNam
 }
 
 /****************************************************************************
- * Проверка имени файла на допустимые символы
+ * РџСЂРѕРІРµСЂРєР° РёРјРµРЅРё С„Р°Р№Р»Р° РЅР° РґРѕРїСѓСЃС‚РёРјС‹Рµ СЃРёРјРІРѕР»С‹
  ****************************************************************************/
 bool RenFile::CheckFileName(const wchar_t *str)
 {
@@ -141,7 +141,7 @@ bool RenFile::CheckFileName(const wchar_t *str)
 }
 
 /****************************************************************************
- * Проверим, что содержимое тега не пусто
+ * РџСЂРѕРІРµСЂРёРј, С‡С‚Рѕ СЃРѕРґРµСЂР¶РёРјРѕРµ С‚РµРіР° РЅРµ РїСѓСЃС‚Рѕ
  ****************************************************************************/
 bool RenFile::IsEmpty(const wchar_t *Str)
 {
@@ -157,7 +157,7 @@ bool RenFile::IsEmpty(const wchar_t *Str)
 
 
 /****************************************************************************
- * Преобразование по маске имени и расширения файлов
+ * РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РїРѕ РјР°СЃРєРµ РёРјРµРЅРё Рё СЂР°СЃС€РёСЂРµРЅРёСЏ С„Р°Р№Р»РѕРІ
  ****************************************************************************/
 bool RenFile::GetNewNameExt(const wchar_t *src, string &strDest,unsigned ItemIndex, DWORD *dwFlags, SYSTEMTIME ModificTime, bool bProcessName)
 {
@@ -200,19 +200,19 @@ bool RenFile::GetNewNameExt(const wchar_t *src, string &strDest,unsigned ItemInd
 			bool bName=!Strncmp(pMask, L"[N", 2);
 			int len=bName?Name.length():Ext.length();
 
-			if (*(pMask+2)==L']')  // [N] или [E]
+			if (*(pMask+2)==L']')  // [N] РёР»Рё [E]
 			{
 				buf+=(bName?Name.get():Ext.get()); pMask+=3;
 			}
-			else // [N#-#] или [E#-#]
+			else // [N#-#] РёР»Рё [E#-#]
 			{
 				string strStart, strEnd;
 				int iStart, iEnd;
 				bool bFromEnd_Start=false, bFromEnd_End=false;
 				pMask+=2;
-				// отсчитывать будем с конца имени
+				// РѕС‚СЃС‡РёС‚С‹РІР°С‚СЊ Р±СѓРґРµРј СЃ РєРѕРЅС†Р° РёРјРµРЅРё
 				if (*pMask==L'-') { bFromEnd_Start=true; pMask++; }
-				// число
+				// С‡РёСЃР»Рѕ
 				for (int i=0; *pMask>=L'0' && *pMask<=L'9'; i++, pMask++) { strStart+=*pMask; }
 				iStart=FSF.atoi(strStart.get());
 				if (iStart==0)
@@ -224,18 +224,18 @@ bool RenFile::GetNewNameExt(const wchar_t *src, string &strDest,unsigned ItemInd
 					iStart--;
 					if (iStart>len) iStart=len;
 				}
-				// копируем символ...
+				// РєРѕРїРёСЂСѓРµРј СЃРёРјРІРѕР»...
 				if (*pMask==L']')
 				{
 					pMask++;
 					if (iStart<0) iStart=len;   //< bFromEnd_Start==true
 					buf+=(bName?Name[(size_t)iStart]:Ext[(size_t)iStart]);
 				}
-				// иначе, разбираем дальше...
+				// РёРЅР°С‡Рµ, СЂР°Р·Р±РёСЂР°РµРј РґР°Р»СЊС€Рµ...
 				else
 				{
 					if (iStart<0) iStart=0;     //< bFromEnd_Start==true
-					// копируем несколько символов
+					// РєРѕРїРёСЂСѓРµРј РЅРµСЃРєРѕР»СЊРєРѕ СЃРёРјРІРѕР»РѕРІ
 					if (*pMask==L',')
 					{
 						pMask++;
@@ -250,17 +250,17 @@ bool RenFile::GetNewNameExt(const wchar_t *src, string &strDest,unsigned ItemInd
 							buf+=ptrcur;  free(ptrcur);  pMask++;
 						}
 					}
-					// копируем диапазон символов...
+					// РєРѕРїРёСЂСѓРµРј РґРёР°РїР°Р·РѕРЅ СЃРёРјРІРѕР»РѕРІ...
 					else if (*pMask==L'-')
 					{
 						pMask++;
-						// просто до конца строки
+						// РїСЂРѕСЃС‚Рѕ РґРѕ РєРѕРЅС†Р° СЃС‚СЂРѕРєРё
 						if (*pMask==L']')
 						{
 							buf+=(bName?Name.get():Ext.get())+iStart;
 							pMask++;
 						}
-						// сам диапазон
+						// СЃР°Рј РґРёР°РїР°Р·РѕРЅ
 						else
 						{
 							if (bFromEnd_Start) bFromEnd_End=true;
@@ -509,7 +509,7 @@ bool RenFile::GetNewNameExt(const wchar_t *src, string &strDest,unsigned ItemInd
 
 
 /****************************************************************************
- * Поиск и замена в именах файлов (регистрозависимая, опционально).
+ * РџРѕРёСЃРє Рё Р·Р°РјРµРЅР° РІ РёРјРµРЅР°С… С„Р°Р№Р»РѕРІ (СЂРµРіРёСЃС‚СЂРѕР·Р°РІРёСЃРёРјР°СЏ, РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ).
  ****************************************************************************/
 bool RenFile::Replase(string &strSrc)
 {
@@ -521,7 +521,7 @@ bool RenFile::Replase(string &strSrc)
 	int j=0;
 	const wchar_t *src=strSrc.get();
 	string strBuf;
-	// делаем замену
+	// РґРµР»Р°РµРј Р·Р°РјРµРЅСѓ
 	if (!Opt.RegEx)
 	{
 		for (int i=0; i<lenSrc; )
@@ -564,20 +564,20 @@ bool RenFile::Replase(string &strSrc)
 
 				if (Info.RegExpControl(re,RECTL_SEARCHEX,0,&search))
 				{
-					// копируем ДО паттерна
+					// РєРѕРїРёСЂСѓРµРј Р”Рћ РїР°С‚С‚РµСЂРЅР°
 					for (int i=start_offset; i<match[0].start; i++)
 						strBuf+=src[i];
 
-					// нашли паттерн. подменяем содержимым StrOpt.Replace
+					// РЅР°С€Р»Рё РїР°С‚С‚РµСЂРЅ. РїРѕРґРјРµРЅСЏРµРј СЃРѕРґРµСЂР¶РёРјС‹Рј StrOpt.Replace
 					for (int i=0; i<lenReplace; i++)
 					{
-						// после '\' вставляем без изменений
+						// РїРѕСЃР»Рµ '\' РІСЃС‚Р°РІР»СЏРµРј Р±РµР· РёР·РјРµРЅРµРЅРёР№
 						if (StrOpt.Replace[(size_t)i]==L'\\' && i+1<lenReplace)
 						{
 							strBuf+=(StrOpt.Replace.get())[++i]; continue;
 						}
 
-						// подменяем на найденные подвыражения
+						// РїРѕРґРјРµРЅСЏРµРј РЅР° РЅР°Р№РґРµРЅРЅС‹Рµ РїРѕРґРІС‹СЂР°Р¶РµРЅРёСЏ
 						if (StrOpt.Replace[(size_t)i]==L'$' && i+1<lenReplace)
 						{
 							wchar_t *p=StrOpt.Replace.get()+(i+1), Digit[10];
@@ -611,7 +611,7 @@ bool RenFile::Replase(string &strSrc)
 			free(match);
 			Info.RegExpControl(re,RECTL_FREE,0,0);
 		}
-		// копируем всё то что не вошло в паттерн
+		// РєРѕРїРёСЂСѓРµРј РІСЃС‘ С‚Рѕ С‡С‚Рѕ РЅРµ РІРѕС€Р»Рѕ РІ РїР°С‚С‚РµСЂРЅ
 		for (int i=start_offset; i<lenSrc; i++)
 			strBuf+=src[i];
 		if (!CheckFileName(strBuf.get())) return false;
@@ -621,7 +621,7 @@ bool RenFile::Replase(string &strSrc)
 }
 
 /****************************************************************************
- * Транслитерация имен файлов: русский <-> russkij
+ * РўСЂР°РЅСЃР»РёС‚РµСЂР°С†РёСЏ РёРјРµРЅ С„Р°Р№Р»РѕРІ: СЂСѓСЃСЃРєРёР№ <-> russkij
  ****************************************************************************/
 void RenFile::Translit(string &strName, string &strExt, DWORD dwTranslit)
 {
@@ -629,19 +629,19 @@ void RenFile::Translit(string &strName, string &strExt, DWORD dwTranslit)
 			dwTranslit&EXT_TRANSLIT_ENG || dwTranslit&EXT_TRANSLIT_RUS   )
 	{
 		const wchar_t rus[][33]={
-///			 "ж"         "з"         "ы"         "в"         "у"
+///			 "Р¶"         "Р·"         "С‹"         "РІ"         "Сѓ"
 			{0x436,0x0},{0x437,0x0},{0x44b,0x0},{0x432,0x0},{0x443,0x0},
-///			 "т"         "щ"         "ш"         "с"         "р"
+///			 "С‚"         "С‰"         "С€"         "СЃ"         "СЂ"
 			{0x442,0x0},{0x449,0x0},{0x448,0x0},{0x441,0x0},{0x440,0x0},
-///			 "п"         "о"         "н"         "м"         "л"
+///			 "Рї"         "Рѕ"         "РЅ"         "Рј"         "Р»"
 			{0x43f,0x0},{0x43e,0x0},{0x43d,0x0},{0x43c,0x0},{0x43b,0x0},
-///			 "х"         "к"         "ю"         "ё"         "я"
+///			 "С…"         "Рє"         "СЋ"         "С‘"         "СЏ"
 			{0x445,0x0},{0x43a,0x0},{0x44e,0x0},{0x451,0x0},{0x44f,0x0},
-///			 "й"         "и"         "г"         "ф"         "э"
+///			 "Р№"         "Рё"         "Рі"         "С„"         "СЌ"
 			{0x439,0x0},{0x438,0x0},{0x433,0x0},{0x444,0x0},{0x44d,0x0},
-///			 "е"         "д"         "ч"         "ц"         "б"
+///			 "Рµ"         "Рґ"         "С‡"         "С†"         "Р±"
 			{0x435,0x0},{0x434,0x0},{0x447,0x0},{0x446,0x0},{0x431,0x0},
-///			 "а"         "ъ"         "ь"
+///			 "Р°"         "СЉ"         "СЊ"
 			{0x430,0x0},{0x44a,0x0},{0x44c,0x0}
 		};
 
@@ -706,12 +706,12 @@ void RenFile::Translit(string &strName, string &strExt, DWORD dwTranslit)
 }
 
 /****************************************************************************
- * Изменение регистра имен файлов.
+ * РР·РјРµРЅРµРЅРёРµ СЂРµРіРёСЃС‚СЂР° РёРјРµРЅ С„Р°Р№Р»РѕРІ.
  ****************************************************************************/
 void RenFile::Case(wchar_t *Name, wchar_t *Ext, DWORD dwCase)
 {
 	if (!dwCase) return;
-	// регистр имени
+	// СЂРµРіРёСЃС‚СЂ РёРјРµРЅРё
 	if (dwCase&NAME_CASE_LOWER)
 		FSF.LStrlwr(Name);
 	else if (dwCase&NAME_CASE_UPPER)
@@ -731,8 +731,8 @@ void RenFile::Case(wchar_t *Name, wchar_t *Ext, DWORD dwCase)
 				Name[i]=(wchar_t)FSF.LLower((wchar_t)Name[i]);
 		}
 	}
-	// музыкальный файл обрабатывается особо:
-	// все слова до " - " или "_-_" будут в CASE_NAME_TITLE, а после в - CASE_NAME_FIRST
+	// РјСѓР·С‹РєР°Р»СЊРЅС‹Р№ С„Р°Р№Р» РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ РѕСЃРѕР±Рѕ:
+	// РІСЃРµ СЃР»РѕРІР° РґРѕ " - " РёР»Рё "_-_" Р±СѓРґСѓС‚ РІ CASE_NAME_TITLE, Р° РїРѕСЃР»Рµ РІ - CASE_NAME_FIRST
 	else if (dwCase&NAME_CASE_MUSIC)
 	{
 		int lenName=wcslen(Name);
@@ -765,7 +765,7 @@ void RenFile::Case(wchar_t *Name, wchar_t *Ext, DWORD dwCase)
 		}
 	}
 
-	// регистр расширения
+	// СЂРµРіРёСЃС‚СЂ СЂР°СЃС€РёСЂРµРЅРёСЏ
 	if (dwCase&EXT_CASE_LOWER)
 		FSF.LStrlwr(Ext);
 	else if (dwCase&EXT_CASE_UPPER)
@@ -787,7 +787,7 @@ void RenFile::Case(wchar_t *Name, wchar_t *Ext, DWORD dwCase)
 
 
 /****************************************************************************
- * Проверка на Esc. Возвращает true, если пользователь нажал Esc
+ * РџСЂРѕРІРµСЂРєР° РЅР° Esc. Р’РѕР·РІСЂР°С‰Р°РµС‚ true, РµСЃР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅР°Р¶Р°Р» Esc
  ****************************************************************************/
 bool RenFile::CheckForEsc(HANDLE hConInp)
 {
@@ -805,7 +805,7 @@ bool RenFile::CheckForEsc(HANDLE hConInp)
 		ReadConsoleInput(hConInp, &rec, 1, &ReadCount);
 		if ( rec.EventType == KEY_EVENT && rec.Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE &&
 					rec.Event.KeyEvent.bKeyDown )
-			// Опциональное подтверждение прерывания по Esc
+			// РћРїС†РёРѕРЅР°Р»СЊРЅРѕРµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ РїСЂРµСЂС‹РІР°РЅРёСЏ РїРѕ Esc
 			if (GetFarSetting(FSSF_CONFIRMATIONS,L"Esc"))
 			{
 				if (YesNoMsg(MEscTitle, MEscBody)) return true;
@@ -817,7 +817,7 @@ bool RenFile::CheckForEsc(HANDLE hConInp)
 
 
 /****************************************************************************
- * Основная функция по обработке и созданию новых имен файлов.
+ * РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ РїРѕ РѕР±СЂР°Р±РѕС‚РєРµ Рё СЃРѕР·РґР°РЅРёСЋ РЅРѕРІС‹С… РёРјРµРЅ С„Р°Р№Р»РѕРІ.
  ****************************************************************************/
 bool RenFile::ProcessFileName()
 {
@@ -863,8 +863,8 @@ bool RenFile::ProcessFileName()
 			NewName(src, (size_t)(ptr-src));
 		}
 
-		if ( !GetNewNameExt(Item->strSrcFileName.get(), NewName, Index, &dwFlags, ModificTime, true) ||   // имя файла
-				 !GetNewNameExt(Item->strSrcFileName.get(), NewExt, Index, &dwFlags, ModificTime, false)  )   // расширение
+		if ( !GetNewNameExt(Item->strSrcFileName.get(), NewName, Index, &dwFlags, ModificTime, true) ||   // РёРјСЏ С„Р°Р№Р»Р°
+				 !GetNewNameExt(Item->strSrcFileName.get(), NewExt, Index, &dwFlags, ModificTime, false)  )   // СЂР°СЃС€РёСЂРµРЅРёРµ
 		{
 			bRet=false; break;
 		}
@@ -913,9 +913,9 @@ bool RenFile::ProcessFileName()
 
 
 /****************************************************************************
- * Функция по переименованию файлов. Делает протокол переименования.
- * Показывает предупреждение, если произошла ошибка при переименовании файла.
- * Показывает кол-во обработанных файлов из общего числа переданных.
+ * Р¤СѓРЅРєС†РёСЏ РїРѕ РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЋ С„Р°Р№Р»РѕРІ. Р”РµР»Р°РµС‚ РїСЂРѕС‚РѕРєРѕР» РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЏ.
+ * РџРѕРєР°Р·С‹РІР°РµС‚ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ, РµСЃР»Рё РїСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° РїСЂРё РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёРё С„Р°Р№Р»Р°.
+ * РџРѕРєР°Р·С‹РІР°РµС‚ РєРѕР»-РІРѕ РѕР±СЂР°Р±РѕС‚Р°РЅРЅС‹С… С„Р°Р№Р»РѕРІ РёР· РѕР±С‰РµРіРѕ С‡РёСЃР»Р° РїРµСЂРµРґР°РЅРЅС‹С….
  ****************************************************************************/
 bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 {
@@ -926,7 +926,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 
 	Info.PanelControl(PANEL_ACTIVE,FCTL_BEGINSELECTION,0,0);
 
-	// вначале снимем выделение на панели
+	// РІРЅР°С‡Р°Р»Рµ СЃРЅРёРјРµРј РІС‹РґРµР»РµРЅРёРµ РЅР° РїР°РЅРµР»Рё
 	for (int j=0; j<SelectedItemsNumber; j++)
 		Info.PanelControl(PANEL_ACTIVE,FCTL_CLEARSELECTION,j,0);
 
@@ -940,7 +940,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 			wchar_t *src =Item->strSrcFileName.get(),
 							*dest=Item->strDestFileName.get();
 
-			// Имена совпадают - пропустим переименование
+			// РРјРµРЅР° СЃРѕРІРїР°РґР°СЋС‚ - РїСЂРѕРїСѓСЃС‚РёРј РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёРµ
 			if (!Strncmp(src, dest)) continue;
 
 			string srcFull=strNativePanelDir.get();
@@ -949,11 +949,11 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 			destFull+=dest;
 
  RETRY_1:
-			// Переименовываем
+			// РџРµСЂРµРёРјРµРЅРѕРІС‹РІР°РµРј
 			if (MoveFileW(srcFull.get(), destFull.get()))
 			{
 				iRen++;
-				// поместим в Undo
+				// РїРѕРјРµСЃС‚РёРј РІ Undo
 				if (Opt.LogRen && !InitUndoItem(dest, src, iUndo++))
 				{
 					Opt.LogRen=0;
@@ -961,9 +961,9 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 				}
 				continue;
 			}
-			// файл был удален сторонним процессом - продолжим без него
+			// С„Р°Р№Р» Р±С‹Р» СѓРґР°Р»РµРЅ СЃС‚РѕСЂРѕРЅРЅРёРј РїСЂРѕС†РµСЃСЃРѕРј - РїСЂРѕРґРѕР»Р¶РёРј Р±РµР· РЅРµРіРѕ
 			if (GetLastError()==ERROR_FILE_NOT_FOUND) continue;
-			// не переименовали - отметим
+			// РЅРµ РїРµСЂРµРёРјРµРЅРѕРІР°Р»Рё - РѕС‚РјРµС‚РёРј
 			if (bSkipAll)
 			{
 				for (int j=0; j<ItemsNumber; j++)
@@ -985,7 +985,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 				}
 				continue;
 			}
-			// Запрос с сообщением-ошибкой переименования
+			// Р—Р°РїСЂРѕСЃ СЃ СЃРѕРѕР±С‰РµРЅРёРµРј-РѕС€РёР±РєРѕР№ РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЏ
 			const wchar_t *MsgItems[]={
 				GetMsg(MVRenTitle),
 				GetMsg(MRenameFail),
@@ -998,13 +998,13 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 														MsgItems, sizeof(MsgItems) / sizeof(MsgItems[0]), 4 );
 			switch (Ret)
 			{
-				case 2:     // Повторить
+				case 2:     // РџРѕРІС‚РѕСЂРёС‚СЊ
 					goto RETRY_1;
-				case 1:     // Пропустить все
+				case 1:     // РџСЂРѕРїСѓСЃС‚РёС‚СЊ РІСЃРµ
 					bSkipAll=true;
-				case 0:     // Пропустить
+				case 0:     // РџСЂРѕРїСѓСЃС‚РёС‚СЊ
 				{
-					// не переименовали - отметим
+					// РЅРµ РїРµСЂРµРёРјРµРЅРѕРІР°Р»Рё - РѕС‚РјРµС‚РёРј
 					for (int j=0; j<ItemsNumber; j++)
 					{
 						size_t size=Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELITEM,j,0);
@@ -1024,9 +1024,9 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 					}
 					break;
 				}
-				default:    // Отменить
+				default:    // РћС‚РјРµРЅРёС‚СЊ
 				{
-					// не переименовали - отметим
+					// РЅРµ РїРµСЂРµРёРјРµРЅРѕРІР°Р»Рё - РѕС‚РјРµС‚РёРј
 					for ( ; Item != NULL; Item=FileList.Next(Item))
 					{
 						for (int j=0; j<ItemsNumber; j++)
@@ -1058,7 +1058,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 
 		size_t n=FSF.ConvertPath(CPM_NATIVE,Undo.Dir,0,0);
 		string strNativeDir;
-		wchar_t *p=strNativeDir.get(n+1); //+1 для FSF.AddEndSlash()
+		wchar_t *p=strNativeDir.get(n+1); //+1 РґР»СЏ FSF.AddEndSlash()
 		FSF.ConvertPath(CPM_NATIVE,Undo.Dir,p,n);
 		strNativeDir.updsize();
 		FSF.AddEndSlash(p);
@@ -1088,22 +1088,22 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 														MsgItems, sizeof(MsgItems) / sizeof(MsgItems[0]), 4 );
 			switch (Ret)
 			{
-				case 2:     // Повторить
+				case 2:     // РџРѕРІС‚РѕСЂРёС‚СЊ
 					goto RETRY_2;
-				case 1:     // Пропустить все
+				case 1:     // РџСЂРѕРїСѓСЃС‚РёС‚СЊ РІСЃРµ
 					bSkipAll=true;
-				case 0:     // Пропустить
+				case 0:     // РџСЂРѕРїСѓСЃС‚РёС‚СЊ
 					break;
-				default:    // Отменить
+				default:    // РћС‚РјРµРЅРёС‚СЊ
 					goto BREAK;
 			}
 		}
  BREAK:
 		if (i<0) i=0;
-		// установим каталог
+		// СѓСЃС‚Р°РЅРѕРІРёРј РєР°С‚Р°Р»РѕРі
 		FarPanelDirectory dirInfo={sizeof(FarPanelDirectory),Undo.Dir,NULL,{0},NULL};
 		Info.PanelControl(PANEL_ACTIVE,FCTL_SETPANELDIRECTORY,0,&dirInfo);
-		// отметим файлы
+		// РѕС‚РјРµС‚РёРј С„Р°Р№Р»С‹
 		struct PanelInfo PInfo={sizeof(PanelInfo)};
 		Info.PanelControl(PANEL_ACTIVE,FCTL_GETPANELINFO,0,&PInfo);
 		for (int k=i; k<Count; k++)
@@ -1130,17 +1130,17 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 	}
 
  NEXT:
-	// удалим из структуры лишние элементы (от старого Undo)
+	// СѓРґР°Р»РёРј РёР· СЃС‚СЂСѓРєС‚СѓСЂС‹ Р»РёС€РЅРёРµ СЌР»РµРјРµРЅС‚С‹ (РѕС‚ СЃС‚Р°СЂРѕРіРѕ Undo)
 	for (i=Undo.iCount-1; i>iUndo-1; i--)
 	{
 		free(Undo.CurFileName[i]); Undo.CurFileName[i]=0;
 		free(Undo.OldFileName[i]); Undo.OldFileName[i]=0;
 	}
 
-	// что-то поместили в Undo...
+	// С‡С‚Рѕ-С‚Рѕ РїРѕРјРµСЃС‚РёР»Рё РІ Undo...
 	if (Undo.iCount=iUndo)
 	{
-		// ...запомним тогда и каталог
+		// ...Р·Р°РїРѕРјРЅРёРј С‚РѕРіРґР° Рё РєР°С‚Р°Р»РѕРі
 		if (!(Undo.Dir=(wchar_t*)realloc(Undo.Dir, (strPanelDir.length()+1)*sizeof(wchar_t))) )
 		{
 			FreeUndo();
@@ -1168,7 +1168,7 @@ bool RenFile::RenameFile(int SelectedItemsNumber, int ItemsNumber)
 
 
 /****************************************************************************
- * Создание файла с листом имен файлов для переименования
+ * РЎРѕР·РґР°РЅРёРµ С„Р°Р№Р»Р° СЃ Р»РёСЃС‚РѕРј РёРјРµРЅ С„Р°Р№Р»РѕРІ РґР»СЏ РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЏ
  ****************************************************************************/
 int RenFile::CreateList(const wchar_t *TempFileName)
 {
@@ -1210,7 +1210,7 @@ int RenFile::CreateList(const wchar_t *TempFileName)
 }
 
 /****************************************************************************
- * Чтение листа
+ * Р§С‚РµРЅРёРµ Р»РёСЃС‚Р°
  ****************************************************************************/
 int RenFile::ReadList(const wchar_t *TempFileName)
 {
@@ -1245,14 +1245,14 @@ int RenFile::ReadList(const wchar_t *TempFileName)
 					if (*p==L'\n' || *p==L'\r') { UnmapViewOfFile(buf); return 2; }
 				}
 				if (!*p) continue;
-				// найдем по индексу нужный элемент
+				// РЅР°Р№РґРµРј РїРѕ РёРЅРґРµРєСЃСѓ РЅСѓР¶РЅС‹Р№ СЌР»РµРјРµРЅС‚
 				File *cur=NULL; unsigned index;
 				for (cur=FileList.First(), index=0; cur && index<i; cur=FileList.Next(cur), index++)
 					;
 				i++;
 				if (cur) cur->strDestFileName(StrStart, p-StrStart);
 				else { UnmapViewOfFile(buf); return 1; }
-				// проверим, что имя не пусто и/или не содержит недопустимых символов:
+				// РїСЂРѕРІРµСЂРёРј, С‡С‚Рѕ РёРјСЏ РЅРµ РїСѓСЃС‚Рѕ Рё/РёР»Рё РЅРµ СЃРѕРґРµСЂР¶РёС‚ РЅРµРґРѕРїСѓСЃС‚РёРјС‹С… СЃРёРјРІРѕР»РѕРІ:
 				FSF.Trim(cur->strDestFileName.get()); cur->strDestFileName.updsize();
 				if (cur->strDestFileName.length()==0 || !CheckFileName(cur->strDestFileName.get()))
 				{
@@ -1266,7 +1266,7 @@ int RenFile::ReadList(const wchar_t *TempFileName)
 }
 
 /****************************************************************************
- * Основная ф-ция по переименованию файлов в редакторе
+ * РћСЃРЅРѕРІРЅР°СЏ С„-С†РёСЏ РїРѕ РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЋ С„Р°Р№Р»РѕРІ РІ СЂРµРґР°РєС‚РѕСЂРµ
  ****************************************************************************/
 void RenFile::RenameInEditor(int SelectedItemsNumber, int ItemsNumber)
 {
@@ -1282,10 +1282,10 @@ void RenFile::RenameInEditor(int SelectedItemsNumber, int ItemsNumber)
  EDIT:
 	switch (Info.Editor(TempFileName, GetMsg(MEditorTitle), 0,0,-1,-1, EF_DISABLEHISTORY, 0, width, CP_UNICODE))
 	{
-		case 3:       // Загрузка файла прервана пользователем
+		case 3:       // Р—Р°РіСЂСѓР·РєР° С„Р°Р№Р»Р° РїСЂРµСЂРІР°РЅР° РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј
 			ErrorMsg(MVRenTitle, MAborted);
 			goto END;
-		case 2:       // Файл не был изменен
+		case 2:       // Р¤Р°Р№Р» РЅРµ Р±С‹Р» РёР·РјРµРЅРµРЅ
 			{
 				bool ren=false;
 				for (File *Item=FileList.First(); Item != NULL; Item=FileList.Next(Item))
@@ -1299,22 +1299,22 @@ void RenFile::RenameInEditor(int SelectedItemsNumber, int ItemsNumber)
 				if (!ren) goto END;
 				break;
 			}
-		case 0:       // Ошибка открытия файла
+		case 0:       // РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°
 			ErrorMsg(MVRenTitle, MErrorOpenList);
 			goto END;
-		default:      // Файл был изменен
+		default:      // Р¤Р°Р№Р» Р±С‹Р» РёР·РјРµРЅРµРЅ
 			break;
 	}
 
 	switch (ReadList(TempFileName))
 	{
-		case 2:       // Ошибки в листе имен файлов
+		case 2:       // РћС€РёР±РєРё РІ Р»РёСЃС‚Рµ РёРјРµРЅ С„Р°Р№Р»РѕРІ
 			ErrorMsg(MVRenTitle, MErrorReadList);
 			goto EDIT;
-		case 1:       // Ошибка открытия файла
+		case 1:       // РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°
 			ErrorMsg(MVRenTitle, MErrorOpenList);
 			goto END;
-		default:      // Удачно прочитали лист новых имен
+		default:      // РЈРґР°С‡РЅРѕ РїСЂРѕС‡РёС‚Р°Р»Рё Р»РёСЃС‚ РЅРѕРІС‹С… РёРјРµРЅ
 			break;
 	}
 

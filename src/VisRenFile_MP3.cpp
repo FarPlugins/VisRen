@@ -30,18 +30,18 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
  /***************************************************************************
-  * Используются исходники модуля "mp3" плагин "Anamorphosis"
+  * РСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РёСЃС…РѕРґРЅРёРєРё РјРѕРґСѓР»СЏ "mp3" РїР»Р°РіРёРЅ "Anamorphosis"
   * WARP ItSelf <WARP_ItSelf@inbox.ru>
   ***************************************************************************/
 
-// тэги преобразованные в строки
+// С‚СЌРіРё РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРЅС‹Рµ РІ СЃС‚СЂРѕРєРё
 struct ID3TagInternal {
-	int nEntryCount;             // кол-во
-	wchar_t **pEntry;               // массив строк (содержимое тэга)
+	int nEntryCount;             // РєРѕР»-РІРѕ
+	wchar_t **pEntry;               // РјР°СЃСЃРёРІ СЃС‚СЂРѕРє (СЃРѕРґРµСЂР¶РёРјРѕРµ С‚СЌРіР°)
 };
 
 #define TAG_ENTRY_COUNT  6
-// элементы
+// СЌР»РµРјРµРЅС‚С‹
 enum {
 	TAG_TRACK,
 	TAG_TITLE,
@@ -57,7 +57,7 @@ enum {
  ****************************************************************************/
 
 #define ID3_V1_TAG_ID "TAG"
-// структура
+// СЃС‚СЂСѓРєС‚СѓСЂР°
 struct ID3v11TagReal {
 	char cID[3];
 	char cTitle[30];
@@ -109,7 +109,7 @@ const char *Genres[148]={
 };
 
 /****************************************************************************
- * читаем оригинальный Tag v.1
+ * С‡РёС‚Р°РµРј РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Р№ Tag v.1
  ****************************************************************************/
 bool doReadID3v11Tag(HANDLE hFile, ID3v11TagReal *Tag, bool &NoTag)
 {
@@ -125,7 +125,7 @@ bool doReadID3v11Tag(HANDLE hFile, ID3v11TagReal *Tag, bool &NoTag)
 }
 
 /****************************************************************************
- * преобразовываем во внутреннюю форму
+ * РїСЂРµРѕР±СЂР°Р·РѕРІС‹РІР°РµРј РІРѕ РІРЅСѓС‚СЂРµРЅРЅСЋСЋ С„РѕСЂРјСѓ
  ****************************************************************************/
 ID3TagInternal *InitializeInternalTag1(ID3v11TagReal *pRealTag)
 {
@@ -174,7 +174,7 @@ ID3TagInternal *InitializeInternalTag1(ID3v11TagReal *pRealTag)
 #define ID3_V2_TAG_ID "ID3"
 
 /****************************************************************************
- * читаем Tag.Header
+ * С‡РёС‚Р°РµРј Tag.Header
  ****************************************************************************/
 struct ID3v2TagHeader{
 	char ID[3];
@@ -211,7 +211,7 @@ bool doReadID3v2TagHeader(HANDLE hFile, ID3v2TagHeader *Header, bool &NoTag)
 
 
 /****************************************************************************
- * читаем Tag.Frame
+ * С‡РёС‚Р°РµРј Tag.Frame
  ****************************************************************************/
 struct ID3v2TagFrame {
 	int  Length;
@@ -271,7 +271,7 @@ bool doReadFrame(HANDLE hFile, ID3v2TagFrame *pFrame, bool bSkip)
 
 #define KNOWN_FRAMES  6
 /****************************************************************************
- * преобразуем Tag.Frame
+ * РїСЂРµРѕР±СЂР°Р·СѓРµРј Tag.Frame
  ****************************************************************************/
 enum {
 	FRAME_TRACK,
@@ -306,12 +306,12 @@ const FramToIndexTranstaltion FrameTranslationTable[KNOWN_FRAMES] = {
 };
 
 /****************************************************************************
- * читаем Tag v.2
+ * С‡РёС‚Р°РµРј Tag v.2
  ****************************************************************************/
 #define FRAME_READ false
 #define FRAME_SKIP true
 
-// структура
+// СЃС‚СЂСѓРєС‚СѓСЂР°
 typedef struct {
 	ID3v2TagHeader Header;
 	ID3v2TagFrame Frames[KNOWN_FRAMES];
@@ -389,12 +389,12 @@ void EncodeData(char *pData, DWORD dwDataSize, wchar_t **pResult, int nEncoding)
 			MultiByteToWideChar(CP_ACP,0,pData,-1,*pResult,dwDataSize);
 			break;
 
-		// они разные, но вот писалки глючные...
+		// РѕРЅРё СЂР°Р·РЅС‹Рµ, РЅРѕ РІРѕС‚ РїРёСЃР°Р»РєРё РіР»СЋС‡РЅС‹Рµ...
 		case ENCODING_UTF_16_BOM:
 		case ENCODING_UTF_16_NO_BOM:
 		{
 			nCount = dwDataSize/2;
-			// запроверим здесь, что это за юникод
+			// Р·Р°РїСЂРѕРІРµСЂРёРј Р·РґРµСЃСЊ, С‡С‚Рѕ СЌС‚Рѕ Р·Р° СЋРЅРёРєРѕРґ
 			if (wData[0] == 0xFFFE)
 				for (int i=0; i<nCount; i++)
 					wData[i] = MAKEWORD(HIBYTE(wData[i]), LOBYTE(wData[i]));
@@ -415,7 +415,7 @@ void ConvertFrameData(ID3v2TagFrame *pFrame, wchar_t **lpResult, int nOffset=0)
 
 
 /****************************************************************************
- * преобразовываем во внутреннюю форму
+ * РїСЂРµРѕР±СЂР°Р·РѕРІС‹РІР°РµРј РІРѕ РІРЅСѓС‚СЂРµРЅРЅСЋСЋ С„РѕСЂРјСѓ
  ****************************************************************************/
 ID3TagInternal *InitializeInternalTag2(ID3v2TagReal *pRealTag)
 {
@@ -452,13 +452,13 @@ ID3TagInternal *InitializeInternalTag2(ID3v2TagReal *pRealTag)
 
 ID3TagInternal *AnalyseMP3File(const wchar_t *FileName)
 {
-	// оригинальные тэги
+	// РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Рµ С‚СЌРіРё
 	ID3v11TagReal Tag1;
 #ifdef TAG2
 	ID3v2TagReal  Tag2;
 #endif
 
-	// преобразованный
+	// РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРЅС‹Р№
 	ID3TagInternal *pInternalTag=0;
 
 	bool bTag1Found = false;

@@ -37,7 +37,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ****************************************************************************/
 
 /****************************************************************************
- * ID-константы диалога
+ * ID-РєРѕРЅСЃС‚Р°РЅС‚С‹ РґРёР°Р»РѕРіР°
  ****************************************************************************/
 enum {
 	DlgBORDER = 0,    // 0
@@ -71,7 +71,7 @@ enum {
 };
 
 /***************************************************************************
- * Узнаем и установим размеры для диалога
+ * РЈР·РЅР°РµРј Рё СѓСЃС‚Р°РЅРѕРІРёРј СЂР°Р·РјРµСЂС‹ РґР»СЏ РґРёР°Р»РѕРіР°
  ***************************************************************************/
 void VisRenDlg::GetDlgSize()
 {
@@ -79,7 +79,7 @@ void VisRenDlg::GetDlgSize()
 	CONSOLE_SCREEN_BUFFER_INFO csbiNfo;
 	if (GetConsoleScreenBufferInfo(hConOut, &csbiNfo))
 	{
-		// необходимо после правки FAR: drkns 22.05.2010 20:00:00 +0200 - build 1564
+		// РЅРµРѕР±С…РѕРґРёРјРѕ РїРѕСЃР»Рµ РїСЂР°РІРєРё FAR: drkns 22.05.2010 20:00:00 +0200 - build 1564
 		csbiNfo.dwSize.X=csbiNfo.srWindow.Right-csbiNfo.srWindow.Left+1;
 		csbiNfo.dwSize.Y=csbiNfo.srWindow.Bottom-csbiNfo.srWindow.Top+1;
 
@@ -96,7 +96,7 @@ void VisRenDlg::GetDlgSize()
 }
 
 /****************************************************************************
- * Узнаем максимальную длину файлов, длину имени и длину расширения
+ * РЈР·РЅР°РµРј РјР°РєСЃРёРјР°Р»СЊРЅСѓСЋ РґР»РёРЅСѓ С„Р°Р№Р»РѕРІ, РґР»РёРЅСѓ РёРјРµРЅРё Рё РґР»РёРЅСѓ СЂР°СЃС€РёСЂРµРЅРёСЏ
  ****************************************************************************/
 void VisRenDlg::LenItems(const wchar_t *FileName, bool bDest)
 {
@@ -119,23 +119,23 @@ void VisRenDlg::LenItems(const wchar_t *FileName, bool bDest)
 }
 
 /***************************************************************************
- * Изменение/обновление листа файлов в диалоге
+ * РР·РјРµРЅРµРЅРёРµ/РѕР±РЅРѕРІР»РµРЅРёРµ Р»РёСЃС‚Р° С„Р°Р№Р»РѕРІ РІ РґРёР°Р»РѕРіРµ
  ***************************************************************************/
 bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 {
 	Opt.lenFileName=Opt.lenName=Opt.lenExt=0;
 	Opt.lenDestFileName=Opt.lenDestName=Opt.lenDestExt=0;
-	// ширина колонок
+	// С€РёСЂРёРЅР° РєРѕР»РѕРЅРѕРє
 	int widthSrc, widthDest;
 	widthSrc=widthDest=(bFull?DlgSize.mW2:DlgSize.W2)-2;
 	if (Opt.CurBorder!=0) { widthSrc+=Opt.CurBorder; widthDest-=Opt.CurBorder; }
-	// количество строк
+	// РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚СЂРѕРє
 	int ItemsNumber=(bUndoList?Undo.iCount:FileList.Count());
-	// для корректного показа границы между колонками
+	// РґР»СЏ РєРѕСЂСЂРµРєС‚РЅРѕРіРѕ РїРѕРєР°Р·Р° РіСЂР°РЅРёС†С‹ РјРµР¶РґСѓ РєРѕР»РѕРЅРєР°РјРё
 	int AddNumber=((bFull?DlgSize.mH:DlgSize.H)-4)-9+1;
 	if (ItemsNumber<AddNumber) AddNumber-=ItemsNumber;
 	else AddNumber=0;
-	// запросим информацию
+	// Р·Р°РїСЂРѕСЃРёРј РёРЅС„РѕСЂРјР°С†РёСЋ
 	FarListInfo ListInfo={sizeof(FarListInfo)};
 	Info.SendDlgMessage(hDlg,DM_LISTINFO,DlgLIST,&ListInfo);
 
@@ -162,7 +162,7 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 				src=cur->strSrcFileName.get(); dest=cur->strDestFileName.get();
 			}
 /*
-			else //на всякий случай
+			else //РЅР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№
 			{
 				AddNumber+=ItemsNumber-(i+1);
 				ItemsNumber=i+1;
@@ -170,7 +170,7 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 			}
 */
 		}
-		// схитрим, тут же определим max длины :)
+		// СЃС…РёС‚СЂРёРј, С‚СѓС‚ Р¶Рµ РѕРїСЂРµРґРµР»РёРј max РґР»РёРЅС‹ :)
 		LenItems(src, 0); LenItems(dest, 1);
 
 		int lenSrc=wcslen(src), posSrc=Opt.srcCurCol;
@@ -192,7 +192,7 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 	}
 
 	if (buf) free(buf);
-	// восстановим положение курсора
+	// РІРѕСЃСЃС‚Р°РЅРѕРІРёРј РїРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР°
 	FarListPos ListPos={sizeof(FarListPos)};
 	ListPos.SelectPos=ListInfo.SelectPos<ItemsNumber?ListInfo.SelectPos:(ListInfo.SelectPos-1<0?0:ListInfo.SelectPos-1);
 	static bool bOldFull=bFull;
@@ -204,25 +204,25 @@ bool VisRenDlg::UpdateFarList(HANDLE hDlg, bool bFull, bool bUndoList)
 }
 
 /***************************************************************************
- * Изменение размера диалога
+ * РР·РјРµРЅРµРЅРёРµ СЂР°Р·РјРµСЂР° РґРёР°Р»РѕРіР°
  ***************************************************************************/
 void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 {
 	COORD c;
-	if (bF5) // нажали F5
+	if (bF5) // РЅР°Р¶Р°Р»Рё F5
 	{
-		if (DlgSize.Full==false)  // был нормальный размер
+		if (DlgSize.Full==false)  // Р±С‹Р» РЅРѕСЂРјР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ
 		{
 			c.X=DlgSize.mW; c.Y=DlgSize.mH;
-			DlgSize.Full=true;  // установили максимальный
+			DlgSize.Full=true;  // СѓСЃС‚Р°РЅРѕРІРёР»Рё РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№
 		}
 		else
 		{
 			c.X=DlgSize.W; c.Y=DlgSize.H;
-			DlgSize.Full=false; // вернули нормальный
+			DlgSize.Full=false; // РІРµСЂРЅСѓР»Рё РЅРѕСЂРјР°Р»СЊРЅС‹Р№
 		}
 	}
-	else // иначе просто пересчитаем размеры диалога
+	else // РёРЅР°С‡Рµ РїСЂРѕСЃС‚Рѕ РїРµСЂРµСЃС‡РёС‚Р°РµРј СЂР°Р·РјРµСЂС‹ РґРёР°Р»РѕРіР°
 	{
 		if (DlgSize.Full) { c.X=DlgSize.mW; c.Y=DlgSize.mH; }
 		else { c.X=DlgSize.W; c.Y=DlgSize.H; }
@@ -273,7 +273,7 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 				FGDI.Item->X2=(DlgSize.Full?DlgSize.mW:DlgSize.W)-2;
 				FGDI.Item->Y2=(DlgSize.Full?DlgSize.mH:DlgSize.H)-4;
 
-				// !!! Обходим некузявость FARa по возврату ListItems из FarDialogItem
+				// !!! РћР±С…РѕРґРёРј РЅРµРєСѓР·СЏРІРѕСЃС‚СЊ FARa РїРѕ РІРѕР·РІСЂР°С‚Сѓ ListItems РёР· FarDialogItem
 				UpdateFarList(hDlg, DlgSize.Full, Opt.LoadUndo);
 				break;
 			}
@@ -298,7 +298,7 @@ void VisRenDlg::DlgResize(HANDLE hDlg, bool bF5)
 }
 
 /****************************************************************************
- * Формирование строки масок по выбранному шаблону
+ * Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЃС‚СЂРѕРєРё РјР°СЃРѕРє РїРѕ РІС‹Р±СЂР°РЅРЅРѕРјСѓ С€Р°Р±Р»РѕРЅСѓ
  ****************************************************************************/
 bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 {
@@ -306,7 +306,7 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 	FarListPos ListPos={sizeof(FarListPos)};
 	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, IdTempl, &ListPos);
 
-	if (IdTempl==DlgETEMPLNAME) // список с шаблонами имени
+	if (IdTempl==DlgETEMPLNAME) // СЃРїРёСЃРѕРє СЃ С€Р°Р±Р»РѕРЅР°РјРё РёРјРµРЅРё
 	{
 		switch (ListPos.SelectPos)
 		{
@@ -340,7 +340,7 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 			case 27: wcscpy(templ, L"[V]");      break;
 		}
 	}
-	else   // список с шаблонами расширения
+	else   // СЃРїРёСЃРѕРє СЃ С€Р°Р±Р»РѕРЅР°РјРё СЂР°СЃС€РёСЂРµРЅРёСЏ
 	{
 		switch (ListPos.SelectPos)
 		{
@@ -366,7 +366,7 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 	if (es.BlockType!=BTYPE_NONE && es.BlockStartPos>=0)
 	{
 		Pos.X=es.BlockStartPos;
-		strBuf2=(strBuf.get()+es.BlockStartPos+es.BlockWidth);  // обрывок за выделением
+		strBuf2=(strBuf.get()+es.BlockStartPos+es.BlockWidth);  // РѕР±СЂС‹РІРѕРє Р·Р° РІС‹РґРµР»РµРЅРёРµРј
 		strBuf(strBuf.get(),Pos.X);
 		strBuf+=strBuf2.get();
 	}
@@ -390,7 +390,7 @@ bool VisRenDlg::SetMask(HANDLE hDlg, DWORD IdMask, DWORD IdTempl)
 }
 
 /****************************************************************************
- * Поддержка Drag&Drop мышью в листе файлов
+ * РџРѕРґРґРµСЂР¶РєР° Drag&Drop РјС‹С€СЊСЋ РІ Р»РёСЃС‚Рµ С„Р°Р№Р»РѕРІ
  ****************************************************************************/
 void VisRenDlg::MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY)
 {
@@ -452,7 +452,7 @@ void VisRenDlg::MouseDragDrop(HANDLE hDlg, DWORD dwMousePosY)
 }
 
 /****************************************************************************
- * Обработка клика правой клавишей мыши в листе файлов
+ * РћР±СЂР°Р±РѕС‚РєР° РєР»РёРєР° РїСЂР°РІРѕР№ РєР»Р°РІРёС€РµР№ РјС‹С€Рё РІ Р»РёСЃС‚Рµ С„Р°Р№Р»РѕРІ
  ****************************************************************************/
 int VisRenDlg::ListMouseRightClick(HANDLE hDlg, DWORD dwMousePosX, DWORD dwMousePosY)
 {
@@ -462,7 +462,7 @@ int VisRenDlg::ListMouseRightClick(HANDLE hDlg, DWORD dwMousePosX, DWORD dwMouse
 	Info.SendDlgMessage(hDlg, DM_LISTGETCURPOS, DlgLIST, &ListPos);
 	int Pos=ListPos.TopPos+(dwMousePosY-(dlgRect.Top+9));
 	if ( Pos>=(Opt.LoadUndo?Undo.iCount:FileList.Count())
-				// щелкнули за пределами границ DlgLIST
+				// С‰РµР»РєРЅСѓР»Рё Р·Р° РїСЂРµРґРµР»Р°РјРё РіСЂР°РЅРёС† DlgLIST
 				|| dwMousePosX<=dlgRect.Left  || dwMousePosX>=dlgRect.Right
 				|| dwMousePosY<=dlgRect.Top+8 || dwMousePosY>=dlgRect.Bottom-2
 		)
@@ -473,7 +473,7 @@ int VisRenDlg::ListMouseRightClick(HANDLE hDlg, DWORD dwMousePosX, DWORD dwMouse
 }
 
 /****************************************************************************
- * Ф-ция отображает текущее имя из листа файлов на несколько строк
+ * Р¤-С†РёСЏ РѕС‚РѕР±СЂР°Р¶Р°РµС‚ С‚РµРєСѓС‰РµРµ РёРјСЏ РёР· Р»РёСЃС‚Р° С„Р°Р№Р»РѕРІ РЅР° РЅРµСЃРєРѕР»СЊРєРѕ СЃС‚СЂРѕРє
  ****************************************************************************/
 void VisRenDlg::ShowName(int Pos)
 {
@@ -488,7 +488,7 @@ void VisRenDlg::ShowName(int Pos)
 	File *cur=NULL; int index;
 	for (cur=FileList.First(), index=0; cur && index<Pos; cur=FileList.Next(cur), index++)
 			;
-	// старое имя
+	// СЃС‚Р°СЂРѕРµ РёРјСЏ
 	wchar_t *src=Opt.LoadUndo?Undo.CurFileName[Pos]:(cur?cur->strSrcFileName.get():NULL);
 	int len=wcslen(src);
 	for (i=0; i<4; i++, len-=65)
@@ -501,7 +501,7 @@ void VisRenDlg::ShowName(int Pos)
 		else
 			lstrcpyn(srcName[i], (src+i*65)?(src+i*65):L"", 66);
 	}
-	// новое имя
+	// РЅРѕРІРѕРµ РёРјСЏ
 	wchar_t *dest=Opt.LoadUndo?Undo.OldFileName[Pos]:(cur?cur->strDestFileName.get():NULL);
 	len=wcslen(dest);
 	for (i=0; i<4; i++, len-=65)
@@ -547,7 +547,7 @@ intptr_t WINAPI VisRenDlg::ShowDialogProcThunk(HANDLE hDlg, intptr_t Msg, intptr
 }
 
 /****************************************************************************
- * Обработчик диалога для ShowDialog
+ * РћР±СЂР°Р±РѕС‚С‡РёРє РґРёР°Р»РѕРіР° РґР»СЏ ShowDialog
  ****************************************************************************/
 intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Param1, void *Param2)
 {
@@ -564,7 +564,7 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 				FarSettingsCreate settings={sizeof(FarSettingsCreate),MainGuid,INVALID_HANDLE_VALUE};
 				if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,&settings))
 				{
-					size_t Root=0; // корень ключа
+					size_t Root=0; // РєРѕСЂРµРЅСЊ РєР»СЋС‡Р°
 					FarSettingsItem item={sizeof(FarSettingsItem),Root,L"WordDiv",FST_STRING};
 					if (Info.SettingsControl(settings.Handle,SCTL_GET,0,&item))
 						StrOpt.WordDiv=item.String;
@@ -586,10 +586,10 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 					Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgEMASKNAME, L"[N]");
 					Info.SendDlgMessage(hDlg, DM_SETTEXTPTR, DlgEMASKEXT, L"[E]");
 				}
-				// установим предыдущий размер диалога
+				// СѓСЃС‚Р°РЅРѕРІРёРј РїСЂРµРґС‹РґСѓС‰РёР№ СЂР°Р·РјРµСЂ РґРёР°Р»РѕРіР°
 				DlgResize(hDlg);
 
-				// для корректного использования масок из истории
+				// РґР»СЏ РєРѕСЂСЂРµРєС‚РЅРѕРіРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РјР°СЃРѕРє РёР· РёСЃС‚РѕСЂРёРё
 				FarGetDialogItem FGDI={sizeof(FarGetDialogItem)};
 				FGDI.Item=(FarDialogItem *)malloc(FGDI.Size=Info.SendDlgMessage(hDlg,DM_GETDLGITEM,DlgEMASKNAME,0));
 				if (FGDI.Item)
@@ -756,7 +756,7 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 								FarSettingsCreate settings={sizeof(FarSettingsCreate),MainGuid,INVALID_HANDLE_VALUE};
 								if (Info.SettingsControl(INVALID_HANDLE_VALUE,SCTL_CREATE,0,&settings))
 								{
-									size_t Root=0; // корень ключа
+									size_t Root=0; // РєРѕСЂРµРЅСЊ РєР»СЋС‡Р°
 									FarSettingsItem item={sizeof(FarSettingsItem),Root,L"WordDiv",FST_STRING};
 									item.String=WordDiv;
 									Info.SettingsControl(settings.Handle,SCTL_SET,0,&item);
@@ -773,7 +773,7 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 				else if (IsNone(record) && Key==VK_F5 && !Info.SendDlgMessage(hDlg, DM_GETDROPDOWNOPENED, 0, 0))
 				{
  DLGRESIZE:
-					DlgResize(hDlg, true);  //true - т.к. нажали F5
+					DlgResize(hDlg, true);  //true - С‚.Рє. РЅР°Р¶Р°Р»Рё F5
 					return true;
 				}
 				//----
@@ -1080,12 +1080,12 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 						Ret=false; break;
 				}
 				/* $ !!  skirda, 10.07.2007 1:27:03:
-				*       в обработчике мыши после смены фокуса идет ShowDialog(-1)
-				*       а в обработчике клавиатуры - ShowDialog(OldPos); ShowDialog(FocusPos);
+				*       РІ РѕР±СЂР°Р±РѕС‚С‡РёРєРµ РјС‹С€Рё РїРѕСЃР»Рµ СЃРјРµРЅС‹ С„РѕРєСѓСЃР° РёРґРµС‚ ShowDialog(-1)
+				*       Р° РІ РѕР±СЂР°Р±РѕС‚С‡РёРєРµ РєР»Р°РІРёР°С‚СѓСЂС‹ - ShowDialog(OldPos); ShowDialog(FocusPos);
 				*
-				*       AS,  т.е. для мыши Фар дает команду "DN_DRAWDIALOG"
-				*            а для клавы "DN_DRAWDLGITEM"
-				*       учтем этот нюанс для DN_CTLCOLORDLGITEM:
+				*       AS,  С‚.Рµ. РґР»СЏ РјС‹С€Рё Р¤Р°СЂ РґР°РµС‚ РєРѕРјР°РЅРґСѓ "DN_DRAWDIALOG"
+				*            Р° РґР»СЏ РєР»Р°РІС‹ "DN_DRAWDLGITEM"
+				*       СѓС‡С‚РµРј СЌС‚РѕС‚ РЅСЋР°РЅСЃ РґР»СЏ DN_CTLCOLORDLGITEM:
 				*/
 				Info.SendDlgMessage(hDlg, DM_SHOWITEM, DlgSEP2, (void*)1);
 					/* $ */
@@ -1112,7 +1112,7 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 								return false;
 						}
 					}
-					// обработка клика правой клавишей мыши в листе файлов
+					// РѕР±СЂР°Р±РѕС‚РєР° РєР»РёРєР° РїСЂР°РІРѕР№ РєР»Р°РІРёС€РµР№ РјС‹С€Рё РІ Р»РёСЃС‚Рµ С„Р°Р№Р»РѕРІ
 					else if (record->Event.MouseEvent.dwButtonState==RIGHTMOST_BUTTON_PRESSED && Focus==DlgLIST)
 					{
 						int Pos=ListMouseRightClick(hDlg, record->Event.MouseEvent.dwMousePosition.X, record->Event.MouseEvent.dwMousePosition.Y);
@@ -1170,17 +1170,17 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 	/************************************************************************/
 
 		case DN_CTLCOLORDLGITEM:
-			// !!! См. комментарии в DN_GOTFOCUS.
-			// красим сепаратор над листбоксом...
+			// !!! РЎРј. РєРѕРјРјРµРЅС‚Р°СЂРёРё РІ DN_GOTFOCUS.
+			// РєСЂР°СЃРёРј СЃРµРїР°СЂР°С‚РѕСЂ РЅР°Рґ Р»РёСЃС‚Р±РѕРєСЃРѕРј...
 			if (Param1==DlgSEP2)
 			{
 				FarColor Color;
 				struct FarDialogItemColors *Colors=(FarDialogItemColors*)Param2;
 
-				// ... если листбокс в фокусе, то красим в выделенный цвет
+				// ... РµСЃР»Рё Р»РёСЃС‚Р±РѕРєСЃ РІ С„РѕРєСѓСЃРµ, С‚Рѕ РєСЂР°СЃРёРј РІ РІС‹РґРµР»РµРЅРЅС‹Р№ С†РІРµС‚
 				if (DlgLIST==Info.SendDlgMessage(hDlg, DM_GETFOCUS, 0, 0))
 					Info.AdvControl(&MainGuid, ACTL_GETCOLOR, COL_DIALOGHIGHLIGHTBOXTITLE,&Color);
-				// ... иначе - в обычный цвет
+				// ... РёРЅР°С‡Рµ - РІ РѕР±С‹С‡РЅС‹Р№ С†РІРµС‚
 				else
 					Info.AdvControl(&MainGuid, ACTL_GETCOLOR, COL_DIALOGBOX,&Color);
 				Colors->Colors[0]=Color;
@@ -1212,8 +1212,8 @@ intptr_t WINAPI VisRenDlg::ShowDialogProc(HANDLE hDlg, intptr_t Msg, intptr_t Pa
 
 
 /****************************************************************************
- * Читает настройки из реестра, показывает диалог с опциями переименования,
- * заполняет структуру Opt, сохраняет (если надо) новые настройки в реестре.
+ * Р§РёС‚Р°РµС‚ РЅР°СЃС‚СЂРѕР№РєРё РёР· СЂРµРµСЃС‚СЂР°, РїРѕРєР°Р·С‹РІР°РµС‚ РґРёР°Р»РѕРі СЃ РѕРїС†РёСЏРјРё РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЏ,
+ * Р·Р°РїРѕР»РЅСЏРµС‚ СЃС‚СЂСѓРєС‚СѓСЂСѓ Opt, СЃРѕС…СЂР°РЅСЏРµС‚ (РµСЃР»Рё РЅР°РґРѕ) РЅРѕРІС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё РІ СЂРµРµСЃС‚СЂРµ.
  ****************************************************************************/
 int VisRenDlg::ShowDialog()
 {
@@ -1254,7 +1254,7 @@ int VisRenDlg::ShowDialog()
 		/*24*/{DI_BUTTON,   0,DlgSize.H-2,          0,          0, 0, 0,                0, DIF_CENTERGROUP, GetMsg(MCancel), 0,0}
 	};
 
-	// комбинированный список с шаблонами
+	// РєРѕРјР±РёРЅРёСЂРѕРІР°РЅРЅС‹Р№ СЃРїРёСЃРѕРє СЃ С€Р°Р±Р»РѕРЅР°РјРё
 	FarListItem itemTempl1[28];
 	int n = sizeof(itemTempl1) / sizeof(itemTempl1[0]);
 	for (int i = 0; i < n; i++)

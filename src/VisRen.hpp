@@ -37,9 +37,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "plugin.hpp"
 #include "farcolor.hpp"
 #include "string.hpp"
-#include "VisRenLng.hpp"        // набор констант для извлечения строк из .lng файла
+#include "VisRenLng.hpp"        // РЅР°Р±РѕСЂ РєРѕРЅСЃС‚Р°РЅС‚ РґР»СЏ РёР·РІР»РµС‡РµРЅРёСЏ СЃС‚СЂРѕРє РёР· .lng С„Р°Р№Р»Р°
 
-/// ВАЖНО! используем данные функции, чтоб дополнительно не обнулять память
+/// Р’РђР–РќРћ! РёСЃРїРѕР»СЊР·СѓРµРј РґР°РЅРЅС‹Рµ С„СѓРЅРєС†РёРё, С‡С‚РѕР± РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ РЅРµ РѕР±РЅСѓР»СЏС‚СЊ РїР°РјСЏС‚СЊ
 #define malloc(size) HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,size)
 #define free(ptr) ((ptr)?HeapFree(GetProcessHeap(),0,ptr):0)
 #define realloc(ptr,size) ((size)?((ptr)?HeapReAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,ptr,size):HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,size)):(HeapFree(GetProcessHeap(),0,ptr),(void *)0))
@@ -48,7 +48,7 @@ inline void * __cdecl operator new(size_t size) { return malloc(size); }
 inline void __cdecl operator delete(void *block) { free(block); }
 #endif
 
-/// Подмена strncmp() (или strcmp() при n=-1)
+/// РџРѕРґРјРµРЅР° strncmp() (РёР»Рё strcmp() РїСЂРё n=-1)
 inline int __cdecl Strncmp(const wchar_t *s1, const wchar_t *s2, int n=-1) { return CompareString(0,SORT_STRINGSORT,s1,n,s2,n)-2; }
 
 ///
@@ -98,19 +98,19 @@ DEFINE_GUID(InputBoxGuid,0xb60068e2, 0xac3b, 0x4b4a, 0x8f, 0x5d, 0x99, 0x11, 0x9
 
 
 /****************************************************************************
- * Копии стандартных структур FAR
+ * РљРѕРїРёРё СЃС‚Р°РЅРґР°СЂС‚РЅС‹С… СЃС‚СЂСѓРєС‚СѓСЂ FAR
  ****************************************************************************/
 extern struct PluginStartupInfo Info;
 extern struct FarStandardFunctions FSF;
 
 /****************************************************************************
- * Элемент для переименования
+ * Р­Р»РµРјРµРЅС‚ РґР»СЏ РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЏ
  ****************************************************************************/
 struct File
 {
-	string strSrcFileName;                         //   здесь оригинальные имена с панели
-	string strDestFileName;                        //   конечные имена
-	FILETIME ftLastWriteTime;                      //   время последней модификации
+	string strSrcFileName;                         //   Р·РґРµСЃСЊ РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Рµ РёРјРµРЅР° СЃ РїР°РЅРµР»Рё
+	string strDestFileName;                        //   РєРѕРЅРµС‡РЅС‹Рµ РёРјРµРЅР°
+	FILETIME ftLastWriteTime;                      //   РІСЂРµРјСЏ РїРѕСЃР»РµРґРЅРµР№ РјРѕРґРёС„РёРєР°С†РёРё
 
 	File()
 	{
@@ -134,7 +134,7 @@ struct File
 };
 
 /****************************************************************************
- * Текущие настройки плагина
+ * РўРµРєСѓС‰РёРµ РЅР°СЃС‚СЂРѕР№РєРё РїР»Р°РіРёРЅР°
  ****************************************************************************/
 extern struct Options {
 	int UseLastHistory,
@@ -150,9 +150,9 @@ extern struct Options {
 			ShowOrgName,
 			CaseSensitive,
 			RegEx,
-			LogRen,                             // отвечает за заполнение отката
-			LoadUndo,                           // если есть откат - загрузим/отобразим
-			Undo;                               // если есть откат - выполним его
+			LogRen,                             // РѕС‚РІРµС‡Р°РµС‚ Р·Р° Р·Р°РїРѕР»РЅРµРЅРёРµ РѕС‚РєР°С‚Р°
+			LoadUndo,                           // РµСЃР»Рё РµСЃС‚СЊ РѕС‚РєР°С‚ - Р·Р°РіСЂСѓР·РёРј/РѕС‚РѕР±СЂР°Р·РёРј
+			Undo;                               // РµСЃР»Рё РµСЃС‚СЊ РѕС‚РєР°С‚ - РІС‹РїРѕР»РЅРёРј РµРіРѕ
 	Options()
 	{
 		UseLastHistory=0;
@@ -183,29 +183,29 @@ struct StrOptions {
 };
 
 /****************************************************************************
- * Undo переименования
+ * Undo РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЏ
  ****************************************************************************/
-extern struct UndoFileName                       // элементы для отката переименования
+extern struct UndoFileName                       // СЌР»РµРјРµРЅС‚С‹ РґР»СЏ РѕС‚РєР°С‚Р° РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЏ
 {
-	wchar_t *Dir;                                  //   папка в которой переименовывали
-	wchar_t **CurFileName;                         //   имена, в которые переименовали файлы
-	wchar_t **OldFileName;                         //   имена, которые были у файлов до переименования
-	int iCount;                                    //   кол-во
+	wchar_t *Dir;                                  //   РїР°РїРєР° РІ РєРѕС‚РѕСЂРѕР№ РїРµСЂРµРёРјРµРЅРѕРІС‹РІР°Р»Рё
+	wchar_t **CurFileName;                         //   РёРјРµРЅР°, РІ РєРѕС‚РѕСЂС‹Рµ РїРµСЂРµРёРјРµРЅРѕРІР°Р»Рё С„Р°Р№Р»С‹
+	wchar_t **OldFileName;                         //   РёРјРµРЅР°, РєРѕС‚РѕСЂС‹Рµ Р±С‹Р»Рё Сѓ С„Р°Р№Р»РѕРІ РґРѕ РїРµСЂРµРёРјРµРЅРѕРІР°РЅРёСЏ
+	int iCount;                                    //   РєРѕР»-РІРѕ
 } Undo;
 
 /****************************************************************************
- * Размер диалога.
+ * Р Р°Р·РјРµСЂ РґРёР°Р»РѕРіР°.
  ****************************************************************************/
 extern struct DlgSize
 {
-	// состояние диалога
+	// СЃРѕСЃС‚РѕСЏРЅРёРµ РґРёР°Р»РѕРіР°
 	bool Full;
-	// нормальный
+	// РЅРѕСЂРјР°Р»СЊРЅС‹Р№
 	DWORD W;
 	DWORD W2;
 	DWORD WS;
 	DWORD H;
-	// максимизированный
+	// РјР°РєСЃРёРјРёР·РёСЂРѕРІР°РЅРЅС‹Р№
 	DWORD mW;
 	DWORD mW2;
 	DWORD mWS;
